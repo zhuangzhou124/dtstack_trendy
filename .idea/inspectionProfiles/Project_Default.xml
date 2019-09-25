@@ -1,0 +1,63 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="AlipayHardCodeAccountRule" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="AlipayLogRule" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="AvoidConstantsInterface" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="AvoidDeeplyNestedIfStmts" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="AvoidInstanceofChecksInCatchClause" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="AvoidPrintStackTrace" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="AvoidProtectedFieldInFinalClass" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="AvoidStartWithDollarAndUnderLineNamingRule" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="AvoidSynchronizedAtMethodLevel" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="BigIntegerInstantiation" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="BooleanInstantiation" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="BooleanPropertyShouldNotStartWithIsRule" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="BrokenNullCheck" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="ClassCastExceptionWithSubListToArrayListRule" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="ClassCastExceptionWithToArray" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="ClassNamingShouldBeCamelRule" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="CloudengineUpgradeTo3_2_8_0" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="CollapsibleIfStatements" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="CommentsMustBeJavadocFormatRule" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="ConsecutiveLiteralAppends" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="ConstantFieldShouldBeUpperCaseRule" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="DefaultLabelNotLastInSwitchStmt" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="DontModifyInForeachCircleRule" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="DontUseDouble" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="EmptyStaticInitializer" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="EmptySwitchStatements" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="EmptySynchronizedBlock" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="FasttextSecurityIssue" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="FinalFieldCouldBeStatic" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="ImmutableField" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="InefficientEmptyStringCheck" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="InefficientStringBuffering" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="InsufficientStringBufferDeclaration" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="JumbledIncrementer" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="LoggerIsNotStaticFinal" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="MissingStaticMethodInNonInstantiatableClass" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="NonThreadSafeSingleton" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="OptimizableToArrayCall" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="ProperLogger" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SimplifyBooleanExpressions" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SingularField" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="StringInstantiation" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="SwitchStatementRule" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="TestClassShouldEndWithTestNamingRule" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="UnnecessaryCaseChange" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="UnnecessaryConversionTemporary" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="UnnecessaryLocalBeforeReturn" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="UnusedFormalParameter" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="UnusedNullCheckInEquals" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="UnusedPrivateField" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="UpperEllRule" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="UseCollectionIsEmpty" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="UseEqualsToCompareStrings" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="UseIndexOfChar" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="UseLocaleWithCaseConversions" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="UseStringBufferLength" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="UselessOverridingMethod" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="UselessStringValueOf" enabled="false" level="WARNING" enabled_by_default="false" />
+  </profile>
+</component>
