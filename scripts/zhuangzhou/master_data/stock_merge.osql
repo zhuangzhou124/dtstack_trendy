@@ -1,0 +1,19 @@
+--name:stock_merge
+--author:ZhuangZhou
+--create time:2019-09-27 10:40
+--subject:
+
+
+SELECT sl.org_code
+    , sl.channel_endpint_code
+    , sli.sku_code
+    , sum(sli.qty_transit)
+FROM ods_stock_logic_items sli
+LEFT JOIN ods_stock_logic sl
+ON sli.stock_logic_id = sl.id
+AND sl.ds = '20190920'
+WHERE sli.ds = '20190920'
+GROUP BY sl.org_code
+    , sl.channel_endpint_code
+    , sli.sku_code;
+
