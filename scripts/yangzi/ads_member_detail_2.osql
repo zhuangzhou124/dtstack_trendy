@@ -1,0 +1,37 @@
+--name:ads_member_detail_2
+--author:yangyijing
+--create time:2019-09-27 11:48
+create table if not exists ads_member_detail_2(
+  member_no                                  string comment '会员编号',--和会员卡号什么关系？
+  computingDuration                          string comment '最近的订单单距今消费间隔,单位:天',
+  cml_consumption_date                       string comment '累计消费计算日期',
+  cml_consumption_store                      string comment '累计消费门店',
+  cml_consumption_times                      string comment '累计消费次数',
+  cml_consumption_item_quantity              string comment '累计消费件数',
+  cml_consumption_days                       string comment '累计消费天数',
+  cml_consumption_months                     string comment '累计消费月数',
+  cml_consumption_amount                     string comment '累计消费金额',
+  cml_consumption_amount_include_coupon      string comment '累计消费金额(含券)',
+  cml_return_times                           string comment '累计退款次数',
+  cml_return_amount                          string comment '累计退款金额',
+  cml_avg_discount                           string comment '累计平均折扣',
+  cml_avg_discount_include_coupon            string comment '累计平均折扣(含券)',
+  cml_avg_sales_amount_per_order             string comment '累计平均客单价',
+  cml_avg_sales_item_per_order               string comment '累计平均客单件',
+  cml_avg_sales_amount_per_item              string comment '累计平均件单价',
+  consumeMore                                string comment '距离下等级消费金额差',
+  lastContactDays                            string comment '最近联系距今天数',
+  gradeExpiration                            string comment '等级到期时间'
+)comment '会员明细表' partitioned by(
+  ds string comment '时间分区');
+
+
+select replace(substr(create_time, 1, 10), '-', '')
+,      member_no
+,      datediff(to_Date('${bizdate}', 'yyyymmdd'), to_Date(max(create_time), 'yyyy-mm-dd hh:mi:ss'), 'dd') as
+       computingDuration
+from ods_sales_order
+where cast(member_no as int) > 1 and ds = '20190920' and replace(substr(create_time, 1, 10), '-', '') = '${bizdate}'
+group by --org_code, shopping_guider_no,
+replace(substr(create_time, 1, 10), '-', ''), member_no
+having sum(price_amt_discount) > 0;

@@ -1,0 +1,301 @@
+--name:yangzi_test
+--author:yangyijing
+--create time:2019-09-26 14:06
+create table if not exists ads_store_detail_2(
+  avgHyXszb             double comment '平均会员销售占比：会员实际销售金额/单数（单数改为：实际销售金额）',
+  avgJdj                double comment '平均件单价：实际销售金额/件数',
+  avgKdj                double comment '平均客单价：实际销售金额/单数',
+  avgOrderQuantity      int comment '平均单数  （如何平均）',
+  avgSu                 double comment '平均连带率：件数/单数',
+  avgVipXszb            double comment '平均VIP销售占比：VIP实际销售金额/单数（单数改为：实际销售金额）',
+  hyXszb                double comment '会员销售占比：会员实际销售金额/单数（单数改为：实际销售金额）',
+  maxHyXszb             double comment '最大会员销售占比：会员实际销售金额/单数（VIP和会员有无区别？）',
+  maxJdj                double comment '最大l件单价：实际销售金额/件数',
+  maxKdj                double comment '最大客单价：实际销售金额/单数',
+  maxOrderQuantity      int comment '最大单数',
+  maxSu                 double comment '最大连带率：件数/单数',
+  maxVipXszb            double comment '最大VIP销售占比：VIP实际销售金额/单数（单数改为：实际销售金额）'
+)
+comment '门店明细表' partitioned by(
+  ds string comment '时间分区');
+--new
+select sale_amt.real_store_code
+,      sale_amt.real_store_id
+,      sale_amt--实际销售金额
+,      member_sale_amt--会员实际销售金额
+,      vip_sale_amt--vip实际销售金额
+,      pro_cnt--销售件数
+,      vip_pro_cnt --vip销售件数
+,      order_cnt--销售单数
+,      vip_cnt--vip销售单数
+from (
+  select a.real_store_code, a.real_store_id
+  --目标金额
+  ,      coalesce(sale_amt, 0) - coalesce(amt_pay, 0) as sale_amt--实际销售金额
+  ,      coalesce(member_sale_amt, 0) - coalesce(amt_pay_member, 0) as member_sale_amt--会员实际销售金额
+  ,      coalesce(vip_sale_amt, 0) - coalesce(amt_pay_vip, 0) as vip_sale_amt--vip实际销售金额
+  from (
+    select rs_r.store_code as real_store_code
+    ,      rs_r.id as real_store_id
+    ,      sum(case
+    when mgi.is_vip = 1 then so.amt_total
+    end) as vip_sale_amt --vip销售金额
+    ,      sum(so.amt_total) as sale_amt --销售金额
+    ,      sum(case
+    when so.member_no != -1 then so.amt_total
+    end) as member_sale_amt--会员销售金额
+    from (
+      select member_no, amt_total, channel_endpoint_code, org_code, member_grade_code
+      from ods_sales_order
+      where ds = '20190920') so
+      --left join ods_channel_endpoint ce_r on so.channel_endpoint_code = ce_r.channel_endpoint_code and ce_r.ds = '20190920'
+      --left join ods_endpoint e_r on ce_r.endpoint_code = e_r.endpoint_code and e_r.ds = '20190920'
+      --left join ods_real_store rs_r on e_r.entity_code = rs_r.store_code and rs_r.ds = '20190920'
+
+    join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
+
+
+
+
+      left join ods_member_grade_info mgi on so.member_grade_code = mgi.grade_code and mgi.ds = '20190920'
+    group by rs_r.store_code
+    , rs_r.id
+  ) a
+    left join (
+      select rs_r.store_code as real_store_code
+      ,      rs_r.id as real_store_id
+      ,      sum(case
+      when mgi.is_vip = 1 then sop.amt_pay
+      end) as amt_pay_vip
+      ,      sum(case
+      when so.member_no != -1 = true then sop.amt_pay
+      end) as amt_pay_member
+      ,      sum(sop.amt_pay) as amt_pay
+      from (
+        select amt_pay, sales_order_no, pay_way
+        from ods_sales_order_payment
+        where ds = '20190920') sop
+        left join (
+          select member_no, member_grade_code, org_code, channel_endpoint_code, sales_order_no
+          from ods_sales_order
+          where ds = '20190920') so on sop.sales_order_no = so.sales_order_no
+        left join (
+          select grade_code, is_vip
+          from ods_member_grade_info
+          where ds = '20190920') mgi on so.member_grade_code = mgi.grade_code
+        --left join ods_channel_endpoint ce_r on so.channel_endpoint_code = ce_r.channel_endpoint_code
+        --and ce_r.ds = '20190920'
+        --left join ods_endpoint e_r on ce_r.endpoint_code = e_r.endpoint_code and e_r.ds = '20190920'
+        --left join ods_real_store rs_r on e_r.entity_code = rs_r.store_code and rs_r.ds = '20190920'
+        join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
+      where sop.pay_way = 'COUPON'
+      group by rs_r.store_code
+      , rs_r.id
+    ) b on a.real_store_id = b.real_store_id
+) sale_amt
+  left outer join (
+    select rs_r.store_code as real_store_code
+    ,      rs_r.id as real_store_id
+    ,      sum(soi.qty_product) as pro_cnt--销售件数
+    ,      sum(case
+    when mgi.is_vip = 1 then soi.qty_product
+    end) as vip_pro_cnt
+    from (
+      select qty_product, sales_order_no, price_discount
+      from ods_sales_order_item
+      where ds = '20190920') soi
+      left join (
+        select channel_endpoint_code, sales_order_no, member_grade_code
+        from ods_sales_order
+        where ds = '20190920') so on soi.sales_order_no = so.sales_order_no
+      left join (
+        select is_vip, grade_code
+        from ods_member_grade_info
+        where ds = '20190920') mgi on so.member_grade_code = mgi.grade_code
+      --left join ods_channel_endpoint ce_r on so.channel_endpoint_code = ce_r.channel_endpoint_code
+      --and ce_r.ds = '20190920'
+      --left join ods_endpoint e_r on ce_r.endpoint_code = e_r.endpoint_code and e_r.ds = '20190920'
+      --left join ods_real_store rs_r on e_r.entity_code = rs_r.store_code and rs_r.ds = '20190920'
+      join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
+    where soi.price_discount > 0 and soi.qty_product > 0
+    group by rs_r.store_code
+    , rs_r.id
+  ) pro_cnt on sale_amt.real_store_id = pro_cnt.real_store_id
+  left outer join (
+    select rs_r.store_code as real_store_code
+    ,      rs_r.id as real_store_id
+    ,      count(1) as order_cnt--销售单数
+    ,      sum(case
+    when mgi.is_vip = 1 then 1
+    end) as vip_cnt--vip销售单数
+    --,      sum(case
+    --when so.member_no != -1 then 1
+    --end) as member_cnt--会员销售单数
+    from (
+      select org_code, channel_endpoint_code, member_no, order_type, amt_total, qty_order_item, member_grade_code
+      from ods_sales_order
+      where ds = '20190920') so
+      left join (
+        select is_vip, grade_code
+        from ods_member_grade_info
+        where ds = '20190920') mgi on so.member_grade_code = mgi.grade_code
+      --left join ods_channel_endpoint ce_r on so.channel_endpoint_code = ce_r.channel_endpoint_code
+      --and ce_r.ds = '20190920'
+      --left join ods_endpoint e_r on ce_r.endpoint_code = e_r.endpoint_code and e_r.ds = '20190920'
+      --left join ods_real_store rs_r on e_r.entity_code = rs_r.store_code and rs_r.ds = '20190920'
+      join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
+    where so.order_type in ('101', '103')
+    or (so.order_type = '104' and (so.amt_total != 0 OR (so.amt_total = 0 AND so.qty_order_item != 0)))
+    group by rs_r.store_code
+    , rs_r.id
+  ) order_cnt on sale_amt.real_store_id = order_cnt.real_store_id;
+
+
+--old
+create table if not exists ads_store_detail_2(
+  avgHyXszb             double comment '平均会员销售占比：会员实际销售金额/单数（单数改为：实际销售金额）',
+  avgJdj                double comment '平均件单价：实际销售金额/件数',
+  avgKdj                double comment '平均客单价：实际销售金额/单数',
+  avgOrderQuantity      int comment '平均单数  （如何平均）',
+  avgSu                 double comment '平均连带率：件数/单数',
+  avgVipXszb            double comment '平均VIP销售占比：VIP实际销售金额/单数（单数改为：实际销售金额）',
+  hyXszb                double comment '会员销售占比：会员实际销售金额/单数（单数改为：实际销售金额）',
+  maxHyXszb             double comment '最大会员销售占比：会员实际销售金额/单数（VIP和会员有无区别？）',
+  maxJdj                double comment '最大l件单价：实际销售金额/件数',
+  maxKdj                double comment '最大客单价：实际销售金额/单数',
+  maxOrderQuantity      int comment '最大单数',
+  maxSu                 double comment '最大连带率：件数/单数',
+  maxVipXszb            double comment '最大VIP销售占比：VIP实际销售金额/单数（单数改为：实际销售金额）'
+)
+comment '门店明细表' partitioned by(
+  ds string comment '时间分区');
+
+
+select channel_endpoint_code
+,      sale_amt as salesAmount
+,      pro_cnt as itemQuantity
+,      Jdj
+,      Kdj
+,      OrderQuantity
+,      Su
+,      avg(HyXszb)over (partition by org_code) as avgHyXszb
+,      avg(Jdj)over (partition by org_code) as avgJdj
+,      avg(Kdj)over (partition by org_code) as avgKdj
+,      avg(OrderQuantity)over (partition by org_code) as avgOrderQuantity
+,      avg(Su)over (partition by org_code) as avgSu
+,      avg(Xszb)over (partition by org_code) as avgXszb
+,      HyXszb as hyXszb
+,      max(HyXszb)over (partition by org_code) as maxHyXszb
+,      max(Jdj)over (partition by org_code) as maxJdj
+,      max(Kdj)over (partition by org_code) as maxKdj
+,      max(OrderQuantity)over (partition by org_code) as maxOrderQuantity
+,      max(Su)over (partition by org_code) as maxSu
+,      max(Xszb)over (partition by org_code) as maxXszb
+from (
+  select sale_amt.org_code, sale_amt.channel_endpoint_code
+  ,      if(sale_amt.sale_amt is null or sale_amt.sale_amt == '' or sale_amt.sale_amt == 0, 0, (sale_amt.member_sale_amt
+  / sale_amt.sale_amt)) as HyXszb--是否保留小数？
+  ,      if(pro_cnt.pro_cnt is null or pro_cnt.pro_cnt == '' or pro_cnt.pro_cnt == 0, 0, (sale_amt.sale_amt / pro_cnt.
+  pro_cnt)) as Jdj
+  ,      if(order_cnt.order_cnt is null or order_cnt.order_cnt == '' or order_cnt.order_cnt == 0, 0, (sale_amt.sale_amt
+  /
+  order_cnt.order_cnt)) as Kdj
+  ,      order_cnt.order_cnt as OrderQuantity
+  ,      if(order_cnt.order_cnt is null or order_cnt.order_cnt == '' or order_cnt.order_cnt == 0, 0, (pro_cnt.pro_cnt /
+  order_cnt.order_cnt)) as Su
+  ,      if(sale_amt.sale_amt is null or sale_amt.sale_amt == '' or sale_amt.sale_amt == 0, 0, (sale_amt.vip_sale_amt /
+  sale_amt.sale_amt)) as Xszb
+  ,      sale_amt.sale_amt
+  ,      pro_cnt.pro_cnt
+  from (
+    select a.org_code, a.channel_endpoint_code
+    ,      sale_amt - amt_pay as sale_amt--实际销售金额
+    ,      member_sale_amt - amt_pay_member as member_sale_amt--会员实际销售金额
+    ,      vip_sale_amt - amt_pay_vip as vip_sale_amt--vip实际销售金额
+    from (
+      select so.org_code, so.channel_endpoint_code
+      ,      sum(case
+      when to_char(mgi.is_vip) = 1 then so.amt_total
+      end) as vip_sale_amt --vip销售金额
+      ,      sum(so.amt_total) as sale_amt --销售金额
+      ,      sum(case
+      when so.member_no != -1 then so.amt_total
+      end) as member_sale_amt--会员销售金额
+      from (
+        select member_no, amt_total, channel_endpoint_code, org_code, member_grade_code
+        from ods_sales_order
+        where ds = '20190920') so
+        left join (
+          select grade_code, is_vip
+          from ods_member_grade_info
+          where ds = '20190920') mgi on so.member_grade_code = mgi.grade_code
+      group by so.channel_endpoint_code, so.org_code
+    ) a
+      left join (
+        select so.org_code
+        ,      so.channel_endpoint_code
+        ,      sum(case
+        when to_char(mgi.is_vip) = 1 then sop.amt_pay
+        end) as amt_pay_vip
+        ,      sum(case
+        when so.member_no != -1 = true then sop.amt_pay
+        end) as amt_pay_member
+        ,      sum(sop.amt_pay) as amt_pay
+        from (
+          select amt_pay, sales_order_no, pay_way
+          from ods_sales_order_payment
+          where ds = '20190920') sop
+          left join (
+            select member_no, member_grade_code, org_code, channel_endpoint_code, sales_order_no
+            from ods_sales_order
+            where ds = '20190920') so on sop.sales_order_no = so.sales_order_no
+          left join (
+            select grade_code, is_vip
+            from ods_member_grade_info
+            where ds = '20190920') mgi on so.member_grade_code = mgi.grade_code
+        where sop.pay_way = 'COUPON'
+        group by so.org_code, so.channel_endpoint_code
+      ) b on a.channel_endpoint_code = b.channel_endpoint_code
+  ) sale_amt
+    left outer join (
+      select so.channel_endpoint_code
+      ,      sum(soi.qty_product) as pro_cnt--销售件数
+      --,sum(case when to_char(mgi.is_vip) = 1 then soi.qty_product end) as vip_pro_cnt
+      from (
+        select qty_product, sales_order_no, price_discount
+        from ods_sales_order_item
+        where ds = '20190920') soi
+        left join (
+          select channel_endpoint_code, sales_order_no, member_grade_code
+          from ods_sales_order
+          where ds = '20190920') so on soi.sales_order_no = so.sales_order_no
+      --left join (
+      --  select is_vip, grade_code
+      --  from ods_member_grade_info
+      --  where ds = '20190920') mgi on so.member_grade_code = mgi.grade_code
+      where soi.price_discount > 0 and soi.qty_product > 0
+      group by so.channel_endpoint_code
+    ) pro_cnt on sale_amt.channel_endpoint_code = pro_cnt.channel_endpoint_code
+
+    left outer join (
+      select so.channel_endpoint_code
+      ,      count(1) as order_cnt--销售单数
+      --,      sum(case
+      --when to_char(mgi.is_vip) = 1 then 1
+      --end) as vip_cnt--vip销售单数
+      --,      sum(case
+      --when so.member_no != -1 then 1
+      --end) as member_cnt--会员销售单数
+      from (
+        select org_code, channel_endpoint_code, member_no, order_type, amt_total, qty_order_item, member_grade_code
+        from ods_sales_order
+        where ds = '20190920') so
+      --left join (
+      --  select is_vip, grade_code
+      --  from ods_member_grade_info
+      --  where ds = '20190920') mgi on so.member_grade_code = mgi.grade_code
+      where so.order_type in ('101', '103')
+      or (so.order_type = '104' and (so.amt_total != 0 OR (so.amt_total = 0 AND so.qty_order_item != 0)))
+      group by so.channel_endpoint_code
+    ) order_cnt on sale_amt.channel_endpoint_code = order_cnt.channel_endpoint_code
+) avg;
