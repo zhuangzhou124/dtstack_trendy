@@ -1,0 +1,74 @@
+--name:sanmu_test1
+--author:sanmu
+--create time:2019-09-28 10:31
+--drop table sanmu_test1
+
+
+
+select * from (				SELECT org_code
+,
+															member_no
+,
+															substr(regexp_replace(min(create_time), '-', '', 0), 1, 8) AS first_order_time
+											 FROM ods_sales_order
+											 WHERE ds = '${bizdate}' group by org_code,member_no) as t1
+where t1.first_order_time = to_char(dateadd(to_date('${bizdate}', 'yyyymmdd'), - 1, 'mm'),'yyyymmdd')
+;
+
+select org_code,member_no,to_char(dateadd(to_date('${bizdate}', 'yyyymmdd'), - 1, 'mm'),'yyyymmdd') from ods_sales_order
+WHERE ds = '${bizdate}' and org_code = 'TRE';
+
+SELECT cc.org_code
+,
+			 cc.member_manage_channel_endpoint_code
+,
+			 cc.member_manage_clerk
+,
+			 COUNT(DISTINCT cc.member_no) AS new_member_qty
+FROM td_ods_dev.ods_member_info aa
+	JOIN td_ods_dev.ods_member_card cc
+		ON cc.member_no = aa.member_no
+	LEFT JOIN (
+		SELECT a.org_code
+		,
+					 a.member_no
+		,
+					 min(a.create_time) AS first_order_time
+		FROM td_ods_dev.ods_sales_order a
+		WHERE 1 = 1 AND a.audit_time <= '2019-09-30 23:59:59' AND a.org_code = 'TRE' AND a.channel_endpoint_code = '1201'
+		AND a.price_amt_discount > 0 AND a.member_no NOT IN ('-1', '1')
+		GROUP BY a.org_code, a.member_no
+	) bb
+		ON bb.org_code = cc.org_code AND bb.member_no = cc.member_no
+WHERE 1 = 1 AND cc.member_register_time <= '2019-09-30 23:59:59' AND cc.org_code = 'TRE'
+AND cc.member_manage_channel_endpoint_code = '1102' AND aa.STATUS > 0 AND cc.member_no NOT IN ('-1', '1')
+AND bb.first_order_time BETWEEN '2019-09-01 00:00:00' AND '2019-09-30 23:59:59'
+GROUP BY cc.org_code
+, cc.member_manage_channel_endpoint_code
+, cc.member_manage_clerk
+;
+
+
+
+
+
+
+SELECT
+channel_endpoint_code,
+order_type
+FROM ods_sales_order
+WHERE ds = '${bizdate}' and ()
+
+
+
+
+
+
+
+
+--
+--客流统计
+--净销售额（不含现金券）
+--成交笔数（不减去退货笔数）(销售订单数)
+--成交率 (销售订单数 /客流统计)
+--vip销售占比
