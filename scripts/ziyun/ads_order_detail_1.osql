@@ -1,0 +1,99 @@
+--name:ads_order_detail_1
+--author:huangbin
+--create time:2019-09-27 16:17
+create table if not exists ads_order_product_detail(
+brandCode	String	comment  '品牌编码',
+storeCode	String	comment  '门店编号',
+clerkNo	String	comment  '店员编号',
+orderCode	String	comment  '订单编号',
+terminalStoreCode	String	comment  '终端代码',
+terminalStoreName	String	comment  '终端名称',
+orderCreateTime	String	comment  '订单建立时间',
+orderCreateDate	String	comment  '订单建立日期',
+businessDate	String	comment  '营业日期',
+auditTime	String	comment  '营业时间',
+payTime	String	comment  '支付时间',
+clerkName	String	comment  '导购员名称',
+salesOrderNo	String	comment  '销售单号',
+ecId	String	comment  'EC单号',
+outerOrderNo	String	comment  'OMS临时单号',
+omsOrderNo	String	comment  'OMS订单号',
+trackingNo	String	comment  '快递单号',
+customerLevelText	String	comment  '会员等级',
+vipNo	String	comment  '会员信息',
+couponType	String	comment  '优惠券类别',
+couponNo	String	comment  '优惠券号',
+couponName	String	comment  '优惠券名',
+shoppingCard	String	comment  '商场卡',
+wxpay	String	comment  '微信',
+alipay	String	comment  '支付宝',
+card	String	comment  '借记卡/信用卡',
+cash	String	comment  '现金',
+mallproxy	String	comment  '商场代收',
+payWay	String	comment  '支付方式',
+orderRemark	String	comment  '订单备注',
+promotionCodes	String	comment  '促销方案编码',
+promotionNames	String	comment  '促销名称',
+promotionType	String	comment  '促销类型',
+promotionDiscount	String	comment  '促销提案折扣',
+originalOrderNo	String	comment  '原单号',
+pricePrintTypeText	String	comment  '入机类型',
+originalAuditDate	String	comment  '原单营业日期',
+thirdOnline	String	comment  '第三方支付方式',
+memberPhone	String	comment  '会员手机号',
+isWipeZero	String	comment  '是否抹零',
+foodproxy	String	comment  '餐饮代收',
+promotionDiscountPoints	String	comment  '促销商场扣点',
+memberUnionId	String	comment  'UnionId',
+	string	comment  '券号',
+coupon_category	string	comment  '券批次类型',
+coupon_type_detail	string	comment  '券/券批次类型描述',
+coupon_name	string	comment  '活动名称',
+coupon_template_no	string	comment  '券批次号',
+coupon_denomination	Float	comment  '券面额/折扣',
+coupon_status	string	comment  '券状态',
+coupon_start_time	string	comment  '券生效日期',
+coupon_end_time	string	comment  '券失效日期',
+coupon_batch_time	string	comment  '券绑定日期',
+coupon_used_time	string	comment  '券使用日期',
+member_manage_store_code	string	comment  '会员管理门店编号',
+member_manage_store_name	string	comment  '会员管理门店名称',
+member_no	string	comment  '会员编号',
+member_wechat_id	string	comment  'OpenID',
+member_name	string	comment  '会员姓名',
+member_mobile	string	comment  '会员手机',
+order_grade_id	string	comment  '消费当前会员等级',
+order_trade_source	string	comment  '消费渠道',
+order_store_code	string	comment  '订单消费门店编号',
+order_store_name	string	comment  '订单消费门店名称',
+coupon_used_order_no	string	comment  '券使用订单号',
+coupon_passcode	string	comment  '券密码',
+retailPriceAmount	double	comment  '吊牌价总计',
+actualAmount	double	comment  '实收金额',
+totalAmount	double	comment  '订单总额(需支付总额)',
+discountCouponAmount	double	comment  '现金券抵扣金额',
+salesAmountDeductCoupon	double	comment  '销售金额(扣券)',
+salesAmountWithCoupon	double	comment  '销售金额(未扣券)',
+actualAmountDeductCoupon	double	comment  '实际成交额(扣券)',
+actualAmountWithCoupon	double	comment  '实际成交额(未扣券)',
+promotionDiscountCouponAmount	double	comment  '折扣券优惠总额',
+orderItemQuantity	String	comment  '订单商品数量',
+storedValueCardPayAmount	double	comment  '储值卡支付金额',
+order_fact_amount_include_coupon	Float	comment  '订单扣券金额',
+
+)comment '订单商品明细表' partitioned by(
+  ds string comment '时间分区');
+
+
+select so.org_code as brandCode
+,so.channel_endpoint_code as storeCode
+,so.shopping_guider_no as clerkNo
+,so.sales_order_no as orderCode
+,null as terminalStoreCode
+,null as terminalStoreName
+,so.create_time as orderCreateTime
+,substr(so.create_time,1,10) as orderCreateDate
+from ods_sales_order so
+--LEFT JOIN  ods_sales_order_item soi
+--on soi.sales_order_no = so.sales_order_no
+where so.ds=20190920
