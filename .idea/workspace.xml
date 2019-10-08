@@ -2,50 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ccb34a09-2509-4140-9103-1a564ca8795d" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/scripts/ziyun/ads_brand_detail_2.osql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/ziyun/ads_clerk_detail_1.osql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/ziyun/ads_clerk_detail_2.osql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/ziyun/ads_order_detail_1.osql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/ziyun/ads_order_product_detail_1.osql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/ziyun/ads_store_item_detail_2.osql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_alibaba_fastjson_1_2_28_odps.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_common_local_0_28_4_public.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_lot_proto_0_28_4_public.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_mapred_bridge_0_28_4_public.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_mapred_local_0_28_4_public.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_sdk_commons_0_28_4_public.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_sdk_core_0_28_4_public.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_sdk_lot_0_28_4_public.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_sdk_mapred_0_28_4_public.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_sdk_udf_0_28_4_public.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_udf_example_0_28_4_public.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_udf_local_0_28_4_public.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_code_gson_gson_2_2_4.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_protobuf_protobuf_java_2_4_1.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__commons_cli_commons_cli_1_3_1.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__commons_codec_commons_codec_1_9.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__commons_collections_commons_collections_3_2_1.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__commons_io_commons_io_2_4.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__commons_lang_commons_lang_2_6.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__commons_logging_commons_logging_1_1_1.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__javax_activation_activation_1_1.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__javax_mail_mail_1_4_7.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__junit_junit_4_12.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__net_sourceforge_javacsv_javacsv_2_0.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_commons_commons_compress_1_4.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_velocity_velocity_1_7.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_aspectj_aspectjrt_1_8_2.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_codehaus_jackson_jackson_core_asl_1_9_13.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_codehaus_jackson_jackson_mapper_asl_1_9_13.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_hamcrest_hamcrest_core_1_3.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_slf4j_slf4j_api_1_7_5.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_tukaani_xz_1_0.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_xerial_snappy_snappy_java_1_1_1_6.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/test_git.osql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/test_git.osql" afterDir="false" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/scripts/heshang/ads_store_memberlevel_detail.osql" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -70,81 +29,18 @@
     <select />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="test_git.osql" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/test_git.osql">
+    <leaf>
+      <file leaf-file-name="ads_store_memberlevel_detail.osql" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/scripts/heshang/ads_store_memberlevel_detail.osql">
+          <provider editor-type-id="OdpsQlGraph">
+            <state />
+          </provider>
           <provider selected="true" editor-type-id="OdpsQlEditor">
-            <state relative-caret-position="120">
-              <caret line="8" selection-start-line="8" selection-end-line="8" />
+            <state relative-caret-position="342">
+              <caret line="18" column="0" lean-forward="true" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
-          <provider editor-type-id="OdpsQlGraph" />
-        </entry>
-      </file>
-      <file leaf-file-name="ads_brand_detail_2.osql" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/ziyun/ads_brand_detail_2.osql">
-          <provider selected="true" editor-type-id="OdpsQlEditor">
-            <state relative-caret-position="255">
-              <caret line="17" selection-start-line="17" selection-end-line="115" selection-end-column="1" />
-            </state>
-          </provider>
-          <provider editor-type-id="OdpsQlGraph" />
-        </entry>
-      </file>
-      <file leaf-file-name="ads_store_item_detail_2.osql" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/ziyun/ads_store_item_detail_2.osql">
-          <provider selected="true" editor-type-id="OdpsQlEditor">
-            <state relative-caret-position="45">
-              <caret line="3" selection-start-line="3" selection-end-line="11" selection-end-column="28" />
-            </state>
-          </provider>
-          <provider editor-type-id="OdpsQlGraph" />
-        </entry>
-      </file>
-      <file leaf-file-name="ads_clerk_detail_2.osql" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/ziyun/ads_clerk_detail_2.osql">
-          <provider selected="true" editor-type-id="OdpsQlEditor">
-            <state relative-caret-position="14">
-              <caret line="51" column="29" selection-start-line="51" selection-start-column="29" selection-end-line="51" selection-end-column="29" />
-            </state>
-          </provider>
-          <provider editor-type-id="OdpsQlGraph" />
-        </entry>
-      </file>
-      <file leaf-file-name="ods_member_grade_info" pinned="false" current-in-tab="false">
-        <entry file="mock://td_ods_dev.ods_member_grade_info">
-          <provider selected="true" editor-type-id="OdpsTableDetail" />
-          <provider editor-type-id="odpsTablePartition" />
-        </entry>
-      </file>
-      <file leaf-file-name="ads_clerk_detail_1.osql" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/scripts/ziyun/ads_clerk_detail_1.osql">
-          <provider selected="true" editor-type-id="OdpsQlEditor">
-            <state relative-caret-position="30">
-              <caret line="2" column="30" lean-forward="true" selection-start-line="2" selection-start-column="30" selection-end-line="2" selection-end-column="30" />
-            </state>
-          </provider>
-          <provider editor-type-id="OdpsQlGraph" />
-        </entry>
-      </file>
-      <file leaf-file-name="ads_order_product_detail_1.osql" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/ziyun/ads_order_product_detail_1.osql">
-          <provider selected="true" editor-type-id="OdpsQlEditor">
-            <state relative-caret-position="263">
-              <caret line="98" column="30" selection-start-line="98" selection-start-column="30" selection-end-line="98" selection-end-column="30" />
-            </state>
-          </provider>
-          <provider editor-type-id="OdpsQlGraph" />
-        </entry>
-      </file>
-      <file leaf-file-name="ads_order_detail_1.osql" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/ziyun/ads_order_detail_1.osql">
-          <provider selected="true" editor-type-id="OdpsQlEditor">
-            <state relative-caret-position="261">
-              <caret line="87" selection-start-line="87" selection-end-line="98" selection-end-column="20" />
-            </state>
-          </provider>
-          <provider editor-type-id="OdpsQlGraph" />
         </entry>
       </file>
     </leaf>
@@ -169,6 +65,11 @@
       </map>
     </option>
   </component>
+  <component name="GradleLocalSettings">
+    <option name="externalProjectsViewState">
+      <projects_view />
+    </option>
+  </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
@@ -183,6 +84,7 @@
         <option value="$PROJECT_DIR$/scripts/ziyun/ads_clerk_detail_2.osql" />
         <option value="$PROJECT_DIR$/scripts/ziyun/ads_clerk_detail_1.osql" />
         <option value="$PROJECT_DIR$/scripts/ziyun/ads_order_product_detail_1.osql" />
+        <option value="$PROJECT_DIR$/scripts/heshang/ads_store_memberlevel_detail.osql" />
       </list>
     </option>
   </component>
@@ -218,10 +120,10 @@
   <component name="NodePackageJsonFileManager">
     <packageJsonPaths />
   </component>
-  <component name="ProjectFrameBounds">
+  <component name="ProjectFrameBounds" fullScreen="true">
     <option name="y" value="23" />
     <option name="width" value="1440" />
-    <option name="height" value="829" />
+    <option name="height" value="827" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -643,12 +545,21 @@
     </entry>
   </component>
   <component name="ProjectView">
-    <navigator proportions="" version="1">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
       <pane id="AndroidView" />
-      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -665,22 +576,15 @@
               <item name="dtstack_trendy" type="b2602c69:ProjectViewProjectNode" />
               <item name="dtstack_trendy" type="462c0819:PsiDirectoryNode" />
               <item name="scripts" type="462c0819:PsiDirectoryNode" />
-              <item name="ziyun" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="dtstack_trendy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Scratches and Consoles" type="1a2a3e82:ScratchProjectViewPane$MyProjectNode" />
-            </path>
-            <path>
-              <item name="dtstack_trendy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Scratches and Consoles" type="1a2a3e82:ScratchProjectViewPane$MyProjectNode" />
-              <item name="Scratches" type="d62648e6:ScratchProjectViewPane$MyRootNode" />
+              <item name="yangzi" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
       <pane id="Scope" />
+      <pane id="Scratches" />
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -715,11 +619,27 @@
   <component name="RunManager" selected="MaxCompute SQL.ads_order_product_detail_1.osql">
     <configuration default="true" type="Applet" factoryName="Applet">
       <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <option name="WIDTH" value="0" />
+      <option name="HEIGHT" value="0" />
+      <module />
     </configuration>
     <configuration default="true" type="Application" factoryName="Application">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="" />
+      <envs />
     </configuration>
     <configuration default="true" type="JUnit" factoryName="JUnit">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
       <option name="PACKAGE_NAME" />
@@ -729,21 +649,32 @@
       <option name="VM_PARAMETERS" value="-ea" />
       <option name="PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <option name="ENV_VARIABLES" />
       <option name="PASS_PARENT_ENVS" value="true" />
       <option name="TEST_SEARCH_SCOPE">
         <value defaultName="singleModule" />
       </option>
+      <envs />
       <patterns />
     </configuration>
     <configuration name="Resource" type="OdpsJavaConfigurationType" factoryName="MaxCompute Java" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="com.aliyun.odps.examples.mr.Resource" />
-      <module name="java" />
-      <extension name="coverage">
+      <extension name="coverage" enabled="false" merge="false" runner="idea">
         <pattern>
           <option name="PATTERN" value="com.aliyun.odps.examples.mr.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
+      <option name="MAIN_CLASS_NAME" value="com.aliyun.odps.examples.mr.Resource" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="java" />
+      <envs />
       <odpsJavaType>MR</odpsJavaType>
       <odpsEndpoint />
       <odpsProjectName>example_project</odpsProjectName>
@@ -755,81 +686,72 @@
     <configuration name="ads_brand_detail_2.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$PROJECT_DIR$/scripts/ziyun/ads_brand_detail_2.osql</odps_target_file>
       <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
-      <job_name>ads_brand_detail_2_osql</job_name>
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
     </configuration>
     <configuration name="ads_clerk_detail_1.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$PROJECT_DIR$/scripts/ziyun/ads_clerk_detail_1.osql</odps_target_file>
       <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
-      <job_name>ads_clerk_detail_1_osql</job_name>
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
     </configuration>
     <configuration name="ads_clerk_detail_2.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$PROJECT_DIR$/scripts/ziyun/ads_clerk_detail_2.osql</odps_target_file>
       <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
-      <job_name>ads_clerk_detail_2_osql</job_name>
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
     </configuration>
     <configuration name="ads_order_detail_1.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$PROJECT_DIR$/scripts/ziyun/ads_order_detail_1.osql</odps_target_file>
       <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
-      <job_name>ads_order_detail_1_osql</job_name>
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
     </configuration>
     <configuration name="ads_order_product_detail_1.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$PROJECT_DIR$/scripts/ziyun/ads_order_product_detail_1.osql</odps_target_file>
       <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
-      <job_name>ads_order_product_detail_1_osql</job_name>
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
     </configuration>
     <configuration name="ads_store_item_detail_2.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$PROJECT_DIR$/scripts/ziyun/ads_store_item_detail_2.osql</odps_target_file>
       <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
-      <job_name>ads_store_item_detail_2_osql</job_name>
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
     </configuration>
     <configuration name="as" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$PROJECT_DIR$/scripts/ziyun/as</odps_target_file>
       <odps_output_dir>/var/folders/nh/j7gnt6tj6mq1v0lr3c3kmcg00000gn/T/</odps_output_dir>
-      <job_name>as</job_name>
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
     </configuration>
     <configuration name="fggh.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$PROJECT_DIR$/scripts/ziyun/fggh.osql</odps_target_file>
       <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
-      <job_name>fggh_osql</job_name>
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
     </configuration>
     <configuration name="scratch_1.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$APPLICATION_CONFIG_DIR$/scratches/scratch_1.osql</odps_target_file>
       <odps_output_dir>/var/folders/nh/j7gnt6tj6mq1v0lr3c3kmcg00000gn/T/</odps_output_dir>
-      <job_name>scratch_1_osql</job_name>
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
     </configuration>
     <configuration name="scratch.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$APPLICATION_CONFIG_DIR$/scratches/scratch.osql</odps_target_file>
       <odps_output_dir>/var/folders/nh/j7gnt6tj6mq1v0lr3c3kmcg00000gn/T/</odps_output_dir>
-      <job_name />
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
     </configuration>
     <configuration name="test_git.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$PROJECT_DIR$/scripts/test_git.osql</odps_target_file>
       <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
-      <job_name>test_git_osql</job_name>
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
     </configuration>
     <configuration default="true" type="TestNG" factoryName="TestNG">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
       <option name="SUITE_NAME" />
@@ -842,34 +764,45 @@
       <option name="PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
       <option name="OUTPUT_DIRECTORY" />
+      <option name="ANNOTATION_TYPE" />
+      <option name="ENV_VARIABLES" />
       <option name="PASS_PARENT_ENVS" value="true" />
       <option name="TEST_SEARCH_SCOPE">
         <value defaultName="singleModule" />
       </option>
       <option name="USE_DEFAULT_REPORTERS" value="false" />
       <option name="PROPERTIES_FILE" />
+      <envs />
       <properties />
       <listeners />
     </configuration>
-    <list>
-      <item itemvalue="MaxCompute SQL.test_git.osql" />
-      <item itemvalue="MaxCompute SQL.scratch.osql" />
-      <item itemvalue="MaxCompute SQL.as" />
-      <item itemvalue="MaxCompute SQL.scratch_1.osql" />
-      <item itemvalue="MaxCompute SQL.fggh.osql" />
-      <item itemvalue="MaxCompute SQL.ads_brand_detail_2.osql" />
-      <item itemvalue="MaxCompute SQL.ads_store_item_detail_2.osql" />
-      <item itemvalue="MaxCompute SQL.ads_clerk_detail_2.osql" />
-      <item itemvalue="MaxCompute SQL.ads_order_detail_1.osql" />
-      <item itemvalue="MaxCompute SQL.ads_order_product_detail_1.osql" />
-      <item itemvalue="MaxCompute SQL.ads_clerk_detail_1.osql" />
-      <item itemvalue="MaxCompute Java.Resource" />
+    <list size="12">
+      <item index="0" class="java.lang.String" itemvalue="MaxCompute SQL.test_git.osql" />
+      <item index="1" class="java.lang.String" itemvalue="MaxCompute SQL.scratch.osql" />
+      <item index="2" class="java.lang.String" itemvalue="MaxCompute SQL.as" />
+      <item index="3" class="java.lang.String" itemvalue="MaxCompute SQL.scratch_1.osql" />
+      <item index="4" class="java.lang.String" itemvalue="MaxCompute SQL.fggh.osql" />
+      <item index="5" class="java.lang.String" itemvalue="MaxCompute SQL.ads_brand_detail_2.osql" />
+      <item index="6" class="java.lang.String" itemvalue="MaxCompute SQL.ads_store_item_detail_2.osql" />
+      <item index="7" class="java.lang.String" itemvalue="MaxCompute SQL.ads_clerk_detail_2.osql" />
+      <item index="8" class="java.lang.String" itemvalue="MaxCompute SQL.ads_order_detail_1.osql" />
+      <item index="9" class="java.lang.String" itemvalue="MaxCompute SQL.ads_order_product_detail_1.osql" />
+      <item index="10" class="java.lang.String" itemvalue="MaxCompute SQL.ads_clerk_detail_1.osql" />
+      <item index="11" class="java.lang.String" itemvalue="MaxCompute Java.Resource" />
     </list>
     <recent_temporary>
-      <list>
-        <item itemvalue="MaxCompute Java.Resource" />
+      <list size="1">
+        <item index="0" class="java.lang.String" itemvalue="MaxCompute Java.Resource" />
       </list>
     </recent_temporary>
+  </component>
+  <component name="SbtLocalSettings">
+    <option name="externalProjectsViewState">
+      <projects_view />
+    </option>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -891,44 +824,68 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="72428000" />
+    <option name="totallyTimeSpent" value="72529000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1440" height="829" extended-state="0" />
+    <frame x="0" y="0" width="1440" height="900" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info anchor="right" id="Palette" order="2" />
-      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5007153" side_tool="true" weight="0.325811" />
-      <window_info anchor="right" id="Maven Projects" order="5" />
-      <window_info anchor="bottom" id="Database Changes" order="0" show_stripe_button="false" />
-      <window_info id="Capture Tool" order="7" />
-      <window_info id="Designer" order="3" />
-      <window_info id="Project Explorer" order="5" weight="0.32904148" />
-      <window_info id="Job Explorer" order="8" weight="0.3297568" />
-      <window_info anchor="bottom" id="Console" order="12" />
-      <window_info anchor="right" id="Database" order="7" />
-      <window_info id="Structure" order="1" side_tool="true" weight="0.24964234" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info id="UI Designer" order="4" />
-      <window_info anchor="bottom" id="Debug" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Messages" order="3" sideWeight="0.49928468" weight="0.325811" />
-      <window_info anchor="right" id="Palette&#9;" order="8" />
-      <window_info id="Image Layers" order="2" />
-      <window_info anchor="right" id="Capture Analysis" order="4" />
-      <window_info anchor="bottom" id="Run" order="4" sideWeight="0.49928468" visible="true" weight="0.32299012" />
-      <window_info anchor="bottom" id="Version Control" order="11" weight="0.32889965" />
-      <window_info anchor="bottom" id="Terminal" order="9" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.1881259" />
-      <window_info anchor="right" id="Theme Preview" order="9" />
-      <window_info id="Favorites" order="6" side_tool="true" />
-      <window_info anchor="right" id="FAQ Robot" order="6" />
-      <window_info anchor="bottom" id="Inspection" order="8" weight="0.4" />
-      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
-      <window_info anchor="bottom" id="Cvs" order="7" weight="0.25" />
-      <window_info anchor="bottom" id="Message" order="1" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="3" weight="0.25" />
-      <window_info anchor="bottom" id="Find" order="2" />
+      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24964234" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project Explorer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Job Explorer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="SciView" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.325811" sideWeight="0.5007153" order="10" side_tool="true" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Database Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="combo" />
+      <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Project Explorer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32904148" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Job Explorer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3297568" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24964234" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.325811" sideWeight="0.49928468" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32299012" sideWeight="0.49928468" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32889965" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="FAQ Robot" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1881259" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="true" content_ui="tabs" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -937,227 +894,119 @@
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
   </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager />
+    <watches-manager />
+  </component>
   <component name="antWorkspaceConfiguration">
     <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/asa">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch_4.osql">
-      <provider selected="true" editor-type-id="OdpsQlEditor" />
-    </entry>
-    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch.osql">
-      <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="30">
-          <caret line="2" column="22" selection-start-line="2" selection-start-column="22" selection-end-line="2" selection-end-column="22" />
-        </state>
-      </provider>
-      <provider editor-type-id="OdpsQlGraph" />
-    </entry>
-    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch_1.osql">
-      <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state>
-          <caret selection-end-line="2" selection-end-column="22" />
-        </state>
-      </provider>
-      <provider editor-type-id="OdpsQlGraph" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/ziyun/fggh.osql" />
-    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/asa">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch.osql">
-      <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="30">
-          <caret line="2" column="22" lean-forward="true" selection-start-line="2" selection-start-column="22" selection-end-line="2" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch_1.osql">
-      <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state>
-          <caret selection-end-line="2" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/java/examples/data/speech_wav/tsh148_seg_2_3013_3_6_48_80bd359827e24dd7_0.wav">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch.osql" />
+    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch_1.osql" />
     <entry file="file://$PROJECT_DIR$/java/examples/com/aliyun/odps/examples/mr/Resource.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="697">
-          <caret line="84" selection-start-line="84" selection-end-line="84" />
+          <caret line="84" column="0" lean-forward="false" selection-start-line="84" selection-start-column="0" selection-end-line="84" selection-end-column="0" />
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/warehouse/example_project/__tables__/wc_out/R_000000">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/warehouse/example_project/__tables__/wc_in1/__schema__">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/warehouse/example_project/__tables__/rs_out/M_000001">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/warehouse/example_project/__tables__/rs_out/__schema__">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/warehouse/example_project/__tables__/ads_log/__schema__">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/warehouse/example_project/__tables__/ads_log/data">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/warehouse/example_project/__resources__/speech_model_random_5_utterance">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/warehouse/example_project/__resources__/file_resource.txt">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/warehouse/example_project/__resources__/table_resource1/__ref__">
-      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/java/examples/com/aliyun/odps/examples/unstructured/TextExtractor.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1369">
-          <caret line="18" column="13" selection-start-line="18" selection-start-column="13" selection-end-line="18" selection-end-column="13" />
+          <caret line="18" column="13" lean-forward="false" selection-start-line="18" selection-start-column="13" selection-end-line="18" selection-end-column="13" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/java/examples/com/aliyun/odps/examples/unstructured/SpeechSentenceSnrExtractor.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="360">
-          <caret line="24" column="13" selection-start-line="24" selection-start-column="13" selection-end-line="24" selection-end-column="13" />
+          <caret line="24" column="13" lean-forward="false" selection-start-line="24" selection-start-column="13" selection-end-line="24" selection-end-column="13" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/java/examples/com/aliyun/odps/examples/udf/test/UDTFTest.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="192">
-          <caret line="13" column="13" selection-start-line="13" selection-start-column="13" selection-end-line="13" selection-end-column="13" />
+          <caret line="13" column="13" lean-forward="false" selection-start-line="13" selection-start-column="13" selection-end-line="13" selection-end-column="13" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/java/examples/com/aliyun/odps/examples/udf/test/UDFTest.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="195">
-          <caret line="13" column="13" selection-start-line="13" selection-start-column="13" selection-end-line="13" selection-end-column="13" />
+          <caret line="13" column="13" lean-forward="false" selection-start-line="13" selection-start-column="13" selection-end-line="13" selection-end-column="13" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/java/examples/com/aliyun/odps/examples/udf/test/UDAFTest.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="195">
-          <caret line="13" column="13" selection-start-line="13" selection-start-column="13" selection-end-line="13" selection-end-column="13" />
+          <caret line="13" column="13" lean-forward="false" selection-start-line="13" selection-start-column="13" selection-end-line="13" selection-end-column="13" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/java/examples/com/aliyun/odps/examples/udf/UDTFResource.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-243">
-          <caret line="20" column="13" selection-start-line="20" selection-start-column="13" selection-end-line="20" selection-end-column="13" />
+          <caret line="20" column="13" lean-forward="false" selection-start-line="20" selection-start-column="13" selection-end-line="20" selection-end-column="13" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/java/examples/com/aliyun/odps/examples/udf/UDTFExample.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="195">
-          <caret line="13" column="13" selection-start-line="13" selection-start-column="13" selection-end-line="13" selection-end-column="13" />
+          <caret line="13" column="13" lean-forward="false" selection-start-line="13" selection-start-column="13" selection-end-line="13" selection-end-column="13" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/java/examples/com/aliyun/odps/examples/udf/UDFResource.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="180">
-          <caret line="12" column="13" selection-start-line="12" selection-start-column="13" selection-end-line="12" selection-end-column="13" />
+          <caret line="12" column="13" lean-forward="false" selection-start-line="12" selection-start-column="13" selection-end-line="12" selection-end-column="13" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/java/examples/com/aliyun/odps/examples/udf/UDFExample.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="60">
-          <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
+          <caret line="4" column="13" lean-forward="false" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/java/examples/com/aliyun/odps/examples/udf/UDAFResource.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="111">
-          <caret line="23" column="13" selection-start-line="23" selection-start-column="13" selection-end-line="23" selection-end-column="13" />
+          <caret line="23" column="13" lean-forward="false" selection-start-line="23" selection-start-column="13" selection-end-line="23" selection-end-column="13" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/java/examples/com/aliyun/odps/examples/udf/UDAFExample.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="240">
-          <caret line="16" column="13" selection-start-line="16" selection-start-column="13" selection-end-line="16" selection-end-column="13" />
+          <caret line="16" column="13" lean-forward="false" selection-start-line="16" selection-start-column="13" selection-end-line="16" selection-end-column="13" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/java/examples/com/aliyun/odps/examples/TestUtil.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="588">
-          <caret line="54" selection-start-line="54" selection-end-line="54" />
+          <caret line="54" column="0" lean-forward="false" selection-start-line="54" selection-start-column="0" selection-end-line="54" selection-end-column="0" />
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/java/pom.xml">
-      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/java/examples/com/aliyun/odps/examples/unstructured/SpeechStorageHandler.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="90">
-          <caret line="6" column="13" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
+          <caret line="6" column="13" lean-forward="false" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
         </state>
       </provider>
-    </entry>
-    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch.sql">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch_2.osql">
-      <provider selected="true" editor-type-id="OdpsQlEditor" />
-      <provider editor-type-id="OdpsQlGraph" />
     </entry>
     <entry file="file://$PROJECT_DIR$/scripts/ziyun/as" />
-    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch_3.osql">
-      <provider selected="true" editor-type-id="OdpsQlEditor" />
-      <provider editor-type-id="OdpsQlGraph" />
-    </entry>
-    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch_1.osql">
-      <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state>
-          <caret selection-end-line="2" selection-end-column="22" />
-        </state>
-      </provider>
-      <provider editor-type-id="OdpsQlGraph" />
-    </entry>
-    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch.osql">
-      <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="30">
-          <caret line="2" column="22" selection-start-line="2" selection-start-column="22" selection-end-line="2" selection-end-column="22" />
-        </state>
-      </provider>
-      <provider editor-type-id="OdpsQlGraph" />
-    </entry>
-    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/asa">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/ziyun/scratch_5.osql" />
-    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch_4.osql">
-      <provider selected="true" editor-type-id="OdpsQlEditor" />
-      <provider editor-type-id="OdpsQlGraph" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/ziyun/fggh.osql" />
-    <entry file="file://$PROJECT_DIR$/scripts/test_git.osql">
-      <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="120">
-          <caret line="8" selection-start-line="8" selection-end-line="8" />
-        </state>
-      </provider>
-      <provider editor-type-id="OdpsQlGraph" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/trendy_api.iml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="150">
@@ -1165,53 +1014,16 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/ziyun/ads_store_item_detail_2.osql">
+    <entry file="file://$PROJECT_DIR$/scripts/heshang/ads_store_memberlevel_detail.osql">
+      <provider editor-type-id="OdpsQlGraph">
+        <state />
+      </provider>
       <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="45">
-          <caret line="3" selection-start-line="3" selection-end-line="11" selection-end-column="28" />
+        <state relative-caret-position="342">
+          <caret line="18" column="0" lean-forward="true" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
-      <provider editor-type-id="OdpsQlGraph" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/ziyun/ads_order_detail_1.osql">
-      <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="261">
-          <caret line="87" selection-start-line="87" selection-end-line="98" selection-end-column="20" />
-        </state>
-      </provider>
-      <provider editor-type-id="OdpsQlGraph" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/ziyun/ads_order_product_detail_1.osql">
-      <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="263">
-          <caret line="98" column="30" selection-start-line="98" selection-start-column="30" selection-end-line="98" selection-end-column="30" />
-        </state>
-      </provider>
-      <provider editor-type-id="OdpsQlGraph" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/ziyun/ads_brand_detail_2.osql">
-      <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="255">
-          <caret line="17" selection-start-line="17" selection-end-line="115" selection-end-column="1" />
-        </state>
-      </provider>
-      <provider editor-type-id="OdpsQlGraph" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/ziyun/ads_clerk_detail_2.osql">
-      <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="14">
-          <caret line="51" column="29" selection-start-line="51" selection-start-column="29" selection-end-line="51" selection-end-column="29" />
-        </state>
-      </provider>
-      <provider editor-type-id="OdpsQlGraph" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/ziyun/ads_clerk_detail_1.osql">
-      <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="30">
-          <caret line="2" column="30" lean-forward="true" selection-start-line="2" selection-start-column="30" selection-end-line="2" selection-end-column="30" />
-        </state>
-      </provider>
-      <provider editor-type-id="OdpsQlGraph" />
     </entry>
   </component>
   <component name="masterDetails">

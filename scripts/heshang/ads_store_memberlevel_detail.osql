@@ -1,0 +1,135 @@
+--name:ads_store_memberlevel_detail
+--author:xuzhengzhi
+--create time:2019-10-08 17:38
+
+
+CREATE TABLE IF NOT EXISTS ads_store_memberlevel_detail(
+  salesDate	string	comment'销售日期',
+  storeCode	string	comment'门店编号',
+  member_level_type	string	comment'会员等级类型',
+  member_level_amount BIGINT COMMENT '会员数',
+  store_member_level_amount BIGINT COMMENT '门店会员总数',
+  sales_income DOUBLE COMMENT '销售收入(元)',
+  store_sales_income DOUBLE COMMENT '门店销售收入',
+  order_amount BIGINT COMMENT '交易单数',
+  item_cnt  bigint comment '交易商品数',
+  evt_date bigint comment '计算日期'
+)PARTITIONED BY(ds STRING);
+
+
+insert overwrite table ads_store_memberlevel_detail partition (ds=${bizdate})
+  select
+  coalesce(tmp1.calculate_date,tmp2.pay_date)
+  ,coalesce(tmp1.member_manage_channel_endpoint_code,tmp2.channel_endpoint_code)
+  ,coalesce(tmp1.grade_id,tmp2.member_grade_code)
+  ,tmp1.member_qty_all
+  ,tmp1.member_qty_all as store_member_qty_all
+  -- ,tmp3.channel_endpoint_code
+  -- ,tmp3.member_grade_code
+  ,tmp2.amt_total
+  ,tmp2.store_amt_total
+  ,tmp2.deal_cnt
+  ,tmp2.item_cnt
+  ,${bizdate} as evt_date
+
+
+  from(
+select
+${bizdate} as calculate_date--存量统计时间
+    ,tmp1.member_manage_channel_endpoint_code
+    ,tmp1.grade_id
+    ,tmp1.member_qty_all
+    ,tmp2.member_qty_all as store_member_qty_all
+
+from(
+  SELECT
+  ods_member_card.member_manage_channel_endpoint_code
+  ,ods_member_grade_state.grade_id
+  ,COUNT ( DISTINCT ods_member_card.member_no ) AS member_qty_all
+
+  FROM
+  ods_member_card left join ods_member_grade_state
+    on ods_member_card.id = ods_member_grade_state.member_card_id
+  and ods_member_grade_state.ds=20190920
+  WHERE ods_member_card.ds=20190920
+  and ods_member_card.status > 0
+  AND CAST ( ods_member_card.member_no AS bigint ) > 1
+  -- AND ods_member_card.member_manage_store = '1102'
+  -- AND ods_member_card.brand_code = '2'
+  GROUP BY
+  ods_member_card.member_manage_channel_endpoint_code
+  ,ods_member_grade_state.grade_id
+)tmp1 left outer join (
+  SELECT
+  ods_member_card.member_manage_channel_endpoint_code
+  ,COUNT ( DISTINCT ods_member_card.member_no ) AS member_qty_all
+  FROM
+  ods_member_card
+  WHERE ods_member_card.ds=20190920
+  and ods_member_card.status > 0
+  AND CAST ( ods_member_card.member_no AS bigint ) > 1
+  group by ods_member_card.member_manage_channel_endpoint_code
+)tmp2 on tmp1.member_manage_channel_endpoint_code=tmp2.member_manage_channel_endpoint_code
+
+)tmp1
+
+  full outer join(
+  --销售金额
+  select tmp1.pay_date
+  ,tmp1.channel_endpoint_code
+  ,tmp1.member_grade_code
+  ,tmp1.amt_total
+  ,tmp2.amt_total as store_amt_total
+  ,tmp1.deal_cnt
+  ,tmp3.item_cnt
+
+  from(
+    SELECT to_char(so.paid_time, 'yyyymmdd') AS pay_date
+    ,      so.channel_endpoint_code
+    ,      member_grade_code
+    ,      sum(so.amt_total) as amt_total
+    ,      count(distinct sales_order_no) as deal_cnt
+    FROM ods_sales_order so
+    WHERE ds = 20190920
+    and order_type=1
+    and to_char(so.paid_time, 'yyyymmdd') is not null
+    GROUP BY to_char(so.paid_time, 'yyyymmdd'),so.channel_endpoint_code,member_grade_code
+  )tmp1 left outer join(
+  --销售金额占比
+    SELECT to_char(so.paid_time, 'yyyymmdd') AS pay_date
+    ,      so.channel_endpoint_code
+    ,      sum(so.amt_total) as amt_total
+    FROM ods_sales_order so
+    WHERE ds = 20190920
+    and order_type=1
+    and to_char(so.paid_time, 'yyyymmdd') is not null
+    GROUP BY to_char(so.paid_time, 'yyyymmdd'),channel_endpoint_code
+  )tmp2 on tmp1.pay_date=tmp2.pay_date
+  and tmp1.channel_endpoint_code=tmp2.channel_endpoint_code
+    left outer join(
+    select
+           to_char(so.paid_time, 'yyyymmdd') AS pay_date
+           ,      so.channel_endpoint_code
+           ,      member_grade_code
+           ,      sum(soi.qty_product) as item_cnt
+    from ods_sales_order_item soi left join
+    ods_sales_order so
+      on soi.sales_order_no = so.sales_order_no
+    and so.ds=20190920
+    where soi.ds=20190920
+    and soi.price_discount > 0
+    and soi.qty_product > 0
+    and so.paid_time is not null
+    group by to_char(so.paid_time, 'yyyymmdd')
+    ,      so.channel_endpoint_code
+    ,      member_grade_code
+    )tmp3 on tmp1.pay_date=tmp3.pay_date
+    and tmp1.channel_endpoint_code=tmp3.channel_endpoint_code
+    and tmp1.member_grade_code=tmp3.member_grade_code
+  )tmp2 on tmp1.calculate_date=tmp2.pay_date
+  and tmp1.member_manage_channel_endpoint_code=tmp2.channel_endpoint_code
+  and tmp1.grade_id=tmp2.member_grade_code;
+-- where tmp2.pay_date is not null;
+
+
+
