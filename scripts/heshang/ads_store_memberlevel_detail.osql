@@ -1,7 +1,6 @@
 --name:ads_store_memberlevel_detail
 --author:xuzhengzhi
---create time:2019-10-08 17:38
-
+--create time:2019-10-08 18:01
 
 CREATE TABLE IF NOT EXISTS ads_store_memberlevel_detail(
   salesDate	string	comment'销售日期',
@@ -34,7 +33,7 @@ insert overwrite table ads_store_memberlevel_detail partition (ds=${bizdate})
 
 
   from(
-select
+select 
 ${bizdate} as calculate_date--存量统计时间
     ,tmp1.member_manage_channel_endpoint_code
     ,tmp1.grade_id
@@ -129,7 +128,6 @@ from(
   )tmp2 on tmp1.calculate_date=tmp2.pay_date
   and tmp1.member_manage_channel_endpoint_code=tmp2.channel_endpoint_code
   and tmp1.grade_id=tmp2.member_grade_code;
- where tmp2.pay_date is not null;
-
+-- where tmp2.pay_date is not null;
 
 
