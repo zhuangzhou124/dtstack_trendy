@@ -1,0 +1,165 @@
+--name:ods_sales_order_item
+--author:zhangjunda
+--create time:2019-09-26 20:45
+--***********************************
+-- 所属系统：订单中心
+-- 功能描述：物理库区表DDL
+-- 生命周期：365天
+-- 调度周期：手动调度
+-- 创建者：毅达
+-- 创建日期：20190902
+-- 修改日志：
+--***********************************
+
+-- drop table ods_sales_order_item;
+CREATE TABLE IF NOT EXISTS ods_sales_order_merge(
+  id                               BIGINT COMMENT '',
+  sales_order_item_no              STRING COMMENT '单据明细编号',
+  sales_order_no                   STRING COMMENT '主单编码（xs-销售单号、th-退货单号、tk-退款单号、hh-换货单号）',
+  original_order_item_no           STRING COMMENT '源订单明细编号（售后单特有）',
+  original_order_no                STRING COMMENT '源销售订单编号（售后单特有）',
+  product_code                     STRING COMMENT '商品编码',
+  sku_code                         STRING COMMENT 'sku编码',
+  shipping_type                    BIGINT COMMENT '发货方式（1：快递、2：自提）',
+  shipping_time                    STRING COMMENT '发货时间',
+  price_retail                     DOUBLE COMMENT '零售价（吊牌价）',
+  qty_product                      BIGINT COMMENT '商品数量（默认为1）',
+  promotions                       STRING COMMENT '参与促销信息，例如：["cpr0000617/[内地/港澳]生日券-正价消费8折"]',
+  discount_rate                    DOUBLE COMMENT '折扣率',
+  price_discount                   DOUBLE COMMENT '折后价',
+  price_print_type                 BIGINT COMMENT '入机类型(1：原价,2：折后，3 ：混合)',
+  amt_sales                        DOUBLE COMMENT '明细分摊金额（原价入机=吊牌价，折后入机=折后价）',
+  amt_freight_contribution         DOUBLE COMMENT '运费摊分金额',
+  item_type                        STRING COMMENT '商品类型：general/gif',
+  can_be_rma                       BIGINT COMMENT '是否允许rma',
+  has_rma                          BIGINT COMMENT '是否有rma处理，0- 无，1-有',
+  create_user_id                   BIGINT COMMENT '创建用户编码',
+  create_user_name                 STRING COMMENT '创建用户名（冗余）',
+  create_time                      STRING COMMENT '创建时间',
+  last_update_user_id              BIGINT COMMENT '最后更新用户编码',
+  last_update_user_name            STRING COMMENT '最后更新用户名（冗余）',
+  last_update_time                 STRING COMMENT '最后修改时间',
+  deleted                          STRING COMMENT '软删除：1-已删除、0-未删除',
+  remark                           STRING COMMENT '备注',
+  sales_order_id                   BIGINT COMMENT '销售订单id',
+  shipping_status                  BIGINT COMMENT '发货状态',
+  refund_tracking_no               STRING COMMENT '退货物流单号',
+  rma_order_type                   BIGINT COMMENT '订单商品类型（如：售后明细：2， 销售明细：1）',
+  app_id                           STRING COMMENT '应用编码',
+  org_code                         STRING COMMENT '销售组织编码',
+  item_status                      BIGINT COMMENT '单据状态',
+  search_source_type               BIGINT COMMENT '寻源类型',
+  item_price                       DOUBLE COMMENT '货价、货值（待讨论）',
+  stock_shipping_code_array        STRING COMMENT '寻源发货逻辑仓库编码数组',
+  stock_use_check                  BIGINT COMMENT '库存中心校验库存是否可用(废弃)',
+  stop_shipping                    BIGINT COMMENT '是否暂停发货（1已暂停 0未暂停）',
+  outer_item_no                    STRING COMMENT '外部明细编号',
+  occupy_channel_stock             BIGINT COMMENT '是否占用渠道库存（废弃）',
+  item_business_hours              STRING COMMENT 'item营业时间',
+  goods_channel_code STRING COMMENT '',
+  amt_m_discount DOUBLE COMMENT '',
+  price_sales DOUBLE COMMENT '销售价格'
+)COMMENT '订单明细信息' PARTITIONED BY(
+  ds STRING COMMENT '时间分区');
+
+
+INSERT OVERWRITE TABLE ods_sales_order_merge PARTITION(ds = '${bizdate}')
+  SELECT id
+  ,      sales_order_item_no
+  ,      sales_order_no
+  ,      original_order_item_no
+  ,      original_order_no
+  ,      product_code
+  ,      sku_code
+  ,      shipping_type
+  ,      shipping_time
+  ,      price_retail
+  ,      qty_product
+  ,      promotions
+  ,      discount_rate
+  ,      price_discount
+  ,      price_print_type
+  ,      amt_sales
+  ,      amt_freight_contribution
+  ,      item_type
+  ,      can_be_rma
+  ,      has_rma
+  ,      create_user_id
+  ,      create_user_name
+  ,      create_time
+  ,      last_update_user_id
+  ,      last_update_user_name
+  ,      last_update_time
+  ,      deleted
+  ,      remark
+  ,      sales_order_id
+  ,      shipping_status
+  ,      refund_tracking_no
+  ,      rma_order_type
+  ,      app_id
+  ,      org_code
+  ,      item_status
+  ,      search_source_type
+  ,      item_price
+  ,      stock_shipping_code_array
+  ,      stock_use_check
+  ,      stop_shipping
+  ,      outer_item_no
+  ,      occupy_channel_stock
+  ,      item_business_hours
+  ,      goods_channel_code
+  ,      amt_m_discount
+  ,      price_sales
+  FROM ods_sales_order_merge
+  WHERE ds = to_char(dateadd(to_date('${bizdate}', 'yyyymmdd'), - 1, 'dd'), 'yyyymmdd') AND create_time <=
+  to_char(dateadd(to_date('${bizdate}', 'yyyymmdd'), - 35, 'dd'), 'yyyymmdd')
+  UNION ALL SELECT id
+  ,                sales_order_item_no
+  ,                sales_order_no
+  ,                original_order_item_no
+  ,                original_order_no
+  ,                product_code
+  ,                sku_code
+  ,                shipping_type
+  ,                shipping_time
+  ,                price_retail
+  ,                qty_product
+  ,                promotions
+  ,                discount_rate
+  ,                price_discount
+  ,                price_print_type
+  ,                amt_sales
+  ,                amt_freight_contribution
+  ,                item_type
+  ,                can_be_rma
+  ,                has_rma
+  ,                create_user_id
+  ,                create_user_name
+  ,                create_time
+  ,                last_update_user_id
+  ,                last_update_user_name
+  ,                last_update_time
+  ,                deleted
+  ,                remark
+  ,                sales_order_id
+  ,                shipping_status
+  ,                refund_tracking_no
+  ,                rma_order_type
+  ,                app_id
+  ,                org_code
+  ,                item_status
+  ,                search_source_type
+  ,                item_price
+  ,                stock_shipping_code_array
+  ,                stock_use_check
+  ,                stop_shipping
+  ,                outer_item_no
+  ,                occupy_channel_stock
+  ,                item_business_hours
+  ,                goods_channel_code
+  ,                amt_m_discount
+  ,                price_sales
+  FROM ods_sales_order_item
+  WHERE ds = '${bizdate}' AND create_time >
+  to_char(dateadd(to_date('${bizdate}', 'yyyymmdd'), - 35, 'dd'), 'yyyymmdd');
+

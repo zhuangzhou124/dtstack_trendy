@@ -398,7 +398,7 @@ INSERT OVERWRITE TABLE ads_store_detail_1 PARTITION(ds = '${bizdate}')
 				 WHERE ds = '${bizdate}') AS t4
 				 ON t1.channel_endpoint_code = t4.store_code
 		 GROUP BY t4.id) as t15
-	on t5.id = t15.id
+	on t5.id = t15.id;
 
 
 
@@ -420,96 +420,6 @@ INSERT OVERWRITE TABLE ads_store_detail_1 PARTITION(ds = '${bizdate}')
 
 
 
-
-
-
-
-
-
-
-	--	SELECT t4.id,
-	--				 sum(t1.price_amt_retail) AS retail_price_amount,
-	--				 sum(t5.qty_return_item) AS return_item_quantity,
-	--				 sum(t5.amt_return_item) AS return_item_amount,
-	----				 sum(t6.qty_product) AS net_sales_item_quantity,
-	--				 COUNT(t7.order_type) AS rma_quantity,
-	--				 sum(t8.amt_total) AS sales_item_amount
-	----				 sum(t9.amt_pay) AS cash_coupon
-	--	FROM (
-	--		SELECT channel_endpoint_code,
-	--					 price_amt_retail
-	--		FROM ods_sales_order
-	--		WHERE ds = '${bizdate}') AS t1
-	--		LEFT OUTER JOIN (
-	--			SELECT channel_endpoint_code,
-	--						 qty_return_item,
-	--						 amt_return_item
-	--			FROM ods_sales_order
-	--			WHERE order_type IN (103) AND ds = '${bizdate}') AS t5
-	--			ON t1.channel_endpoint_code = t5.channel_endpoint_code
-	----		LEFT OUTER JOIN (
-	----			SELECT so.channel_endpoint_code,
-	----						 soi.qty_product
-	----			FROM (
-	----				SELECT sales_order_no,
-	----							 qty_product
-	----				FROM ods_sales_order_item
-	----				WHERE ds = '${bizdate}' AND price_discount > 0 AND qty_product > 0) soi
-	----				LEFT JOIN (
-	----					SELECT channel_endpoint_code,
-	----								 sales_order_no
-	----					FROM ods_sales_order
-	----					WHERE ds = '${bizdate}') so
-	----					ON soi.sales_order_no = so.sales_order_no) AS t6
-	----			ON t1.channel_endpoint_code = t6.channel_endpoint_code
-	--		LEFT OUTER JOIN (
-	--			SELECT channel_endpoint_code,
-	--						 order_type
-	--			FROM ods_sales_order
-	--			WHERE order_type IN ('103', '104') AND ds = '${bizdate}') AS t7
-	--			ON t1.channel_endpoint_code = t7.channel_endpoint_code
-	--		LEFT OUTER JOIN (
-	--			SELECT channel_endpoint_code,
-	--						 amt_total
-	--			FROM ods_sales_order
-	--			WHERE ds = '${bizdate}') AS t8
-	--			ON t1.channel_endpoint_code = t8.channel_endpoint_code
-	----		LEFT OUTER JOIN (
-	----			SELECT so.channel_endpoint_code,
-	----						 sop.amt_pay
-	----			FROM (
-	----				SELECT sales_order_no,
-	----							 amt_pay
-	----				FROM ods_sales_order_payment
-	----				WHERE ds = '${bizdate}' AND pay_way = 'COUPON') sop
-	----				LEFT JOIN (
-	----					SELECT sales_order_no,
-	----								 channel_endpoint_code
-	----					FROM ods_sales_order
-	----					WHERE ds = '${bizdate}') so
-	----					ON sop.sales_order_no = so.sales_order_no) AS t9
-	----			ON t1.channel_endpoint_code = t9.channel_endpoint_code
-	--		LEFT OUTER JOIN (
-	--			SELECT endpoint_code,
-	--						 channel_endpoint_code
-	--			FROM ods_channel_endpoint
-	--			WHERE ds = '${bizdate}') AS t2
-	--			ON t1.channel_endpoint_code = t2.channel_endpoint_code
-	--		LEFT OUTER JOIN (
-	--			SELECT endpoint_code,
-	--						 entity_code
-	--			FROM ods_endpoint
-	--			WHERE ds = '${bizdate}') AS t3
-	--			ON t2.endpoint_code = t3.endpoint_code
-	--		LEFT OUTER JOIN (
-	--			SELECT id,
-	--						 store_code
-	--			FROM ods_real_store
-	--			WHERE ds = '${bizdate}') AS t4
-	--			ON t3.entity_code = t4.store_code
-	--	GROUP BY t4.id;
-	--
-	--
 
 
 
