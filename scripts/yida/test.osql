@@ -1,0 +1,125 @@
+CREATE TABLE IF NOT EXISTS ods_d_target_member_sales_mtd(
+
+  keyid                    BIGINT COMMENT '',
+  rowid                    STRING COMMENT '',
+  brand                    STRING COMMENT '品牌',
+  channel                  STRING COMMENT '渠道',
+  YEAR                     STRING COMMENT '目标年份',
+  version                  STRING COMMENT '目标版本',
+  level                    STRING COMMENT '会员分组',
+  data_flag                STRING COMMENT '',
+  MONTH                    STRING COMMENT '月份',
+  buy_reta                 DOUBLE COMMENT '会员购买频次',
+  apt                      DOUBLE COMMENT '会员apt',
+  order_amount             DOUBLE COMMENT '会员消费金额（元）',
+  people_number            DOUBLE COMMENT '会员人数（人）',
+  order_number             DOUBLE COMMENT '会员单数（单）'
+
+)COMMENT '会员销售mtd' PARTITIONED BY(
+  ds STRING COMMENT '时间分区');
+
+CREATE TABLE IF NOT EXISTS ods_d_target_member_sales_ytd(
+
+  keyid                    BIGINT COMMENT '',
+  rowid                    STRING COMMENT '',
+  brand                    STRING COMMENT '品牌',
+  channel                  STRING COMMENT '渠道',
+  YEAR                     STRING COMMENT '目标年份',
+  version                  STRING COMMENT '目标版本',
+  level                    STRING COMMENT '会员分组',
+  data_flag                STRING COMMENT '',
+  MONTH                    STRING COMMENT '月份',
+  buy_reta                 DOUBLE COMMENT '会员购买频次',
+  apt                      DOUBLE COMMENT '会员apt',
+  order_amount             DOUBLE COMMENT '会员消费金额（元）',
+  people_number            DOUBLE COMMENT '会员人数（人）',
+  order_number             DOUBLE COMMENT '会员单数（单）'
+
+)COMMENT 'ytd会员表' PARTITIONED BY(
+  ds STRING COMMENT '时间分区');
+
+
+CREATE TABLE IF NOT EXISTS ods_feedback_member_asset(
+
+  id                       BIGINT COMMENT '',
+  user_id                  STRING COMMENT '会员id',
+  brand_code               STRING COMMENT '',
+  store_code               STRING COMMENT '最近消费门店',
+  clerk_ids                STRING COMMENT '当前跟进店员id串，用,隔开，例如2000009861,2000010327',
+  cumulative_consumption   DOUBLE COMMENT '累积消费金额',
+  after_shopping_count     BIGINT COMMENT '购物后回访事件计数,当前',
+  about_to_upgrade_count   BIGINT COMMENT '即将升级事件计数,当前',
+  about_to_downgrade_count BIGINT COMMENT '即将降级事件计数,当前',
+  birthday_count           BIGINT COMMENT '生日事件计数,当前',
+  get_coupon_count         BIGINT COMMENT '持券事件计数,当前',
+  activity_decline_count   BIGINT COMMENT '活跃度下降事件计数,当前',
+  clerk_task_count         BIGINT COMMENT '导购任务计数,当前',
+  last_order_id            STRING COMMENT '最近订单no',
+  last_order_time          STRING COMMENT '最近订单消费时间',
+  last_order_amount        DOUBLE COMMENT '最近订单消费金额',
+  last_contact_log_id      BIGINT COMMENT '最近联系日志id',
+  last_contact_days        BIGINT COMMENT '最近联系距今天数',
+  new_event_count          BIGINT COMMENT '新事件计数,当前',
+  consumption_frequency    BIGINT COMMENT '累计消费频次',
+  order_item_quantity      BIGINT COMMENT '最近一单消费总件数'
+
+)COMMENT '会员资产表' PARTITIONED BY(
+  ds STRING COMMENT '时间分区');
+
+
+CREATE TABLE IF NOT EXISTS ods_feedback_event_log(
+
+  event_log_id             BIGINT COMMENT '事件日志id',
+  event_type               BIGINT COMMENT '事件种类id,1=购物后回访,2=即将升级,3=即将降级,4=生日,5=持券,6=活跃度',
+  user_id                  STRING COMMENT '会员id',
+  order_id                 BIGINT COMMENT '订单id',
+  order_time               STRING COMMENT '订单时间',
+  order_spent              DOUBLE COMMENT '订单金额',
+  coupon_id                BIGINT COMMENT '优惠券id',
+  coupon_denomination      DOUBLE COMMENT '优惠券面额',
+  coupon_template_no       STRING COMMENT '优惠券制券编号',
+  score_id                 BIGINT COMMENT '积分日志id',
+  user_birthday            STRING COMMENT '会员生日',
+  create_time              STRING COMMENT '事件创建时间',
+  expire_time              STRING COMMENT '过期时间，指即将降级的过期时间之前需要消费',
+  consuming_more           DOUBLE COMMENT '需要更多消费金额',
+  last_order_time          STRING COMMENT '上次消费时间',
+  contact_log_id           BIGINT COMMENT '联系日志id',
+  STATUS                   BIGINT COMMENT '事件状态，待反馈=1，已反馈=2，已过期=3,已撤销=4，增加或修改，会实时修改member_asset的状态',
+  event_expire_date        STRING COMMENT '事件过期日期',
+  best_call_time_start     STRING COMMENT '最佳回访时间开始',
+  best_call_time_end       STRING COMMENT '最佳回访时间结束',
+  brand_code               STRING COMMENT ' ',
+  feedback_task_id         BIGINT COMMENT '回访任务id'
+
+)COMMENT '事件日志表' PARTITIONED BY(
+  ds STRING COMMENT '时间分区');
+
+
+
+
+CREATE TABLE IF NOT EXISTS ods_feedback_customer_contact_log(
+  contact_log_id            BIGINT COMMENT '联系日志id',
+  clerk_id                  STRING COMMENT '店员id',
+  user_id                   STRING COMMENT '会员id',
+  feedback_intention        STRING COMMENT '反馈意愿,有意愿=11，待考虑=12，近期较忙=21，感谢提醒=22，不要打扰=23,其他=0',
+  feedback_time             STRING COMMENT '反馈时间',
+  store_code                STRING COMMENT '跟进店铺编号',
+  after_shopping_count      BIGINT COMMENT '购物后回访事件计数',
+  about_to_upgrade_count    BIGINT COMMENT '即将升级事件计数',
+  about_to_downgrade_count  BIGINT COMMENT '即将降级事件计数',
+  birthday_count            BIGINT COMMENT '生日事件计数',
+  get_coupon_count          BIGINT COMMENT '持券事件计数',
+  activity_decline_count    BIGINT COMMENT '活跃度下降事件计数',
+  clerk_task_count          BIGINT,
+  contact_desc              STRING COMMENT '回访描述',
+  brand_code                STRING,
+  feedback_way              STRING COMMENT '回访方式,电话=mobile,短信=sms,微信=wechat,企业微信=enterprisewechat'
+)COMMENT '' PARTITIONED BY(
+  ds STRING COMMENT '时间分区');
+
+
+
+
+select memberName,memberCard,memberGender,wechatId,memberGrade,memberScore,memberPhoneNumber,memberBirthday,memberHobby,memberProfession,computingDuration,holdCouponInfo,memberRegisterTime,memberRegisterStore,memberRegisterClerk,gradeExpiration,userId,memberManageStore,memberManageClerk,lastContactDays,brandCode from temp_getmemberinfobyquery
+where brandCode = ${brandCode} and memberNoOrMobile = ${memberNoOrMobile} group by memberName,memberCard,memberGender,wechatId,memberGrade,memberScore,memberPhoneNumber,memberBirthday,memberHobby,memberProfession,computingDuration,holdCouponInfo,memberRegisterTime,memberRegisterStore,memberRegisterClerk,gradeExpiration,userId,memberManageStore,memberManageClerk,lastContactDays,brandCode ;

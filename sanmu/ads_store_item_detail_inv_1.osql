@@ -1,0 +1,116 @@
+--name:ads_store_item_detail_inv_1
+--author:sanmu
+--create time:2019-09-26 16:35
+--drop table ads_store_item_detail_inv_1
+--***********************************
+-- 表   名：ads_store_item_detail_inv_1
+-- 功能描述：日期+门店+商品明细表
+-- 生命周期：30天
+-- 调度周期：周期调度
+-- 创建者：  三木
+-- 创建日期：20190925
+-- 修改日志：
+--***********************************
+
+
+CREATE TABLE IF NOT EXISTS ads_store_item_detail_inv_1(
+	channel_endpint_code                    STRING COMMENT '渠道终端编码',
+	sku_code                                STRING COMMENT 'sku编码',
+	qczks                                   BIGINT COMMENT '期初在库数(截止到某个时间节点前，某个或者多个仓库或者某个渠道的库存数量)',
+	qczts                                   BIGINT COMMENT '期初在途数(截止到某个时间节点前，某个或者多个仓库或者某个渠道的在途数量)',
+	qckcs                                   BIGINT COMMENT '期初库存数=期初在库数+期初在途数',
+	bqkccss                                 BIGINT COMMENT '本期库存初始数(截止范围内，某个或者多个仓库或者某个渠道的库存初始化数)',
+	dbrsl                                   BIGINT COMMENT '调拨入数量(日期范围内总部发给联营客户的数量)',
+	dtcsl                                   BIGINT COMMENT '调退出数量(日期范围内联营客户退货给总部仓的数量(单据类型为[渠道退货]))',
+	phcsl                                   BIGINT COMMENT '配货出数量(日期范围内联营客户配货给店铺的数量(单据类型为[门店配货])',
+	ptrsl                                   BIGINT COMMENT '配退入数量(日期范围内联营店铺退货给联营客户的数量(单据类型为[门店退货]))',
+	phrsl                                   BIGINT COMMENT '配货入数量(日期范围内联营客户配货给店铺的数量(单据类型为[配货]))',
+	ptcsl                                   BIGINT COMMENT '配退出数量(日期范围内联营店铺退货给联营客户的数量(单据类型为[门店退货]))',
+	hdcsl                                   BIGINT COMMENT '横调出数量(截止到某个时间节点前，某个或者多个仓库或者门店横调出货的数量)',
+	hdrsl                                   BIGINT COMMENT '横调入数量(截止到某个时间节点前，某个或者多个仓库或者门店横调入货的数量)',
+	kqdhdcsl                                BIGINT COMMENT '跨渠道横调出数量(截止到某个时间节点前，某个或者多个仓库或者门店跨渠道横调出货的',
+	kqdhdrsl                                BIGINT COMMENT '跨渠道横调入数量(截止到某个时间节点前，某个或者多个仓库或者门店跨渠道横调入货的',
+	pdcysl                                  BIGINT COMMENT '盘点差异数量(截止到某个时间节点前，某个或者多个仓库或者门店盘点的差异的数量)',
+	bqxss                                   BIGINT COMMENT '本期销售数(日期范围内店铺销售的数量)',
+	bqxts                                   BIGINT COMMENT '本期销退数(日期范围内店铺销售退货的数量)',
+	bqzts                                   BIGINT COMMENT '本期在途数(截止到某个时间节点前，某个或者多个仓库或者某个渠道的在途数量)',
+	qmzks                                   BIGINT COMMENT '期末在库数(截止到某个时间节点前，某个或者多个仓库或者某个渠道的在途数量)',
+	qmzts                                   BIGINT COMMENT '期末在途数(截止时间点的在途数量)=期初在途数+本期在途数',
+	qmkcs                                   BIGINT COMMENT '期末库存数(截止时间点的库存数量)=期末在途数+期末在库数',
+	quantity_after                          BIGINT COMMENT '在仓库存'
+)COMMENT '日期+门店+商品明细表' PARTITIONED BY(
+	ds STRING COMMENT '时间分区')
+LIFECYCLE 30;
+
+
+INSERT OVERWRITE TABLE ads_store_item_detail_inv_1 PARTITION(ds = '${bizdate}')
+	SELECT t3.channel_endpint_code,
+				 t3.sku_code,
+				 t3.qczks,
+				 t3.qczts,
+				 (t3.qczks + t3.qczts) AS qckcs,
+				 NULL,
+				 NULL,
+				 NULL,
+				 '',
+				 NULL,
+				 '',
+				 NULL,
+				 NULL,
+				 NULL,
+				 NULL,
+				 t6.pdcysl,
+				 NULL,
+				 NULL,
+				 NULL,
+				 t7.qmzks,
+				 t7.qmzts,
+				 (t7.qmzks + t7.qmzts) AS qmkcs,
+				 t7.qmzks AS quantity_after
+	FROM (
+		SELECT t2.channel_endpint_code,
+					 t1.sku_code,
+					 sum(t1.qty_actual) AS qczks,
+					 sum(t1.qty_transit) AS qczts
+		FROM (
+			SELECT stock_logic_id,
+						 sku_code,
+						 qty_actual,
+						 qty_transit
+			FROM ods_stock_logic_items
+			WHERE ds = '${bizdate}') t1
+			LEFT JOIN (
+				SELECT channel_endpint_code,
+							 id
+				FROM ods_stock_logic
+				WHERE ds = '${bizdate}') t2
+				ON t1.stock_logic_id = t2.id
+		GROUP BY t2.channel_endpint_code, t1.sku_code) AS t3
+
+		LEFT OUTER JOIN (
+			SELECT sku_code,
+						 sum(abs(qty_change)) AS pdcysl
+			FROM ods_stock_physical_order_inventory_items
+			WHERE ds = '${bizdate}'
+			GROUP BY sku_code) AS t6
+			ON t3.sku_code = t6.sku_code
+		LEFT OUTER JOIN (
+			SELECT t2.channel_endpint_code,
+						 t1.sku_code,
+						 sum(t1.qty_actual) AS qmzks,
+						 sum(t1.qty_transit) AS qmzts
+			FROM (
+				SELECT stock_logic_id,
+							 sku_code,
+							 qty_actual,
+							 qty_transit
+				FROM ods_stock_logic_items
+				WHERE ds = '${bizdate}') t1
+				LEFT JOIN (
+					SELECT channel_endpint_code,
+								 id
+					FROM ods_stock_logic
+					WHERE ds = '${bizdate}') t2
+					ON t1.stock_logic_id = t2.id
+			GROUP BY t2.channel_endpint_code, t1.sku_code) AS t7
+			ON t3.channel_endpint_code = t7.channel_endpint_code AND t3.sku_code = t7.sku_code;
