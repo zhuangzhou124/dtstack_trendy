@@ -1,0 +1,116 @@
+--name:ads_order_product_detail_1
+--author:huangbin
+--create time:2019-09-27 15:59
+create table if not exists ads_order_product_detail(
+  skuCode    string  comment  '款号',
+  salesOrderNo    string  comment  '订单编号',
+  productCode    string  comment  '商品编号',
+  clerkNo    string  comment  '店员编号',
+  storeCode    string  comment  '门店编号',
+  salesOrderNo    string  comment  '销售小票号',
+  brandCode    string  comment  '品牌编号',
+  vipNo    string  comment  '会员编号',
+  orderCreateTime    string  comment  '订单建立时间',
+  orderCreateDate    string  comment  '订单建立日期',
+  auditTime    string  comment  '营业时间',
+  auditDate    string  comment  '营业日期',
+  ecId    string  comment  'EC单号',
+  outerOrderNo    string  comment  'OMS临时单号',
+  omsOrderNo    string  comment  'OMS订单号',
+  trackingNo    string  comment  '快递单号',
+  territory    string  comment  '区域',
+  cityName    string  comment  '城市',
+  terminalStoreCode    string  comment  '终端代码',
+  terminalStoreName    string  comment  '终端名称',
+  storeCate    string  comment  '店铺类别',
+  clerkNo	String	comment '导购员代码',
+clerkName	String	comment  '导购员名称',
+productCode	String	comment  '款号',
+skuName	String	comment  '商品名称',
+colorCode	String	comment  '颜色编码',
+colorName	String	comment  '颜色',
+sizeCode	String	comment  '尺码编码',
+sizeName	String	comment '尺码',
+retailPrice	String	comment '吊牌价',
+mainCateText	String	comment '大类',
+subCateType	String	comment '类别',
+leafCate	String	comment '小类',
+series	String	comment '系列',
+discountPrice	String	comment '折扣',
+retailAmount	String	comment '促销方案编码',
+salesAmount	String	comment '促销名称',
+discountRate	String	comment '促销类型',
+promotionDiscount	String	comment '促销提案折扣',
+originalOrderNo	String	comment '原单号',
+rmaReason	String	comment '退换货理由',
+intervalTimeFromRiginalToRma	String	comment '退换货订单与原订单间隔天数',
+rmaContactNumber	String	comment '退换客户电话',
+brand	String	comment '品牌',
+listDate	String	comment '上市时间',
+pricePrintTypeText	String	comment '入机类型',
+rmaTypeText	String	comment '退换货类型',
+cashCouponContributionAmount	String	comment '现金券摊分金额',
+originalAuditDate	String	comment '原单营业日期',
+salesOrderItemNo	String	comment '订单商品编号',
+couponNo	String	comment '优惠券号',
+couponName	String	comment '优惠券名',
+couponType	String	comment '优惠券类别',
+isDonate	String	comment '是否为赠品',
+vipId	String	comment '会员编码',
+memberPhone	String	comment '会员手机号',
+isWipeZero	String	comment '是否抹零',
+subBrandName	String	comment '子品牌',
+promotionDiscountPoints	String	comment '促销商场扣点',
+memberUnionId	String	comment 'UnionId',
+storedValueCardPayAmount	String	comment '储值卡支付金额',
+estimatedDiscountRate	double	comment '扣点',
+promotionName	String	comment '提案名称	',
+customerLevelText	String	comment '会员等级	',
+discountPrice	double	comment '折后价',
+retailAmount	double	comment '零售金额(吊牌价×数量)',
+salesAmount	double	comment '销售金额(小票价×数量)',
+discountAmount	double	comment '折扣金额',
+totalAmountWithoutCash	double	comment '(整单)折后总额(已扣券)',
+discountAmountWithCash	double	comment '(整单)折让总额(折扣减掉的钱+现金券的钱)',
+salesAmountDeductCoupon	double	comment '销售金额(扣券)',
+salesAmountWithCoupon	double	comment '销售金额(未扣券)',
+actualAmountDeductCoupon	double	comment '实际成交额(扣券)',
+actualAmountWithCoupon	double	comment '实际成交额(未扣券)',
+totalAmount	double	comment '订单总额(需支付总额)',
+quantity	Int	comment '数量',
+salesAmount	double	comment '销售金额（券后）'
+)comment '订单商品明细表' partitioned by(
+  ds string comment '时间分区');
+
+
+select so.sku_code as skuCode
+       ,so.sales_order_no as salesOrderNo
+       ,so.product_code as productCode
+       ,so.price_discount as discountPrice  --折后价
+       ,so.price_retail*so.qty_product as productCode  --零售金额(吊牌价×数量)
+       ,so.amt_sales*so.qty_product as salesAmount --销售金额(小票价×数量)
+       ,so.price_retail*qty_product-so.price_discount as discountAmount --折扣金额
+       ,soa.price_amt_discount-sob.amt_pay as totalAmountWithoutCash  --(整单)折后总额(已扣券)
+       ,soa.amt_discount+sob.amt_pay as discountAmountWithCash --(整单)折让总额(折扣减掉的钱+现金券的钱)
+       ,soa.amt_total as salesAmountDeductCoupon --销售金额(未扣券)
+       ,soa.amt_total-sob.amt_pay as totalAmount   --实际成交额(扣券)
+       ,so.qty_product
+from ods_sales_order_item so
+  LEFT JOIN ods_sales_order soa ON so.sales_order_no=soa.sales_order_no
+  and so.ds=soa.ds
+  LEFT JOIN (
+select sop.sales_order_no
+,sop.amt_pay
+from ods_sales_order_payment sop
+where sop.pay_way = 'COUPON'
+and sop.ds=20190920) sob
+  on sob.sales_order_no=so.sales_order_no
+where so.ds=20190920;
+
+
+select price_discount,price_retail,amt_sales,discount_rate
+from ods_sales_order_item
+where ds=20190920
+and sales_order_no='HH190920008389'
+and sku_code='3ZC20637300904'
+

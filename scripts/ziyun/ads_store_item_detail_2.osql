@@ -1,0 +1,43 @@
+--name:ads_store_item_detail_2
+--author:huangbin
+--create time:2019-09-26 19:55
+create table if not exists ads_store_item_detail_2(
+  channel_endpoint_code    string  comment  '渠道终端编码',
+  sku_code    string  comment  'sku编码',
+  itemQuantity    double  comment  '件数',
+  salesAmount    double  comment  '销售金额',
+  zk    double  comment  '折扣',
+  total_retail_price    double  comment  '吊牌总金额'
+)comment '门店商品明细表' partitioned by(
+  ds string comment '时间分区');
+
+
+select so.channel_endpoint_code as channel_endpoint_code        --渠道终端编码
+,soi.sku_code as sku_code                                       --sku编码
+,sum(soi.qty_product) as itemQuantity                           --件数
+,sum(soi.amt_sales-coalesce(sob.amt_pay,0.0)) as salesAmount    --销售金额
+--,avg((soi.amt_sales-coalesce(sob.amt_pay,0,0))/soi.price_retail) as zk   --折扣
+,sum(soi.price_retail) as total_retail_price                    --吊牌总金额
+from ods_sales_order_item soi left join
+ods_sales_order so on soi.sales_order_no = so.sales_order_no and soi.ds = so.ds
+  left join (
+    select sop.sales_order_no
+    ,sop.amt_pay
+    from ods_sales_order_payment sop
+    where sop.pay_way = 'COUPON'
+    and sop.ds=20190920) sob
+    on sob.sales_order_no=so.sales_order_no
+where soi.price_discount > 0
+and soi.qty_product > 0
+and so.ds=20190920
+group by so.channel_endpoint_code,soi.sku_code
+;
+----------------------------------------------------------------------------------------------
+select sku_code,amt_sales,price_retail from ods_sales_order_item where ds=20190920
+
+
+select * from ods_sales_order_item where ds=20190920 and price_discount > 0
+and qty_product > 0 and price_retail=0
+
+
+select count(1) from ods_sales_order_item where ds=20190920 and (sku_code is null or sku_code='')
