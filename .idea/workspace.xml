@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8bd93332-c5f6-472b-8d3a-67b23a397885" name="Default" comment="" />
+    <list default="true" id="8bd93332-c5f6-472b-8d3a-67b23a397885" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/sanmu/ads_brand_detail_member_1.osql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sanmu/ads_clerk_detail_1d_1.osql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sanmu/ads_store_detail_1.osql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sanmu/ads_store_item_detail_inv_1.osql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sanmu/sanmu_test.osql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/sanmu/sanmu_test1.osql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/java/target/" />
@@ -11,75 +19,180 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="DefaultGradleProjectSettings">
-    <option name="isMigrated" value="true" />
+  <component name="FUSProjectUsageTrigger">
+    <session id="970997928">
+      <usages-collector id="statistics.lifecycle.project">
+        <counts>
+          <entry key="project.closed" value="1" />
+          <entry key="project.open.time.15" value="1" />
+          <entry key="project.open.time.2" value="1" />
+          <entry key="project.opened" value="2" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.open">
+        <counts>
+          <entry key="2019092606082825g0gnz192" value="1" />
+          <entry key="20190926072739740gsyn3292" value="1" />
+          <entry key="20190926073633666gj20s392" value="1" />
+          <entry key="20190926073735954gzhhc292" value="1" />
+          <entry key="20190926091253749gkx1u38" value="1" />
+          <entry key="20190926091535158gnsuqmim" value="1" />
+          <entry key="20190926091701714gk2ts592" value="1" />
+          <entry key="20190927024151330gt1hy72m" value="1" />
+          <entry key="20190927054654277gfqh9592" value="1" />
+          <entry key="20190927054855404gdl86792" value="1" />
+          <entry key="20190927055139994grnmc292" value="1" />
+          <entry key="20190927055438715g6ee472m" value="1" />
+          <entry key="20190927055515205g5i36292" value="1" />
+          <entry key="20190927055623482gnx36292" value="1" />
+          <entry key="20190927075555260gm8ws592" value="1" />
+          <entry key="20190927075640727gk916292" value="1" />
+          <entry key="20190927080054602gaj0s392" value="1" />
+          <entry key="20190927080117353g5up0lim" value="1" />
+          <entry key="20190927080442167grzn9592" value="1" />
+          <entry key="20190927081321658gzjqqmim" value="1" />
+          <entry key="20190927081458617gjdk448" value="1" />
+          <entry key="20190927081530229gxdo5692" value="1" />
+          <entry key="20190927083017727gjdb472m" value="1" />
+          <entry key="20190927090322969g6ml9592" value="1" />
+          <entry key="20190927090430849gxwlz192" value="1" />
+          <entry key="20190927090524292gj23s392" value="1" />
+          <entry key="20190927090731855gc5cy72m" value="1" />
+          <entry key="20190927091512440gpx6z38" value="1" />
+          <entry key="20190927091700285gfqh9592" value="1" />
+          <entry key="2019092709260894gv56jjim" value="1" />
+          <entry key="20190927092704434ghom9592" value="1" />
+          <entry key="20190927093509477gog96792" value="1" />
+          <entry key="20190928022854137gu0fb48" value="1" />
+          <entry key="20190928023159891g4fsz192" value="1" />
+          <entry key="20190928025905322ghrmc292" value="1" />
+          <entry key="20190928030008742g4tys592" value="1" />
+          <entry key="20190928030746972gwhd472m" value="1" />
+          <entry key="20190928030918640gazfy72m" value="1" />
+          <entry key="20190928031536700gm7h5mim" value="1" />
+          <entry key="20190928032711316gxtby72m" value="1" />
+          <entry key="20190928032850786gc42jjim" value="1" />
+          <entry key="20190928035015640g8lwr392" value="1" />
+          <entry key="20190928035218768ggwus592" value="1" />
+          <entry key="20190928035746422gam36292" value="1" />
+          <entry key="20190928035924482glc46292" value="1" />
+          <entry key="20190928035959785g25gy72m" value="1" />
+          <entry key="20190928053737905gyz56292" value="1" />
+          <entry key="2019092806532826gslzr392" value="1" />
+          <entry key="20190928071246767g9o16292" value="1" />
+          <entry key="20190928071803886g8a1s392" value="1" />
+          <entry key="20190928072629877gavn5692" value="1" />
+          <entry key="20190928072927518gpspz192" value="1" />
+          <entry key="20190928073242979gbkrz192" value="1" />
+          <entry key="20190928074534190g6slc292" value="1" />
+          <entry key="20190928074707164gw8gy72m" value="1" />
+          <entry key="20190928075513621gpuoz192" value="1" />
+          <entry key="20190928075605302gq8m0lim" value="1" />
+          <entry key="20190928080156863gb8e472m" value="1" />
+          <entry key="20190928080656814g95ft38" value="1" />
+          <entry key="20190928080836921g5yj9592" value="1" />
+          <entry key="20190928080937404gzlmi692" value="1" />
+          <entry key="20190928081153861gipgc292" value="1" />
+          <entry key="20190928081607132g9moz192" value="1" />
+          <entry key="2019092808180692ge5kc292" value="1" />
+          <entry key="20190928081903957gjzpz192" value="1" />
+          <entry key="20190928082058704gdrtqmim" value="1" />
+          <entry key="20190928082805495gii66292" value="1" />
+          <entry key="20190928082950516gj1o3292" value="1" />
+          <entry key="20190928083129615g0cn5692" value="1" />
+          <entry key="20190928083357725grgdy72m" value="1" />
+          <entry key="20190928083532625g5i3jjim" value="1" />
+          <entry key="20190928083855847gxu5jjim" value="1" />
+          <entry key="20190928084107189g07mz192" value="1" />
+          <entry key="2019092808430727gh1h472m" value="1" />
+          <entry key="20190928085148889gxhl9592" value="1" />
+          <entry key="20190928090442892gojxs592" value="1" />
+          <entry key="20190928093242321gp0r5692" value="1" />
+          <entry key="20190928095424929gewf472m" value="1" />
+          <entry key="20190928115559685gywts592" value="1" />
+          <entry key="2019092812003815gppg5mim" value="1" />
+          <entry key="2019092812033811gdjn0lim" value="1" />
+          <entry key="20190928120440165gae4jjim" value="1" />
+          <entry key="20190928120505488gbvo0lim" value="1" />
+          <entry key="20190928120813624gyuzijim" value="1" />
+          <entry key="20190928120942409gyeji692" value="1" />
+          <entry key="20190929063140984gjvwqmim" value="1" />
+          <entry key="20190929063435555gwtby72m" value="1" />
+          <entry key="20190929063750298gcuus592" value="1" />
+          <entry key="20190929065440647gwq16292" value="1" />
+          <entry key="201909290701147gbz2s392" value="1" />
+          <entry key="20190929072745843g38o9592" value="1" />
+          <entry key="dim_cha_channel_endpoint_core_od001_v1" value="1" />
+          <entry key="ods_api_channel_endpoint" value="2" />
+          <entry key="ods_channel_endpoint" value="2" />
+          <entry key="ods_endpoint" value="1" />
+          <entry key="ods_member_card" value="2" />
+          <entry key="ods_member_grade_info" value="2" />
+          <entry key="ods_member_grade_state" value="1" />
+          <entry key="ods_real_store" value="1" />
+          <entry key="ods_sales_order" value="7" />
+          <entry key="ods_sales_order_item" value="3" />
+          <entry key="ods_sales_org_test" value="1" />
+          <entry key="ods_stock_logic" value="2" />
+          <entry key="ods_stock_logic_items" value="2" />
+          <entry key="ods_stock_logic_order_in_notify" value="1" />
+          <entry key="ods_stock_logic_order_in_notify_items" value="1" />
+          <entry key="ods_stock_physical_order_inventory_items" value="1" />
+          <entry key="ods_store_passenger_flow" value="1" />
+          <entry key="ods_tcrm_order_info" value="1" />
+          <entry key="osql" value="31" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.open">
+        <counts>
+          <entry key="OdpsQL" value="31" />
+          <entry key="UNKNOWN" value="123" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.edit">
+        <counts>
+          <entry key="osql" value="4086" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.edit">
+        <counts>
+          <entry key="OdpsQL" value="4086" />
+        </counts>
+      </usages-collector>
+    </session>
   </component>
   <component name="FileEditorManager">
-    <leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/scripts/yangzi/ads_store_detail_2.osql">
-          <provider editor-type-id="OdpsQlGraph" />
+        <entry file="file://$PROJECT_DIR$/sanmu/ads_store_detail_1.osql">
           <provider selected="true" editor-type-id="OdpsQlEditor">
-            <state relative-caret-position="330">
-              <caret line="22" column="29" lean-forward="true" selection-start-line="22" selection-start-column="29" selection-end-line="22" selection-end-column="29" />
+            <state relative-caret-position="443">
+              <caret line="36" lean-forward="true" selection-start-line="36" selection-end-line="36" />
             </state>
           </provider>
+          <provider editor-type-id="OdpsQlGraph" />
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/yangzi/ads_member_detail_2.osql">
-          <provider editor-type-id="OdpsQlGraph" />
+        <entry file="file://$PROJECT_DIR$/sanmu/sanmu_test.osql">
           <provider selected="true" editor-type-id="OdpsQlEditor">
-            <state relative-caret-position="466">
-              <caret line="28" column="24" selection-start-line="28" selection-start-column="24" selection-end-line="28" selection-end-column="24" />
+            <state relative-caret-position="2712">
+              <caret line="344" column="35" selection-start-line="344" selection-start-column="35" selection-end-line="344" selection-end-column="35" />
             </state>
           </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/yangzi/ods_member_log_detail_1d_2.osql">
           <provider editor-type-id="OdpsQlGraph" />
-          <provider selected="true" editor-type-id="OdpsQlEditor">
-            <state relative-caret-position="334">
-              <caret line="65" column="15" lean-forward="true" selection-start-line="65" selection-start-column="15" selection-end-line="65" selection-end-column="15" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="mock://td_ods_dev.ods_feedback_customer_contact_log">
-          <provider editor-type-id="odpsTablePartition" />
-          <provider selected="true" editor-type-id="OdpsTableDetail" />
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="mock://td_ods_dev.ods_feedback_member_asset">
-          <provider editor-type-id="odpsTablePartition" />
-          <provider selected="true" editor-type-id="OdpsTableDetail" />
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="mock://td_ods_dev.ods_product_brand">
-          <provider editor-type-id="odpsTablePartition" />
-          <provider selected="true" editor-type-id="OdpsTableDetail" />
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="mock://td_ods_dev.ods_sales_order_payment">
-          <provider editor-type-id="odpsTablePartition" />
-          <provider selected="true" editor-type-id="OdpsTableDetail" />
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="mock://td_ods_dev.ods_sales_order_item">
-          <provider editor-type-id="odpsTablePartition" />
-          <provider selected="true" editor-type-id="OdpsTableDetail" />
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
         <entry file="mock://td_ods_dev.ods_sales_order">
-          <provider editor-type-id="odpsTablePartition" />
           <provider selected="true" editor-type-id="OdpsTableDetail" />
+          <provider editor-type-id="odpsTablePartition" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="mock://td_ods_dev.ods_sales_order_item">
+          <provider selected="true" editor-type-id="OdpsTableDetail" />
+          <provider editor-type-id="odpsTablePartition" />
         </entry>
       </file>
     </leaf>
@@ -93,18 +206,9 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>= 'true'</find>
-      <find>mgi.is_vip = 'true'</find>
-      <find>to_char(mgi.is_vip) = 'true'</find>
-      <find>ods_sales_order</find>
-      <find>from</find>
-      <find>is_vip</find>
+      <find>ods_sales_order_item</find>
+      <find>cc</find>
     </findStrings>
-    <replaceStrings>
-      <replace>is true</replace>
-      <replace>to_char(mgi.is_vip) = 'true'</replace>
-      <replace>to_char(mgi.is_vip) = 1</replace>
-    </replaceStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -118,12 +222,20 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/scripts/test_git.osql" />
-        <option value="$PROJECT_DIR$/scripts/yangzi/yangzi_test.osql" />
-        <option value="$PROJECT_DIR$/scripts/yangzi/ads_member_detail_2.osql" />
-        <option value="$PROJECT_DIR$/scripts/yangzi/ods_member_log_detail_1d_2.osql" />
-        <option value="$PROJECT_DIR$/scripts/yangzi/ads_store_detail_2.osql" />
+        <option value="$PROJECT_DIR$/sanmu/ads_store_item_detail_inv_1.osql" />
+        <option value="$PROJECT_DIR$/sanmu/ads_clerk_detail_1d_1.osql" />
+        <option value="$PROJECT_DIR$/sanmu/ads_brand_detail_member_1.osql" />
+        <option value="$PROJECT_DIR$/sanmu/sanmu_test1.osql" />
+        <option value="$PROJECT_DIR$/sanmu/sanmu_test.osql" />
+        <option value="$PROJECT_DIR$/sanmu/ads_store_detail_1.osql" />
       </list>
     </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
@@ -573,8 +685,9 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
+      <pane id="AndroidView" />
       <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -585,30 +698,150 @@
             <path>
               <item name="dtstack_trendy" type="b2602c69:ProjectViewProjectNode" />
               <item name="dtstack_trendy" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="sanmu" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="dtstack_trendy" type="b2602c69:ProjectViewProjectNode" />
               <item name="dtstack_trendy" type="462c0819:PsiDirectoryNode" />
               <item name="scripts" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="dtstack_trendy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="dtstack_trendy" type="462c0819:PsiDirectoryNode" />
+              <item name="scripts" type="462c0819:PsiDirectoryNode" />
+              <item name="master_data" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="AndroidView" />
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
+    <property name="SearchEverywhereHistoryKey" value="ods_tcrm_order_info&#9;null&#9;null" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1569660672088" />
     <property name="last_opened_file_path" value="/usr/local/bin/git" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="settings.github" />
+  </component>
+  <component name="RestoreUpdateTree" date="Moments ago" ActionInfo="_Update">
+    <UpdatedFiles>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Updated from server" />
+        <option name="myStatusName" value="Changed on server" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="CHANGED_ON_SERVER" />
+        <FILE-GROUP>
+          <option name="myUpdateName" value="Updated" />
+          <option name="myStatusName" value="Changed" />
+          <option name="mySupportsDeletion" value="false" />
+          <option name="myCanBeAbsent" value="false" />
+          <option name="myId" value="UPDATED" />
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/.idea/workspace.xml</PATH>
+        </FILE-GROUP>
+        <FILE-GROUP>
+          <option name="myUpdateName" value="Created" />
+          <option name="myStatusName" value="Created" />
+          <option name="mySupportsDeletion" value="false" />
+          <option name="myCanBeAbsent" value="false" />
+          <option name="myId" value="CREATED" />
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/scripts/zhuangzhou/master_data/ods_api_real_store.osql</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/scripts/zhuangzhou/master_data/stock_merge.osql</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/scripts/zhuangzhou/master_data/test_git.osql</PATH>
+        </FILE-GROUP>
+        <FILE-GROUP>
+          <option name="myUpdateName" value="Deleted" />
+          <option name="myStatusName" value="Deleted" />
+          <option name="mySupportsDeletion" value="false" />
+          <option name="myCanBeAbsent" value="true" />
+          <option name="myId" value="REMOVED_FROM_REPOSITORY" />
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/scripts/test_git.osql</PATH>
+        </FILE-GROUP>
+        <FILE-GROUP>
+          <option name="myUpdateName" value="Restored" />
+          <option name="myStatusName" value="Will be restored" />
+          <option name="mySupportsDeletion" value="false" />
+          <option name="myCanBeAbsent" value="false" />
+          <option name="myId" value="RESTORED" />
+        </FILE-GROUP>
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Modified" />
+        <option name="myStatusName" value="Modified" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="MODIFIED" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Skipped" />
+        <option name="myStatusName" value="Skipped" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="SKIPPED" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Merged with conflicts" />
+        <option name="myStatusName" value="Will be merged with conflicts" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="MERGED_WITH_CONFLICTS" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Merged with tree conflicts" />
+        <option name="myStatusName" value="Merged with tree conflicts" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="MERGED_WITH_TREE_CONFLICT" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Merged with property conflicts" />
+        <option name="myStatusName" value="Will be merged with property conflicts" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="MERGED_WITH_PROPERTY_CONFLICT" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Merged" />
+        <option name="myStatusName" value="Will be merged" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="MERGED" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Not in repository" />
+        <option name="myStatusName" value="Not in repository" />
+        <option name="mySupportsDeletion" value="true" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="UNKNOWN" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Locally added" />
+        <option name="myStatusName" value="Locally added" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="LOCALLY_ADDED" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Locally removed" />
+        <option name="myStatusName" value="Locally removed" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="LOCALLY_REMOVED" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Switched" />
+        <option name="myStatusName" value="Switched" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="SWITCHED" />
+      </FILE-GROUP>
+    </UpdatedFiles>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -622,8 +855,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="MaxCompute SQL.ads_store_detail_2.osql">
-    <configuration default="true" type="Applet">
+  <component name="RunManager" selected="MaxCompute SQL.ads_store_detail_1.osql">
+    <configuration default="true" type="Applet" factoryName="Applet">
       <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -636,55 +869,7 @@
       </method>
     </configuration>
     <configuration default="true" type="JUnit" factoryName="JUnit">
-      <option name="TEST_OBJECT" value="class" />
       <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="JetRunConfigurationType" factoryName="Kotlin">
-      <module name="java" />
-      <option name="VM_PARAMETERS" />
-      <option name="PROGRAM_PARAMETERS" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="WORKING_DIRECTORY" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType" factoryName="Kotlin script">
-      <module name="java" />
-      <option name="filePath" />
-      <option name="vmParameters" />
-      <option name="alternativeJrePath" />
-      <option name="programParameters" />
-      <option name="passParentEnvs" value="true" />
-      <option name="workingDirectory" />
-      <option name="isAlternativeJrePathEnabled" value="false" />
-      <option name="VM_PARAMETERS" />
-      <option name="PROGRAM_PARAMETERS" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="WORKING_DIRECTORY" />
-      <option name="filePath" />
-      <option name="vmParameters" />
-      <option name="alternativeJrePath" />
-      <option name="programParameters" />
-      <option name="passParentEnvs" value="true" />
-      <option name="workingDirectory" />
-      <option name="isAlternativeJrePathEnabled" value="false" />
-      <option name="VM_PARAMETERS" />
-      <option name="PROGRAM_PARAMETERS" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="WORKING_DIRECTORY" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -709,25 +894,52 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ads_member_detail_2.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
-      <odps_target_file>$PROJECT_DIR$/scripts/yangzi/ads_member_detail_2.osql</odps_target_file>
+    <configuration name="ads_brand_detail_member_1.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
+      <odps_target_file>$PROJECT_DIR$/sanmu/ads_brand_detail_member_1.osql</odps_target_file>
       <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
-      <job_name>ads_member_detail_2_osql</job_name>
+      <job_name>ads_brand_detail_member_1_osql</job_name>
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
+      <odps_macro name="bizdate" value="20190920" />
       <method v="2" />
     </configuration>
-    <configuration name="ads_store_detail_2.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
-      <odps_target_file>$PROJECT_DIR$/scripts/yangzi/ads_store_detail_2.osql</odps_target_file>
+    <configuration name="ads_clerk_detail_1d_1.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
+      <odps_target_file>$PROJECT_DIR$/sanmu/ads_clerk_detail_1d_1.osql</odps_target_file>
       <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
-      <job_name>ads_store_detail_2_osql</job_name>
+      <job_name>ads_clerk_detail_1d_1_osql</job_name>
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
+      <odps_macro name="bizdate" value="20190920" />
       <method v="2" />
     </configuration>
-    <configuration name="ods_member_log_detail_1d_2.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
-      <odps_target_file>$PROJECT_DIR$/scripts/yangzi/ods_member_log_detail_1d_2.osql</odps_target_file>
+    <configuration name="ads_store_detail_1.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
+      <odps_target_file>$PROJECT_DIR$/sanmu/ads_store_detail_1.osql</odps_target_file>
       <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
-      <job_name>ods_member_log_detail_1d_2_osql</job_name>
+      <job_name>ads_store_detail_1_osql</job_name>
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
+      <odps_macro name="bizdate" value="20190920" />
+      <method v="2" />
+    </configuration>
+    <configuration name="ads_store_item_detail_inv_1.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
+      <odps_target_file>$PROJECT_DIR$/sanmu/ads_store_item_detail_inv_1.osql</odps_target_file>
+      <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
+      <job_name>ads_store_item_detail_inv_1_osql</job_name>
+      <odps_parameter name="odps.compiler.runmode" value="Studio" />
+      <odps_macro name="bizdate" value="20190920" />
+      <method v="2" />
+    </configuration>
+    <configuration name="sanmu_test1.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
+      <odps_target_file>$PROJECT_DIR$/sanmu/sanmu_test1.osql</odps_target_file>
+      <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
+      <job_name>sanmu_test1_osql</job_name>
+      <odps_parameter name="odps.compiler.runmode" value="Studio" />
+      <odps_macro name="bizdate" value="20190920" />
+      <method v="2" />
+    </configuration>
+    <configuration name="sanmu_test.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
+      <odps_target_file>$PROJECT_DIR$/sanmu/sanmu_test.osql</odps_target_file>
+      <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
+      <job_name>sanmu_test_osql</job_name>
+      <odps_parameter name="odps.compiler.runmode" value="Studio" />
+      <odps_macro name="bizdate" value="20190920" />
       <method v="2" />
     </configuration>
     <configuration name="test_git.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
@@ -737,15 +949,7 @@
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
       <method v="2" />
     </configuration>
-    <configuration name="yangzi_test.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
-      <odps_target_file>$PROJECT_DIR$/scripts/yangzi/yangzi_test.osql</odps_target_file>
-      <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
-      <job_name>yangzi_test_osql</job_name>
-      <odps_parameter name="odps.compiler.runmode" value="Studio" />
-      <method v="2" />
-    </configuration>
-    <configuration default="true" type="TestNG">
-      <option name="TEST_OBJECT" value="CLASS" />
+    <configuration default="true" type="TestNG" factoryName="TestNG">
       <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
       <properties />
       <listeners />
@@ -753,22 +957,24 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType">
+    <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin">
       <module name="" />
       <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
       <option name="PROGRAM_PARAMETERS" />
-      <predefined_log_file enabled="true" id="idea.log" />
+      <predefined_log_file id="idea.log" enabled="true" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
     <list>
-      <item itemvalue="MaxCompute Java.Resource" />
       <item itemvalue="MaxCompute SQL.test_git.osql" />
-      <item itemvalue="MaxCompute SQL.yangzi_test.osql" />
-      <item itemvalue="MaxCompute SQL.ads_member_detail_2.osql" />
-      <item itemvalue="MaxCompute SQL.ads_store_detail_2.osql" />
-      <item itemvalue="MaxCompute SQL.ods_member_log_detail_1d_2.osql" />
+      <item itemvalue="MaxCompute SQL.sanmu_test.osql" />
+      <item itemvalue="MaxCompute SQL.ads_store_item_detail_inv_1.osql" />
+      <item itemvalue="MaxCompute SQL.ads_brand_detail_member_1.osql" />
+      <item itemvalue="MaxCompute SQL.ads_clerk_detail_1d_1.osql" />
+      <item itemvalue="MaxCompute SQL.sanmu_test1.osql" />
+      <item itemvalue="MaxCompute SQL.ads_store_detail_1.osql" />
+      <item itemvalue="MaxCompute Java.Resource" />
     </list>
     <recent_temporary>
       <list>
@@ -788,39 +994,41 @@
       <updated>1567756367517</updated>
       <workItem from="1567756371201" duration="957000" />
       <workItem from="1569410120262" duration="1043000" />
+      <workItem from="1569477433727" duration="51494000" />
+      <workItem from="1569661035804" duration="14747000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="55163000" />
+    <option name="totallyTimeSpent" value="68241000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1440" height="900" extended-state="0" />
-    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18025751" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18454936" />
       <window_info id="Structure" order="1" weight="0.24964234" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
       <window_info id="UI Designer" order="4" />
-      <window_info id="Project Explorer" order="5" weight="0.25035766" />
+      <window_info id="Project Explorer" order="5" weight="0.24248926" />
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info id="Capture Tool" order="7" />
       <window_info id="Job Explorer" order="8" weight="0.3297568" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.32771084" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.40361446" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="7" visible="true" weight="0.32891566" />
+      <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info anchor="bottom" id="Event Log" order="8" side_tool="true" />
       <window_info anchor="bottom" id="Messages" order="9" weight="0.32771084" />
-      <window_info anchor="bottom" id="Console" order="10" />
+      <window_info anchor="bottom" id="Console" order="10" weight="0.32891566" />
       <window_info anchor="bottom" id="Version Control" order="11" weight="0.32889965" />
+      <window_info anchor="bottom" id="Database Changes" order="12" show_stripe_button="false" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.24964234" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="right" id="Capture Analysis" order="4" />
@@ -829,10 +1037,14 @@
       <window_info anchor="right" id="Database" order="7" />
       <window_info anchor="right" id="Palette&#9;" order="8" />
       <window_info anchor="right" id="Theme Preview" order="9" />
+      <window_info anchor="right" id="SciView" order="10" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
     <option name="LAST_COMMIT_MESSAGE" value="" />
@@ -970,36 +1182,68 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/scripts/test_git.osql">
-      <provider editor-type-id="OdpsQlGraph" />
       <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="120">
+        <state relative-caret-position="136">
           <caret line="8" lean-forward="true" selection-start-line="8" selection-end-line="8" />
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/yangzi/ads_member_detail_2.osql">
       <provider editor-type-id="OdpsQlGraph" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sanmu/ads_store_item_detail_inv_1.osql">
       <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="466">
-          <caret line="28" column="24" selection-start-line="28" selection-start-column="24" selection-end-line="28" selection-end-column="24" />
+        <state relative-caret-position="543">
+          <caret line="45" column="19" lean-forward="true" selection-start-line="45" selection-end-line="46" />
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/yangzi/ods_member_log_detail_1d_2.osql">
       <provider editor-type-id="OdpsQlGraph" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sanmu/ads_brand_detail_member_1.osql">
       <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="334">
-          <caret line="65" column="15" lean-forward="true" selection-start-line="65" selection-start-column="15" selection-end-line="65" selection-end-column="15" />
+        <state relative-caret-position="127">
+          <caret line="8" column="12" lean-forward="true" selection-start-line="8" selection-start-column="12" selection-end-line="8" selection-end-column="12" />
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/yangzi/ads_store_detail_2.osql">
       <provider editor-type-id="OdpsQlGraph" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sanmu/sanmu_test1.osql">
       <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="330">
-          <caret line="22" column="29" lean-forward="true" selection-start-line="22" selection-start-column="29" selection-end-line="22" selection-end-column="29" />
+        <state relative-caret-position="242">
+          <caret line="59" column="29" lean-forward="true" selection-start-line="59" selection-start-column="29" selection-end-line="59" selection-end-column="29" />
         </state>
       </provider>
+      <provider editor-type-id="OdpsQlGraph" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sanmu/ads_clerk_detail_1d_1.osql">
+      <provider selected="true" editor-type-id="OdpsQlEditor">
+        <state relative-caret-position="612">
+          <caret line="36" column="31" lean-forward="true" selection-start-line="36" selection-start-column="31" selection-end-line="36" selection-end-column="31" />
+        </state>
+      </provider>
+      <provider editor-type-id="OdpsQlGraph" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/zhuangzhou/master_data/test_git.osql">
+      <provider selected="true" editor-type-id="OdpsQlEditor" />
+      <provider editor-type-id="OdpsQlGraph" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/zhuangzhou/master_data/ods_api_real_store.osql">
+      <provider selected="true" editor-type-id="OdpsQlEditor" />
+      <provider editor-type-id="OdpsQlGraph" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sanmu/sanmu_test.osql">
+      <provider selected="true" editor-type-id="OdpsQlEditor">
+        <state relative-caret-position="2712">
+          <caret line="344" column="35" selection-start-line="344" selection-start-column="35" selection-end-line="344" selection-end-column="35" />
+        </state>
+      </provider>
+      <provider editor-type-id="OdpsQlGraph" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sanmu/ads_store_detail_1.osql">
+      <provider selected="true" editor-type-id="OdpsQlEditor">
+        <state relative-caret-position="443">
+          <caret line="36" lean-forward="true" selection-start-line="36" selection-end-line="36" />
+        </state>
+      </provider>
+      <provider editor-type-id="OdpsQlGraph" />
     </entry>
   </component>
   <component name="masterDetails">

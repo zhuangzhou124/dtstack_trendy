@@ -1,0 +1,189 @@
+--name:master_data
+--author:ZhuangZhou
+--create time:2019-09-26 14:11
+--subject:
+
+SELECT region_code
+    ,region_name
+    ,COUNT(1) AS cnt
+FROM ods_real_store
+WHERE ds = '20190920'
+GROUP BY region_code, region_name;
+
+
+
+
+SELECT *
+FROM ods_division_channel
+WHERE ds = '20190920'
+;
+
+
+
+SELECT card.member_card_no
+    , info.member_name
+    , brand.cn_name
+       ,card.org_code
+    ,CASE WHEN ua.auth_type = 10 THEN ua.outer_user_id END AS wechat  -- 微信
+    ,gs.grade_id
+    ,gs.grade_expiration                            --等级到期时间
+    ,ss.amt_full_score                              --总积分
+    ,ss.amt_will_score                              --未到账积分
+    ,info.member_mobile
+    ,info.member_birthday
+    ,info.member_hobby                              --会员爱好
+    ,info.member_profession                         --会员职业
+    ,'' AS is_holdcoupon                            --是否持券
+    ,card.member_register_time
+    ,card.member_register_channel_endpoint_code
+    ,card.member_register_clerk
+    ,rs_r.store_code AS member_register_store_code
+    ,rs_r.store_name AS member_register_store_name
+    ,card.member_info_id
+    ,card.member_manage_channel_endpoint_code
+    ,card.member_manage_clerk
+    ,rs_m.store_code AS member_manage_store_code
+    ,card.STATUS
+    ,card.ec_status
+    , CASE WHEN ua.auth_type = 30 THEN ua.outer_user_id END AS taobao_nick
+
+FROM ods_member_card card
+LEFT JOIN ods_member_info info
+ON card.member_info_id = info.id
+AND info.ds = '20190918'
+LEFT JOIN ods_member_grade_state gs
+ON gs.member_card_id = card.member_info_id
+AND gs.ds = '20190905'
+LEFT JOIN ods_member_score_state ss
+ON ss.member_card_id = card.member_info_id
+AND ss.ds = '20190920'
+LEFT JOIN ods_item_brand brand
+ON card.brand_code = brand.brand_code
+AND brand.ds = '20190920'
+LEFT JOIN ods_user_auth ua
+ON card.id = ua.member_card_id
+AND ua.ds= '20190920'
+LEFT JOIN ods_channel_endpoint ce_m
+ON card.member_manage_channel_endpoint_code = ce_m.channel_endpoint_code
+AND ce_m.ds = '20190920'
+LEFT JOIN ods_endpoint e_m
+ON ce_m.endpoint_code = e_m.endpoint_code
+AND e_m.ds = '20190920'
+LEFT JOIN ods_real_store rs_m
+ON e_m.entity_code = rs_m.store_code
+AND rs_m.ds = '20190920'
+LEFT JOIN ods_channel_endpoint ce_r
+ON card.member_register_channel_endpoint_code = ce_r.channel_endpoint_code
+AND ce_r.ds = '20190920'
+LEFT JOIN ods_endpoint e_r
+ON ce_r.endpoint_code = e_r.endpoint_code
+AND e_r.ds = '20190920'
+LEFT JOIN ods_real_store rs_r
+ON e_r.entity_code = rs_r.store_code
+AND rs_r.ds = '20190920'
+WHERE card.ds = '20190926';
+
+
+
+
+
+
+
+SELECT rs.id
+    , rs.store_code
+    , rs.store_name
+    , rs.store_grade
+    , rs.store_type
+    , rs.store_status
+    , rs.store_form
+    , rs.open_date
+    , rs.close_date
+    , rs.expand_type     AS sales_modes
+    , rse.expand_level   AS store_level
+    , rs.coporate_condition_diff_code
+    , rs.real_address
+    , e.company_code
+    , e.app_id
+    , e.endpoint_name
+    , c.business_type
+    , ce.org_code
+    , so.org_name
+    , c.operation_code
+    , c.operation_name
+    , area.country_id
+    , area.country_cn_name
+    , rs.region_code
+    , rs.region_name
+    , rs.province_code
+    , rs.province_name
+    , rs.city_code
+    , rs.city_name
+    , rs.area_code
+    , rs.area_name
+FROM ods_real_store rs
+JOIN ods_endpoint e
+ON rs.store_code = e.entity_code
+AND e.endpoint_type = 'REAL_STORE'
+AND e.ds = '${bizdate}'
+JOIN ods_channel_endpoint ce
+ON e.endpoint_code = ce.endpoint_code
+AND ce.ds = '${bizdate}'
+JOIN ods_channel c
+ON c.channel_code = ce.channel_code
+AND c.ds = '${bizdate}'
+JOIN (
+    SELECT DISTINCT country_id
+        ,country_cn_name
+    FROM ods_division_channel
+    WHERE ds = '${bizdate}'
+) area
+ON rs.cms_country_code = area.country_id
+JOIN ods_sales_org so
+ON so.org_code = ce.org_code
+AND so.ds = '${bizdate}'
+JOIN ods_real_store_ext rse
+ON rs.store_code = rse.store_code
+AND rse.ds = '${bizdate}'
+WHERE rs.ds = '${bizdate}'
+;
+
+
+
+CREATE TABLE IF NOT EXISTS ods_ods_api_real_store(
+    cyctime                       STRING COMMENT '插入时间',
+    store_id                      BIGINT COMMENT '门店id',
+    store_code                    STRING COMMENT '门店编码',
+    store_name                    STRING COMMENT '门店名称',
+    store_grade                   STRING COMMENT '门店等级',
+    store_type                    STRING COMMENT '门店类型',
+    store_status                  STRING COMMENT '门店状态',
+    store_form                    STRING COMMENT '店铺形式',
+    open_date                     STRING COMMENT '开店时间',
+    close_date                    STRING COMMENT '关店时间',
+    expand_type                   STRING COMMENT '拓展类型',
+    expand_level                  STRING COMMENT '门店等级',
+    coporate_condition_diff_code  STRING COMMENT '合作条件差异',
+    real_address                  STRING COMMENT '物理地址',
+    manage_address                STRING COMMENT '管理地址',
+    company_code                  STRING COMMENT '公司编码',
+    app_id                        STRING COMMENT '应用id',
+    endpoint_name                 STRING COMMENT '终端名称',
+    business_type                 STRING COMMENT '能力类型',
+    org_code                      STRING COMMENT '销售组织编码',
+    org_name                      STRING COMMENT '销售组织名称',
+    operation_code                STRING COMMENT '经营方式编码',
+    operation_name                STRING COMMENT '经营方式名称',
+    country_id                    BIGINT COMMENT '国家id',
+    country_cn_name               STRING COMMENT '国家名称',
+    district_code                 STRING COMMENT '片区编码',
+    district_name                 STRING COMMENT '片区名称',
+    region_code                   STRING COMMENT '大区编码',
+    region_name                   STRING COMMENT '大区名称',
+    province_code                 STRING COMMENT '省份编码',
+    province_name                 STRING COMMENT '省份名称',
+    city_code                     STRING COMMENT '城市编码',
+    city_name                     STRING COMMENT '城市名称',
+    area_code                     STRING COMMENT '区域编码',
+    area_name                     STRING COMMENT '区域名称'
+)COMMENT 'api门店表' PARTITIONED BY(
+    ds STRING COMMENT '时间分区');
