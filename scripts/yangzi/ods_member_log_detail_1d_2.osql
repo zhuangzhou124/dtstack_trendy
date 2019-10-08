@@ -1,6 +1,6 @@
 --name:ods_member_log_detail_1d_2
 --author:yangyijing
---create time:2019-09-28 13:31
+--create time:2019-09-28 13:32
 
 create table if not exists ods_member_log_detail_1d_2(
   user_id              STRING COMMENT '会员id',
