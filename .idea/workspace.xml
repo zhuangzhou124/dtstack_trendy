@@ -121,9 +121,8 @@
     <packageJsonPaths />
   </component>
   <component name="ProjectFrameBounds" fullScreen="true">
-    <option name="y" value="23" />
     <option name="width" value="1440" />
-    <option name="height" value="827" />
+    <option name="height" value="900" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -618,63 +617,34 @@
   </component>
   <component name="RunManager" selected="MaxCompute SQL.ads_order_product_detail_1.osql">
     <configuration default="true" type="Applet" factoryName="Applet">
+      <option name="HEIGHT" value="0" />
       <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
       <option name="WIDTH" value="0" />
-      <option name="HEIGHT" value="0" />
-      <module />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
     </configuration>
     <configuration default="true" type="Application" factoryName="Application">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="VM_PARAMETERS" />
-      <option name="PROGRAM_PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="ENABLE_SWING_INSPECTOR" value="false" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <module name="" />
-      <envs />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
     </configuration>
     <configuration default="true" type="JUnit" factoryName="JUnit">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
-      <module name="" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PACKAGE_NAME" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="METHOD_NAME" />
-      <option name="TEST_OBJECT" value="class" />
-      <option name="VM_PARAMETERS" value="-ea" />
-      <option name="PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="singleModule" />
-      </option>
-      <envs />
-      <patterns />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
     </configuration>
     <configuration name="Resource" type="OdpsJavaConfigurationType" factoryName="MaxCompute Java" temporary="true" nameIsGenerated="true">
-      <extension name="coverage" enabled="false" merge="false" runner="idea">
+      <option name="MAIN_CLASS_NAME" value="com.aliyun.odps.examples.mr.Resource" />
+      <module name="java" />
+      <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="com.aliyun.odps.examples.mr.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="MAIN_CLASS_NAME" value="com.aliyun.odps.examples.mr.Resource" />
-      <option name="VM_PARAMETERS" />
-      <option name="PROGRAM_PARAMETERS" />
-      <option name="WORKING_DIRECTORY" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="ENABLE_SWING_INSPECTOR" value="false" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <module name="java" />
-      <envs />
       <odpsJavaType>MR</odpsJavaType>
       <odpsEndpoint />
       <odpsProjectName>example_project</odpsProjectName>
@@ -682,117 +652,123 @@
       <tableColumns />
       <tablePartition />
       <recordLimit>100</recordLimit>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
     </configuration>
     <configuration name="ads_brand_detail_2.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$PROJECT_DIR$/scripts/ziyun/ads_brand_detail_2.osql</odps_target_file>
       <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
+      <job_name />
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
+      <method v="2" />
     </configuration>
     <configuration name="ads_clerk_detail_1.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$PROJECT_DIR$/scripts/ziyun/ads_clerk_detail_1.osql</odps_target_file>
       <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
+      <job_name />
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
+      <method v="2" />
     </configuration>
     <configuration name="ads_clerk_detail_2.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$PROJECT_DIR$/scripts/ziyun/ads_clerk_detail_2.osql</odps_target_file>
       <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
+      <job_name />
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
+      <method v="2" />
     </configuration>
     <configuration name="ads_order_detail_1.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$PROJECT_DIR$/scripts/ziyun/ads_order_detail_1.osql</odps_target_file>
       <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
+      <job_name />
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
+      <method v="2" />
     </configuration>
     <configuration name="ads_order_product_detail_1.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$PROJECT_DIR$/scripts/ziyun/ads_order_product_detail_1.osql</odps_target_file>
       <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
+      <job_name />
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
+      <method v="2" />
     </configuration>
     <configuration name="ads_store_item_detail_2.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$PROJECT_DIR$/scripts/ziyun/ads_store_item_detail_2.osql</odps_target_file>
       <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
+      <job_name />
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
+      <method v="2" />
     </configuration>
     <configuration name="as" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$PROJECT_DIR$/scripts/ziyun/as</odps_target_file>
       <odps_output_dir>/var/folders/nh/j7gnt6tj6mq1v0lr3c3kmcg00000gn/T/</odps_output_dir>
+      <job_name />
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
+      <method v="2" />
     </configuration>
     <configuration name="fggh.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$PROJECT_DIR$/scripts/ziyun/fggh.osql</odps_target_file>
       <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
+      <job_name />
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
+      <method v="2" />
     </configuration>
     <configuration name="scratch_1.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$APPLICATION_CONFIG_DIR$/scratches/scratch_1.osql</odps_target_file>
       <odps_output_dir>/var/folders/nh/j7gnt6tj6mq1v0lr3c3kmcg00000gn/T/</odps_output_dir>
+      <job_name />
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
+      <method v="2" />
     </configuration>
     <configuration name="scratch.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$APPLICATION_CONFIG_DIR$/scratches/scratch.osql</odps_target_file>
       <odps_output_dir>/var/folders/nh/j7gnt6tj6mq1v0lr3c3kmcg00000gn/T/</odps_output_dir>
+      <job_name />
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
+      <method v="2" />
     </configuration>
     <configuration name="test_git.osql" type="OdpsQLRunnerConfigurationType" factoryName="MaxCompute SQL">
       <odps_target_file>$PROJECT_DIR$/scripts/test_git.osql</odps_target_file>
       <odps_output_dir>$PROJECT_DIR$/target</odps_output_dir>
+      <job_name />
       <odps_parameter name="odps.sql.type.system.odps2" value="true" />
       <odps_parameter name="odps.compiler.runmode" value="Studio" />
+      <method v="2" />
     </configuration>
     <configuration default="true" type="TestNG" factoryName="TestNG">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
-      <module name="" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="SUITE_NAME" />
-      <option name="PACKAGE_NAME" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="METHOD_NAME" />
-      <option name="GROUP_NAME" />
-      <option name="TEST_OBJECT" value="CLASS" />
-      <option name="VM_PARAMETERS" value="-ea" />
-      <option name="PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
-      <option name="OUTPUT_DIRECTORY" />
-      <option name="ANNOTATION_TYPE" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="singleModule" />
-      </option>
-      <option name="USE_DEFAULT_REPORTERS" value="false" />
-      <option name="PROPERTIES_FILE" />
-      <envs />
       <properties />
       <listeners />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
     </configuration>
-    <list size="12">
-      <item index="0" class="java.lang.String" itemvalue="MaxCompute SQL.test_git.osql" />
-      <item index="1" class="java.lang.String" itemvalue="MaxCompute SQL.scratch.osql" />
-      <item index="2" class="java.lang.String" itemvalue="MaxCompute SQL.as" />
-      <item index="3" class="java.lang.String" itemvalue="MaxCompute SQL.scratch_1.osql" />
-      <item index="4" class="java.lang.String" itemvalue="MaxCompute SQL.fggh.osql" />
-      <item index="5" class="java.lang.String" itemvalue="MaxCompute SQL.ads_brand_detail_2.osql" />
-      <item index="6" class="java.lang.String" itemvalue="MaxCompute SQL.ads_store_item_detail_2.osql" />
-      <item index="7" class="java.lang.String" itemvalue="MaxCompute SQL.ads_clerk_detail_2.osql" />
-      <item index="8" class="java.lang.String" itemvalue="MaxCompute SQL.ads_order_detail_1.osql" />
-      <item index="9" class="java.lang.String" itemvalue="MaxCompute SQL.ads_order_product_detail_1.osql" />
-      <item index="10" class="java.lang.String" itemvalue="MaxCompute SQL.ads_clerk_detail_1.osql" />
-      <item index="11" class="java.lang.String" itemvalue="MaxCompute Java.Resource" />
+    <list>
+      <item itemvalue="MaxCompute SQL.test_git.osql" />
+      <item itemvalue="MaxCompute SQL.scratch.osql" />
+      <item itemvalue="MaxCompute SQL.as" />
+      <item itemvalue="MaxCompute SQL.scratch_1.osql" />
+      <item itemvalue="MaxCompute SQL.fggh.osql" />
+      <item itemvalue="MaxCompute SQL.ads_brand_detail_2.osql" />
+      <item itemvalue="MaxCompute SQL.ads_store_item_detail_2.osql" />
+      <item itemvalue="MaxCompute SQL.ads_clerk_detail_2.osql" />
+      <item itemvalue="MaxCompute SQL.ads_order_detail_1.osql" />
+      <item itemvalue="MaxCompute SQL.ads_order_product_detail_1.osql" />
+      <item itemvalue="MaxCompute SQL.ads_clerk_detail_1.osql" />
+      <item itemvalue="MaxCompute Java.Resource" />
     </list>
     <recent_temporary>
-      <list size="1">
-        <item index="0" class="java.lang.String" itemvalue="MaxCompute Java.Resource" />
+      <list>
+        <item itemvalue="MaxCompute Java.Resource" />
       </list>
     </recent_temporary>
   </component>
@@ -800,9 +776,6 @@
     <option name="externalProjectsViewState">
       <projects_view />
     </option>
-  </component>
-  <component name="ShelveChangesManager" show_recycled="false">
-    <option name="remove_strategy" value="false" />
   </component>
   <component name="SvnConfiguration">
     <configuration />
