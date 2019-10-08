@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS ads_store_detail_1(
 LIFECYCLE 30;
 
 
+
 INSERT OVERWRITE TABLE ads_store_detail_1 PARTITION(ds = '${bizdate}')
 	SELECT t5.id,
 				 t5.retail_price_amount,
