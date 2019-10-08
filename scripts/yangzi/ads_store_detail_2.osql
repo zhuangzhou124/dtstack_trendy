@@ -1,6 +1,6 @@
 --name:yangzi_test
 --author:yangyijing
---create time:2019-09-26 14:06
+--create time:2019-09-26 14:07
 
 create table if not exists ads_store_detail_2(
   avgHyXszb             double comment '平均会员销售占比：会员实际销售金额/单数（单数改为：实际销售金额）',

@@ -1,6 +1,7 @@
 --name:ads_member_detail_2
 --author:yangyijing
 --create time:2019-09-27 11:48
+
 create table if not exists ads_member_detail_2(
   member_no                                  string comment '会员编号',--和会员卡号什么关系？
   computingDuration                          string comment '最近的订单单距今消费间隔,单位:天',
