@@ -1,0 +1,162 @@
+--name:ads_store_detail_yike
+--author:yike
+--create time:2019-09-26 14:19
+--会员消费人数+消费频次
+select
+  rs_r.store_code as real_store_code,
+  rs_r.id as real_store_id,
+  coalesce(a.m_customer_amount,0) as m_customer_amount,--会员消费人数
+  coalesce(a.fm_customer_amount,0) as fm_customer_amount,--非会员消费人数
+  case when a.m_customer_amount is not null and a.m_customer_amount != 0 then b.member_ord_cnt/a.m_customer_amount else null end as consumption_frequency,--会员消费频次
+  case when a.fm_customer_amount is not null and a.fm_customer_amount != 0 then b.f_member_ord_cnt/a.fm_customer_amount else null end as f_consumption_frequency,--非会员消费频次
+  coalesce(b.member_ord_cnt,0) as m_order_count,--会员交易单数
+  coalesce(b.f_member_ord_cnt,0) as fm_order_count,--非会员交易单数
+  a.ds
+from
+(
+  SELECT
+  tt.brand_code,
+  tt.member_manage_channel_endpoint_code,
+  COUNT ( DISTINCT ( CASE WHEN order_fact_amount > 0 THEN tt.member_no ELSE NULL END ) ) AS m_customer_amount,
+  COUNT ( DISTINCT ( CASE WHEN f_order_fact_amount > 0 THEN tt.member_no ELSE NULL END ) ) AS fm_customer_amount,
+  tt.ds
+  FROM
+  (
+    SELECT T.brand_code,
+           T.member_manage_channel_endpoint_code,
+           T.member_manage_clerk,
+           T.member_no,
+           case when CAST(T.member_no AS bigint) > 1 then SUM ( T.order_fact_amount ) end AS order_fact_amount,
+           case when CAST(T.member_no AS bigint) = -1 then SUM ( T.order_fact_amount ) end AS f_order_fact_amount,
+           T.ds
+    FROM
+    (
+      SELECT t1.brand_code,
+             t1.member_manage_channel_endpoint_code,
+             t1.member_manage_clerk,
+             t1.member_no,
+             t2.sales_order_no,
+             t2.price_amt_discount as order_fact_amount,
+             t1.ds
+      FROM
+      ods_member_card t1 LEFT JOIN ods_sales_order t2 ON t1.member_no = t2.member_no
+      AND t1.org_code = t2.org_code
+      WHERE t1.status > 0 and t1.ds = '20190920' and t2.ds = '20190920'
+    ) T
+    GROUP BY
+    T.brand_code,
+    T.member_manage_channel_endpoint_code,
+    T.member_manage_clerk,
+    T.member_no,
+    T.ds
+  ) tt
+  GROUP BY
+  tt.brand_code,
+  tt.member_manage_channel_endpoint_code,
+  tt.ds
+) a left join (
+  select so.channel_endpoint_code
+  ,    sum(case when so.member_no != -1 then 1 end) as member_ord_cnt--会员销售单数
+  ,    sum(case when so.member_no = -1 then 1 end) as f_member_ord_cnt--非会员销售单数
+  from (
+    select org_code, channel_endpoint_code, member_no, order_type, amt_total, qty_order_item, member_grade_code
+    from ods_sales_order
+    where ds = '20190920') so
+  where so.order_type in ('101', '103')
+  or (so.order_type = '104' and (so.amt_total != 0 OR (so.amt_total = 0 AND so.qty_order_item != 0)))
+  group by so.channel_endpoint_code
+) b on a.member_manage_channel_endpoint_code = b.channel_endpoint_code
+  join ods_real_store rs_r on b.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
+;
+
+
+--去年同比（总+会员销售收入）+同店同比
+select
+  now.real_store_id,
+  now.real_store_code,
+  (case when last.sale_amt is not null and last.sale_amt != 0 then (now.sale_amt-last.sale_amt)/last.sale_amt end) as compared_with_lyst,--总销售金额去年同比
+  (case when last.member_sale_amt is not null and last.member_sale_amt != 0 then (now.member_sale_amt-last.member_sale_amt)/last.member_sale_amt end) as m_compared_with_lyst,--会员销售金额去年同比
+  (case when last.f_member_sale_amt is not null and last.f_member_sale_amt != 0 then (now.f_member_sale_amt-last.f_member_sale_amt)/last.f_member_sale_amt end) as fm_compared_with_lyst,--非会员销售金额去年同比
+  (case when last.sale_amt is not null and last.sale_amt > 0 and now.sale_amt > 0
+  then (now.sale_amt-last.sale_amt)/last.sale_amt else null end) as compared_with_ss_lyst,--总销售金额同店同比
+  (case when last.member_sale_amt is not null and last.member_sale_amt > 0 and now.member_sale_amt > 0
+  then (now.member_sale_amt-last.member_sale_amt)/last.member_sale_amt end) as member_sale_amt_yoy,--会员销售金额同店同比
+  (case when last.f_member_sale_amt is not null and last.f_member_sale_amt > 0 and now.f_member_sale_amt > 0
+  then (now.f_member_sale_amt-last.f_member_sale_amt)/last.f_member_sale_amt end) as fm_compared_with_lyst,--非会员销售金额去年同比
+  now.ds
+from (
+  select a.real_store_id, a.real_store_code,a.ds
+  ,      sale_amt - (case when amt_pay is null then 0 else amt_pay end) as sale_amt--实际销售金额
+  ,      member_sale_amt - (case when amt_pay_member is null then 0 else amt_pay_member end) as member_sale_amt--会员实际销售金额
+  ,      (sale_amt - (case when amt_pay is null then 0 else amt_pay end))
+  -(member_sale_amt - (case when amt_pay_member is null then 0 else amt_pay_member end))as f_member_sale_amt--非会员实际销售金额
+  from (
+    select rs_r.store_code as real_store_code, rs_r.id as real_store_id,so.ds
+    ,      sum(so.amt_total) as sale_amt --销售金额
+    ,      sum(case when so.member_no != -1 then so.amt_total end) as member_sale_amt--会员销售金额
+    from (
+      select member_no, amt_total, channel_endpoint_code, org_code, member_grade_code,ds
+      from ods_sales_order
+      where ds = '20190920' and replace(substr(create_time,1,10),'-','') between '20190101' and '20191231') so
+      join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
+    group by rs_r.store_code, rs_r.id,so.ds
+  ) a
+    left join (
+      select rs_r.store_code as real_store_code
+      ,      rs_r.id as real_store_id
+      ,      sum(case when so.member_no != -1 = true then sop.amt_pay end) as amt_pay_member
+      ,      sum(sop.amt_pay) as amt_pay
+      from (
+        select amt_pay, sales_order_no, pay_way
+        from ods_sales_order_payment
+        where ds = '20190920' and replace(substr(create_time,1,10),'-','') between '20190101' and '20191231'
+      ) sop left join (
+        select member_no, member_grade_code, org_code, channel_endpoint_code, sales_order_no
+        from ods_sales_order
+        where ds = '20190920'
+      ) so on sop.sales_order_no = so.sales_order_no
+        join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
+      where sop.pay_way = 'COUPON'
+      group by rs_r.store_code,rs_r.id
+    ) b on a.real_store_code = b.real_store_code and a.real_store_id = b.real_store_id
+  where b.amt_pay_member is not null and b.amt_pay is not null
+) now left join (
+  select a.real_store_code, a.real_store_id
+  ,      sale_amt - (case when amt_pay is null then 0 else amt_pay end) as sale_amt--实际销售金额
+  ,      member_sale_amt - (case when amt_pay_member is null then 0 else amt_pay_member end) as member_sale_amt--会员实际销售金额
+  ,      (sale_amt - (case when amt_pay is null then 0 else amt_pay end))
+  -(member_sale_amt - (case when amt_pay_member is null then 0 else amt_pay_member end)) as f_member_sale_amt
+  from (
+    select rs_r.store_code as real_store_code, rs_r.id as real_store_id
+    ,      sum(so.amt_total) as sale_amt --销售金额
+    ,      sum(case when so.member_no != -1 then so.amt_total end) as member_sale_amt--会员销售金额
+    from (
+      select member_no, amt_total, channel_endpoint_code, org_code, member_grade_code
+      from ods_sales_order
+      where ds = '20190920' and replace(substr(create_time,1,10),'-','') between '20180101' and '20181231') so
+      join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
+    group by rs_r.store_code,rs_r.id
+  ) a
+    left join (
+      select rs_r.id as real_store_id
+      ,      rs_r.store_code as real_store_code
+      ,      sum(case when so.member_no != -1 then sop.amt_pay end) as amt_pay_member
+      ,      sum(sop.amt_pay) as amt_pay
+      from (
+        select amt_pay, sales_order_no, pay_way
+        from ods_sales_order_payment
+        where ds = '20190920' and replace(substr(create_time,1,10),'-','') between '20180101' and '20181231'
+      ) sop left join (
+        select member_no, member_grade_code, org_code, channel_endpoint_code, sales_order_no
+        from ods_sales_order
+        where ds = '20190920'
+      ) so on sop.sales_order_no = so.sales_order_no
+        join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
+      where sop.pay_way = 'COUPON'
+      group by rs_r.store_code,rs_r.id
+    ) b on a.real_store_id = b.real_store_id and a.real_store_code = b.real_store_code
+) last on now.real_store_code = last.real_store_code and now.real_store_id = last.real_store_id
+;
+
+
+

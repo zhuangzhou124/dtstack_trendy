@@ -1,0 +1,69 @@
+--name:ads_store_detail_yike4
+--author:yike
+--create time:2019-09-26 17:14
+--会员件单价：（非）会员销售金额/件数
+--（非）会员销售件数
+select
+  t1.real_store_id,
+  t1.real_store_code,
+  coalesce(t1.pro_cnt,0),--会员销售件数
+  coalesce(t2.f_pro_cnt,0)--非会员销售件数
+from (
+  select rs_r.store_code as real_store_code
+  ,      rs_r.id as real_store_id
+  ,      sum(soi.qty_product) as pro_cnt--会员销售件数
+  ,      soi.ds
+  from (
+    select qty_product, sales_order_no, price_discount,ds
+    from ods_sales_order_item
+    where ds = '20190920') soi
+    left join (
+      select channel_endpoint_code, sales_order_no, member_grade_code
+      from ods_sales_order
+      where ds = '20190920' and member_no != -1 and replace(substr(create_time,1,10),'-','') = '20190920'
+    ) so on soi.sales_order_no = so.sales_order_no
+    left join ods_channel_endpoint ce_r on so.channel_endpoint_code = ce_r.channel_endpoint_code
+    and ce_r.ds = '20190920'
+    left join ods_endpoint e_r on ce_r.endpoint_code = e_r.endpoint_code and e_r.ds = '20190920'
+    left join ods_real_store rs_r on e_r.entity_code = rs_r.store_code and rs_r.ds = '20190920'
+  where soi.price_discount > 0 and soi.qty_product > 0
+  group by rs_r.store_code
+  , rs_r.id,
+  soi.ds
+) t1 left join (
+  select rs_r.store_code as real_store_code
+  ,      rs_r.id as real_store_id
+  ,      sum(soi.qty_product) as f_pro_cnt--非会员销售件数
+  ,      soi.ds
+  from (
+    select qty_product, sales_order_no, price_discount,ds
+    from ods_sales_order_item
+    where ds = '20190920') soi
+    left join (
+      select channel_endpoint_code, sales_order_no, member_grade_code
+      from ods_sales_order
+      where ds = '20190920' and member_no = -1 and replace(substr(create_time,1,10),'-','') = '20190920'
+    ) so on soi.sales_order_no = so.sales_order_no
+    left join ods_channel_endpoint ce_r on so.channel_endpoint_code = ce_r.channel_endpoint_code
+    and ce_r.ds = '20190920'
+    left join ods_endpoint e_r on ce_r.endpoint_code = e_r.endpoint_code and e_r.ds = '20190920'
+    left join ods_real_store rs_r on e_r.entity_code = rs_r.store_code and rs_r.ds = '20190920'
+  where soi.price_discount > 0 and soi.qty_product > 0
+  group by rs_r.store_code
+  , rs_r.id,
+  soi.ds
+  ) t2 on t1.real_store_code = t2.real_store_code and t1.real_store_id = t2.real_store_id
+;
+
+
+select so.channel_endpoint_code,so.sales_order_no,so.member_grade_code
+,    sum(case when so.member_no != -1 then 1 end) as member_ord_cnt--会员销售单数
+from (
+  select org_code, channel_endpoint_code, member_no, order_type, amt_total, qty_order_item, member_grade_code,sales_order_no
+  from ods_sales_order
+  where ds = '20190920') so
+where so.member_no != -1 and so.order_type in ('101', '103')
+or (so.order_type = '104' and (so.amt_total != 0 OR (so.amt_total = 0 AND so.qty_order_item != 0)))
+group by so.channel_endpoint_code,so.sales_order_no,so.member_grade_code;
+
+select * from ods_sales_order where member_no = '-1' and ds = max_pt('ods_sales_order');

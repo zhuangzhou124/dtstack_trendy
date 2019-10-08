@@ -1,0 +1,86 @@
+--name:ads_store_detail_yike2
+--author:yike
+--create time:2019-09-26 16:27
+--销售收入：会员+非会员+会员占比+非会员占比
+select
+  T.real_store_id,
+  T.real_store_code,
+  T.member_sale_amt as m_sales_income,
+  T.f_member_sale_amt as fm_sales_income,
+  (case when T.sale_amt is not null and T.sale_amt != 0 then T.member_sale_amt/T.sale_amt else null end) as m_sales_income_proportion,
+  (case when T.sale_amt is not null and T.sale_amt != 0 then T.f_member_sale_amt/T.sale_amt else null end) as fm_sales_income_proportion,
+  T.ds
+from (
+  SELECT
+      a.real_store_id,
+      a.real_store_code,
+      a.ds,
+      sale_amt - coalesce(amt_pay,0) AS sale_amt, --实际销售金额
+      member_sale_amt - coalesce(amt_pay_member,0) AS member_sale_amt, --会员实际销售金额
+      (sale_amt - coalesce(amt_pay,0))
+      -(member_sale_amt - coalesce(amt_pay_member,0)) AS f_member_sale_amt --非会员实际销售金额
+  FROM (
+    SELECT
+    rs_r.store_code as real_store_code,
+    rs_r.id as real_store_id,
+    so.ds,
+    sum( so.amt_total ) AS sale_amt, --销售金额
+    sum( CASE WHEN so.member_no != - 1 THEN so.amt_total END ) AS member_sale_amt --会员销售金额
+    FROM
+    (
+      SELECT
+      member_no,
+      amt_total,
+      channel_endpoint_code,
+      org_code,
+      member_grade_code,
+      ds
+      FROM
+      ods_sales_order
+      WHERE
+      ds = '20190920'
+      AND REPLACE ( substr( create_time, 1, 10 ), '-', '' ) = '20190920'
+    ) so left join ods_channel_endpoint ce_r on so.channel_endpoint_code  = ce_r.channel_endpoint_code and ce_r.ds = '20190920'
+      left join ods_endpoint e_r on ce_r.endpoint_code = e_r.endpoint_code and e_r.ds = '20190920'
+      left join ods_real_store rs_r on e_r.entity_code = rs_r.store_code  and rs_r.ds = '20190920'
+    GROUP BY
+    rs_r.store_code,
+    rs_r.id,
+    so.ds
+  ) a
+    LEFT JOIN (
+      SELECT
+      rs_r.store_code as real_store_code,
+      rs_r.id as real_store_id,
+      sum( CASE WHEN so.member_no != - 1 = TRUE THEN sop.amt_pay END ) AS amt_pay_member,
+      sum( sop.amt_pay ) AS amt_pay
+      FROM
+      (
+        SELECT
+        amt_pay,
+        sales_order_no,
+        pay_way
+        FROM
+        ods_sales_order_payment
+        WHERE
+        ds = '20190920'
+        AND REPLACE ( substr( create_time, 1, 10 ), '-', '' ) = '20190920'
+      ) sop
+        LEFT JOIN (
+          SELECT member_no, member_grade_code, org_code, channel_endpoint_code, sales_order_no
+          FROM ods_sales_order WHERE ds = '20190920'
+        ) so ON sop.sales_order_no = so.sales_order_no
+        left join ods_channel_endpoint ce_r on so.channel_endpoint_code  = ce_r.channel_endpoint_code and ce_r.ds = '20190920'
+        left join ods_endpoint e_r on ce_r.endpoint_code = e_r.endpoint_code and e_r.ds = '20190920'
+        left join ods_real_store rs_r on e_r.entity_code = rs_r.store_code  and rs_r.ds = '20190920'
+      WHERE
+      sop.pay_way = 'COUPON'
+      GROUP BY
+      rs_r.store_code,
+      rs_r.id
+    ) b ON a.real_store_code = b.real_store_code and a.real_store_id = b.real_store_id
+    --WHERE b.amt_pay_member IS NOT NULL
+    --AND b.amt_pay IS NOT NULL
+)T
+;
+
