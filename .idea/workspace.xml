@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ccb34a09-2509-4140-9103-1a564ca8795d" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/scripts/heshang/ads_store_memberlevel_detail.osql" />
       <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
@@ -36,7 +35,7 @@
             <state />
           </provider>
           <provider selected="true" editor-type-id="OdpsQlEditor">
-            <state relative-caret-position="342">
+            <state relative-caret-position="-1594">
               <caret line="18" column="0" lean-forward="true" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
               <folding />
             </state>
@@ -58,6 +57,7 @@
     </findStrings>
   </component>
   <component name="Git.Settings">
+    <option name="ROOT_SYNC" value="DONT_SYNC" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
@@ -597,7 +597,7 @@
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
-    <property name="settings.editor.selected.configurable" value="settings.github" />
+    <property name="settings.editor.selected.configurable" value="vcs.Git" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -821,10 +821,18 @@
       <workItem from="1569722263259" duration="9000" />
       <workItem from="1569722612915" duration="7245000" />
     </task>
+    <task id="LOCAL-00001" summary="heshang">
+      <created>1570527581837</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1570527581837</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="72529000" />
+    <option name="totallyTimeSpent" value="72682000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1440" height="900" extended-state="0" />
@@ -893,6 +901,10 @@
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="heshang" />
+    <option name="LAST_COMMIT_MESSAGE" value="heshang" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -1019,7 +1031,7 @@
         <state />
       </provider>
       <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="342">
+        <state relative-caret-position="-1594">
           <caret line="18" column="0" lean-forward="true" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
           <folding />
         </state>
