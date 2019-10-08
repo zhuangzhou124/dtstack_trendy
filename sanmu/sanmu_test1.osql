@@ -53,13 +53,6 @@ GROUP BY cc.org_code
 
 
 
-SELECT
-channel_endpoint_code,
-order_type
-FROM ods_sales_order
-WHERE ds = '${bizdate}' and ()
-
-
 
 
 
@@ -72,3 +65,70 @@ WHERE ds = '${bizdate}' and ()
 --成交笔数（不减去退货笔数）(销售订单数)
 --成交率 (销售订单数 /客流统计)
 --vip销售占比
+
+
+
+
+
+--MonthlyReport/Asset
+--MonthlyReport/Active
+
+CREATE TABLE IF NOT EXISTS ads_api_order_no(
+	outer_order_no                            VARCHAR(100) COMMENT '订单号',
+	order_fact_amount_include_coupon          decimal(10,2) COMMENT '订单扣券金额',
+	report_time                           VARCHAR(100) COMMENT '日期'
+
+)COMMENT '订单号明细表';
+
+
+
+
+--门店开卡数
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
