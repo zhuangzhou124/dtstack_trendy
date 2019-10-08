@@ -35,3 +35,28 @@ where cast(member_no as int) > 1 and ds = '20190920' and replace(substr(create_t
 group by --org_code, shopping_guider_no,
 replace(substr(create_time, 1, 10), '-', ''), member_no
 having sum(price_amt_discount) > 0;
+
+
+CREATE TABLE ads_api_brand_shopChannels_mode (
+	salesdate string COMMENT '销售日期',
+	brand string COMMENT '品牌',
+	shopChannels string COMMENT '电商渠道',
+	MODE string COMMENT '渠道',
+	salesAmount string COMMENT '销售金额',
+	dcl string COMMENT '达成率',
+	itemQuantity string COMMENT'	销售件数',
+	itemQuantityDayOnDay string COMMENT '销售件数日环比',
+	itemQuantityDayOnMonth string COMMENT '销售件数月环比',
+	itemQuantityDayOnWeek string COMMENT '销售件数周环比',
+	lastUpdateTime string COMMENT '最新的订单时间',
+	salesAmountDayOnDay string COMMENT '销售金额日环比（前一日）',
+	salesAmountDayOnMonth string COMMENT '销售金额月环比（上月同一日）',
+	salesAmountDayOnWeek string COMMENT '销售金额周环比（上周同一日）',
+	--只算昨天 
+	register_member_amount string COMMENT '新增会员数',
+	rma_compared_with_ydst string COMMENT '日环比',
+	rma_compared_with_lwst string COMMENT '周环比',
+	rma_compared_with_lmst string COMMENT '月环比'
+	--
+	
+	);
