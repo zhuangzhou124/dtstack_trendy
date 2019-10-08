@@ -129,7 +129,7 @@ from(
   )tmp2 on tmp1.calculate_date=tmp2.pay_date
   and tmp1.member_manage_channel_endpoint_code=tmp2.channel_endpoint_code
   and tmp1.grade_id=tmp2.member_grade_code;
--- where tmp2.pay_date is not null;
+ where tmp2.pay_date is not null;
 
 
 
