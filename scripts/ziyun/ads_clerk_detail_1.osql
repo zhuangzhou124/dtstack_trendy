@@ -1,0 +1,118 @@
+--name:ads_clerk_detail_1
+--author:huangbin
+--create time:2019-09-28 16:16
+
+create table if not exists ads_clerk_detail_1(
+  member_manage_clerk             string comment '导购',
+  member_reg_only_qty             int comment '注册未消费',
+  member_actived_qty              int comment '注册有消费',
+  member_qty_reg                  int comment '注册会员总数',
+  member_vip_qty                  int comment 'vip数',
+  new_member_qty                  int comment '新增人数',
+  salesAmount                     double comment '销售金额'
+comment '导购会员表' partitioned by(
+  ds string comment '时间分区');
+
+
+select * from (
+SELECT
+tt.member_manage_clerk
+,COUNT ( DISTINCT ( tt.member_no ) ) AS member_qty     --会员总数  （各种总数如何计算）
+,COUNT ( DISTINCT ( CASE WHEN order_fact_amount <= 0 THEN tt.member_no ELSE NULL END ) ) AS member_reg_only_qty  --注册未消费
+,COUNT ( DISTINCT ( CASE WHEN order_fact_amount > 0 THEN tt.member_no ELSE NULL END ) ) AS member_actived_qty  --注册有消费
+,COUNT ( DISTINCT ( CASE WHEN tt.member_register_time IS NOT NULL THEN tt.member_no ELSE NULL END ) ) AS member_qty_reg--注册会员总数
+,COUNT ( DISTINCT ( CASE WHEN tt.is_vip='1' THEN tt.member_no ELSE NULL END ) ) AS member_vip_qty      --vip数
+,COUNT ( DISTINCT ( CASE WHEN to_char(cast(tt.create_time as datetime),'yyyymmdd')=20190920 THEN tt.member_no ELSE NULL END ) ) AS new_member_qty  --新增人数
+,sum(salesAmount) as salesAmount  --销售金额
+FROM
+(
+  SELECT T.member_manage_clerk,
+         T.member_no,
+         T.member_register_time,
+         T.create_time,
+         T.is_vip,
+         SUM (coalesce(T.order_fact_amount,0)) AS order_fact_amount,
+         SUM (coalesce(T.salesAmount,0)) AS salesAmount
+  FROM
+  (
+    SELECT ods_member_card.member_manage_clerk,
+           ods_member_card.member_no,
+           ods_member_card.member_register_time,
+           ods_member_card.create_time,
+           ods_sales_order.sales_order_no,
+           ods_member_grade_info.is_vip,
+           ods_sales_order.price_amt_discount as order_fact_amount,
+           ods_sales_order.amt_total as salesAmount
+    FROM
+    ods_member_card LEFT JOIN ods_sales_order ON ods_member_card.member_no = ods_sales_order.member_no
+    AND ods_member_card.org_code = ods_sales_order.org_code
+    and ods_sales_order.ds=ods_member_card.ds
+      LEFT JOIN ods_member_grade_state on ods_member_card.id = ods_member_grade_state.member_card_id
+      and ods_member_card.ds=ods_member_grade_state.ds
+      LEFT JOIN ods_member_grade_info on ods_member_grade_state.grade_id = ods_member_grade_info.grade_id
+      and ods_member_card.ds=ods_member_grade_info.ds
+    WHERE
+--    ods_member_card.create_time BETWEEN '2019-08-01 00:00:00' AND '2019-08-23 23:59:59'
+     ods_member_card.status > 0
+    AND CAST ( ods_member_card.member_no AS int ) > 1
+--    AND ods_member_card.member_manage_store = '1102'
+--    AND ods_member_card.brand_code = '2'
+    AND ods_member_card.ds=20190920
+  ) T
+  GROUP BY
+  T.member_manage_clerk,
+  T.member_no,
+  T.member_register_time,
+  T.create_time,
+  T.is_vip
+) tt
+GROUP BY
+tt.member_manage_clerk
+) d where d.new_member_qty>0;
+
+
+
+select  cc.org_code
+, cc.member_manage_channel_endpoint_code
+, cc.member_manage_clerk
+, count( distinct cc.member_no ) as new_member_qty  --新增人数
+from   td_ods_dev.ods_member_info aa
+  join   td_ods_dev.ods_member_card cc
+    on    cc.member_no = aa.member_no
+  left join (
+    select a.org_code
+    , a.member_no
+    , min( a.create_time ) as first_order_time
+    from   td_ods_dev.ods_sales_order a
+    where  1 = 1
+    and  a.audit_time <= '2019-09-30 23:59:59'
+    and   a.org_code = 'TRE'
+    and   a.channel_endpoint_code = '1201'
+    and   a.price_amt_discount > 0
+    and   a.member_no not in ('-1', '1')
+    group by
+    a.org_code, a.member_no
+  ) bb
+    on    bb.org_code = cc.org_code
+  and   bb.member_no = cc.member_no
+where  1 = 1
+and   cc.member_register_time <= '2019-09-30 23:59:59'
+and   cc.org_code = 'TRE'
+and   cc.member_manage_channel_endpoint_code = '1102'
+and   aa.status > 0
+and    cc.member_no not in ('-1', '1')
+and   bb.first_order_time between '2019-09-01 00:00:00' and '2019-09-30 23:59:59'
+group by
+cc.org_code
+, cc.member_manage_channel_endpoint_code
+, cc.member_manage_clerk
+order by
+cc.org_code
+, cc.member_manage_channel_endpoint_code
+, cc.member_manage_clerk
+limit 1000;
+
+
+
+
+select distinct grade_id from ods_member_grade_info where ds=20190920

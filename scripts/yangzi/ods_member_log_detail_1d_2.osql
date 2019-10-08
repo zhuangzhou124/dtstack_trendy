@@ -1,0 +1,97 @@
+--name:ods_member_log_detail_1d_2
+--author:yangyijing
+--create time:2019-09-28 13:32
+
+create table if not exists ods_member_log_detail_1d_2(
+  user_id              STRING COMMENT '会员id',
+  lastOrderTime        STRING COMMENT '最近订单时间（最近消费时间、上次消费时间）',
+  lastOrderStore       STRING COMMENT '最近订单门店NO',
+  lastOrderStoreName   STRING COMMENT '最近订单门店名称',
+  lastOrderSpent       STRING COMMENT '最近订单消费',
+  lastContactTime      STRING COMMENT '最近回访时间',
+  lastContactStore     STRING COMMENT '最近回访门店NO',
+  lastContactClerkName STRING COMMENT '最近回访店员姓名',
+  computingDuration    STRING COMMENT '最近的订单单距今消费间隔,单位:天',
+  lastOrderId          STRING COMMENT '最近订单No',
+  lastOrderAmount      STRING COMMENT '最近消费金额',
+  lastContactLogId     STRING COMMENT '最近联系日志ID',
+  lastContactDays      STRING COMMENT '最近联系距今天数',
+  newEventCount        STRING COMMENT '新事件计数',
+  orderItemQuantity    STRING COMMENT '最近订单No'
+)comment '会员明细表' partitioned by(
+  ds string comment '时间分区');
+
+
+select user_id
+,      lastOrderTime
+,      lastOrderStore
+,      lastOrderStoreName
+,      lastOrderSpent
+,      lastContactTime
+,      lastContactStore
+,      lastContactClerkName
+,      computingDuration
+,      lastOrderId
+,      lastOrderAmount
+,      lastContactLogId
+,      lastContactDays
+,      newEventCount
+,      orderItemQuantity
+from (
+  select a.user_id
+  ,      a.last_order_time as lastOrderTime--最近订单时间
+  ,      a.store_code as lastOrderStore--最近订单门店NO
+  ,      b.endpoint_name as lastOrderStoreName--最近订单门店名称
+  ,      a.last_order_amount as lastOrderSpent--最近订单消费
+  ,      DATEDIFF('${bizdate}', a.last_order_time) as computingDuration--最近的订单单距今消费间隔,单位:天
+  ,      a.last_order_id as lastOrderId--最近订单No
+  --,      a.last_order_time as lastOrderTime--最近消费时间
+  ,      a.last_order_amount as lastOrderAmount--最近消费金额
+  ,      a.last_contact_days as lastContactDays--最近联系距今天数
+  ,      a.new_event_count as newEventCount--新事件计数
+  ,      a.last_order_id as orderItemQuantity--最近订单No
+  --,      a.last_order_time as lastOrderTime--上次消费时间
+  --select a.brand_code,a.org_code,endpoint_name
+  from (
+    select user_id, aa.brand_code, last_order_time, store_code, last_order_amount, last_order_id, last_contact_days,
+           new_event_count, org_code
+    from (
+      select user_id, brand_code, last_order_time, store_code, last_order_amount, last_order_id, last_contact_days,
+             new_event_count
+      from ods_feedback_member_asset
+      where ds = '20190920'
+    ) aa
+      left outer join ods_product_brand c on aa.brand_code = c.brand_code and ds = '20190920'
+  ) a
+    left join (
+      select distinct a.endpoint_code
+      ,               a.endpoint_name
+      ,               b.org_code
+      ,               b.channel_endpoint_code
+      from (
+        select endpoint_code, endpoint_name
+        from ods_endpoint
+        where ds = '20190920') a
+        join ods_channel_endpoint b on b.endpoint_code = a.endpoint_code and b.ds = '20190920'
+    ) b on b.org_code = a.org_code and b.channel_endpoint_code = a.store_code
+where endpoint_name is not null
+) me_a
+  left outer join (
+    select a.user_id
+    ,      a.feedback_time as lastContactTime--最近回访时间
+    ,      a.store_code as lastContactStore--最近回访门店NO
+    ,      c.clerk_name as lastContactClerkName--最近回访店员姓名
+    ,      a.contact_log_id as lastContactLogId--最近联系日志ID
+    from (
+      select          feedback_time, contact_log_id, user_id, brand_code, store_code
+      from ods_feedback_customer_contact_log
+      where ds = '20190920'
+    ) a
+      join (
+        select brand_code, user_id, max(contact_log_id) as last_contact_log_id
+        from ods_feedback_customer_contact_log
+        where ds = '20190920'
+        group by brand_code, user_id
+      ) b on b.brand_code = a.brand_code and b.user_id = a.user_id and b.last_contact_log_id = a.contact_log_id
+      left join ods_clerk_info c on c.clerk_no = a.clerk_id and ds
+  ) cc_l on me_a.user_id = cc_l.user_id and me_a.brand_code = cc_l.brand_code;

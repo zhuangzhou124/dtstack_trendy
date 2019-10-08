@@ -1,0 +1,118 @@
+--name:ads_brand_detail_2
+--author:huangbin
+--create time:2019-09-26 15:28
+
+
+create table if not exists ads_brand_detail_2(
+  brand                   string  comment  '品牌',
+  itemQuantityDayOnDay    double  comment  '销售件数日环比',
+  itemQuantityDayOnWeek    double  comment  '销售件数周环比',
+  itemQuantityDayOnMonth    double  comment  '销售件数月环比',
+  lastUpdateTime    string  comment  '最新的订单时间',
+  salesAmountDayOnDay    double  comment  '销售金额日环比（前一日）',
+  salesAmountDayOnWeek    double  comment  '销售金额周环比（上周同一日）',
+  salesAmountDayOnMonth    double  comment  '销售金额月环比（上月同一日）'
+
+)comment '品牌销售对比表' partitioned by(
+  ds string comment '时间分区');
+
+select
+soa.brand
+,case when coalesce(sob.itemQuantity,0)=0 then 0 else soa.itemQuantity/sob.itemQuantity end as itemQuantityDayOnDay --销售件数日环比
+,case when coalesce(soc.itemQuantity,0)=0 then 0 else soa.itemQuantity/soc.itemQuantity end as itemQuantityDayOnWeek --销售件数周环比
+,case when coalesce(sod.itemQuantity,0)=0 then 0 else soa.itemQuantity/sod.itemQuantity end as itemQuantityDayOnMonth --销售件数月环比
+,soa.lastUpdateTime --最新的订单时间
+,case when coalesce(sob.salesAmount,0)=0 then 0 else soa.salesAmount/sob.salesAmount end as salesAmountDayOnDay --销售件数日环比
+,case when coalesce(soc.salesAmount,0)=0 then 0 else soa.salesAmount/soc.salesAmount end as salesAmountDayOnDay --销售件数周环比
+,case when coalesce(sod.salesAmount,0)=0 then 0 else soa.salesAmount/sod.salesAmount end as salesAmountDayOnDay --销售件数月环比
+from
+(
+  select so.org_code as brand
+         ,max(substr(paid_time,1,16)) as lastUpdateTime
+    ,sum(soi.qty_product) as itemQuantity --销售件数
+    ,sum(coalesce(so.amt_total,0)-coalesce(sob.amt_pay,0) ) as salesAmount --销售金额
+  from ods_sales_order_item soi
+  left join ods_sales_order so
+  on soi.sales_order_no = so.sales_order_no
+  and soi.ds = so.ds
+  left join (
+    select sop.sales_order_no
+      ,sop.amt_pay
+    from ods_sales_order_payment sop
+    where sop.pay_way = 'COUPON'
+    and sop.ds=20190920) sob
+  on sob.sales_order_no=so.sales_order_no
+  where soi.price_discount > 0
+  and soi.qty_product > 0
+  and soi.ds=20190920
+  AND to_char(cast(paid_time as datetime),'yyyymmdd')=20190920
+  group by so.org_code) soa
+left join (
+  select so.org_code as brand
+    ,sum(soi.qty_product) as itemQuantity
+    ,sum(coalesce(so.amt_total,0)-coalesce(sob.amt_pay,0) ) as salesAmount --销售金额
+  from ods_sales_order_item soi
+  left join ods_sales_order so
+  on soi.sales_order_no = so.sales_order_no
+  and soi.ds = so.ds
+  left join (
+    select sop.sales_order_no
+      ,sop.amt_pay
+    from ods_sales_order_payment sop
+    where sop.pay_way = 'COUPON'
+    and sop.ds=20190920) sob
+  on sob.sales_order_no=so.sales_order_no
+  where soi.price_discount > 0
+  and soi.qty_product > 0
+  and soi.ds=20190920
+  AND to_char(DATEADD(cast(paid_time as datetime),1,'dd') ,'yyyymmdd')=20190920
+  group by so.org_code
+) sob
+on soa.brand=sob.brand
+left join (
+  select so.org_code as brand
+    ,sum(soi.qty_product) as itemQuantity
+    ,sum(coalesce(so.amt_total,0)-coalesce(sob.amt_pay,0) ) as salesAmount --销售金额
+  from ods_sales_order_item soi
+  left join ods_sales_order so
+  on soi.sales_order_no = so.sales_order_no
+  and soi.ds = so.ds
+  left join (
+    select sop.sales_order_no
+      ,sop.amt_pay
+    from ods_sales_order_payment sop
+    where sop.pay_way = 'COUPON'
+    and sop.ds=20190920) sob
+  on sob.sales_order_no=so.sales_order_no
+  where soi.price_discount > 0
+  and soi.qty_product > 0
+  and soi.ds=20190920
+  AND to_char(DATEADD(cast(paid_time as datetime),7,'dd') ,'yyyymmdd')=20190920
+  group by so.org_code
+) soc
+  on soa.brand=soc.brand
+left join (
+  select so.org_code as brand
+    ,sum(soi.qty_product) as itemQuantity
+    ,sum(coalesce(so.amt_total,0)-coalesce(sob.amt_pay,0) ) as salesAmount --销售金额
+  from ods_sales_order_item soi
+  left join ods_sales_order so
+  on soi.sales_order_no = so.sales_order_no
+  and soi.ds = so.ds
+  left join (
+    select sop.sales_order_no
+      ,sop.amt_pay
+    from ods_sales_order_payment sop
+    where sop.pay_way = 'COUPON'
+    and sop.ds=20190920) sob
+  on sob.sales_order_no=so.sales_order_no
+  where soi.price_discount > 0
+  and soi.qty_product > 0
+  and soi.ds=20190920
+  AND to_char(DATEADD(cast(paid_time as datetime),1,'mm') ,'yyyymmdd')=20190920
+  group by so.org_code
+) sod
+  on soa.brand=sod.brand
+;
+
+

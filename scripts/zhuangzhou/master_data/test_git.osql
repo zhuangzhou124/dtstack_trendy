@@ -4,5 +4,5 @@
 --subject:
 
 SELECT *
-FROM ods_channel
-WHERE ds = '20190920';
+FROM ods_drp
+WHERE ds = '20190911';
