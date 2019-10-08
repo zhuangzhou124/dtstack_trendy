@@ -1,0 +1,193 @@
+--name:ads_brand_channel_detail
+--author:zhangjunda
+--create time:2019-09-28 12:00
+
+
+
+
+SELECT so.org_code, so.channel_endpoint_code, sum(soi.qty_product)
+FROM ods_sales_order_item soi
+  LEFT JOIN ods_sales_order so ON soi.sales_order_no = so.sales_order_no
+WHERE soi.price_discount > 0 AND soi.qty_product > 0
+GROUP BY so.org_code, so.channel_endpoint_code;
+
+
+
+--
+--ds	STRING	时间分区
+--id	BIGINT
+--sales_order_no	STRING	主单编码（xs-销售单号、th-退货单号、tk-退款单号、hh-换货单号）
+--app_id	STRING	应用id
+--online_store_order_no	STRING	网单号 第三方平台订单号（ec：天猫、京东单号）
+--original_order_no	STRING	源销售单号（售后单需要纪录）
+--order_type	BIGINT	订单类型 1- 销售 2 -退款 3-退货退款 4-换货
+--price_print_type	BIGINT	入机类型，1-原价，2-折后价，3-混合入机
+--transaction_flow_code	STRING	订单交易流程编码（指定订单交易流程）
+--shipping_type	BIGINT	发货方式 1-快递；2-自提；
+--order_status	BIGINT	单据状态
+--pay_status	BIGINT	支付状态
+--shipping_status	BIGINT	发货状态
+--refund_status	BIGINT	退货状态
+--refund_payment_status	BIGINT	退款状态
+--org_code	STRING	销售组织编码
+--channel_endpoint_code	STRING	销售渠道终端编码（销售门店、网点）
+--shopping_guider_app_code	STRING	导购平台应用编码
+--sales_app_code	STRING	销售平台应用编码
+--shopping_guider_no	STRING	导购人、微分销人员编码
+--has_rma	BIGINT	是否有rma处理，0- 无，1-有
+--rma_contact_number	STRING	rma客户联系电话
+--rma_reason	STRING	退货原因
+--member_no	STRING	会员编号（pos：会员中心编号、ec：外部系统会员账号）
+--member_source_type	STRING	客户类型编码（废弃）
+--member_grade_code	STRING	客户等级（会员中心会员等级）
+--external_member_type	STRING	外部会员类型
+--qty_order_item	BIGINT	订单货物数（销售商品数 - 售后商品数）-1
+--qty_sales_item	BIGINT	销售商品数（销售单、换货单销售商品数）
+--qty_return_item	BIGINT	售后商品数（退货单、换货单退换商品数）
+--price_amt_retail	DOUBLE	原销售总价（吊牌价、原价）
+--price_amt_discount	DOUBLE	折后价总额（促销处理后的价格）
+--amt_total	DOUBLE	订单总额(折后入机：支付金额，原价入机：销售单原价)
+--amt_sales_item	DOUBLE	销售商品总额（销售、换货商品总额）
+--amt_return_item	DOUBLE	售后商品总额（退换商品总额）
+--amt_paid	DOUBLE	已支付金额
+--amt_freight	DOUBLE	运费支付金额
+--refund_logistics_no	STRING	退货物流单号
+--average_discount	DOUBLE	订单平均折扣
+--remark	STRING	备注
+--paid_time	STRING	支付时间
+--shipping_time	STRING	发货时间
+--warehouse_receiving_time	STRING	退货入仓时间
+--customer_receiving_time	STRING	客户收货时间
+--create_user_id	BIGINT	创建用户编码
+--create_user_name	STRING	创建用户名（冗余）
+--create_time	STRING	创建时间
+--last_update_user_id	BIGINT	最后更新用户编码
+--last_update_user_name	STRING	最后更新用户名（冗余）
+--last_update_time	STRING	最后修改时间
+--deleted	STRING	软删除：1-已删除、0-未删除
+--external_order_no	STRING	外部单号（EC单号）
+--outer_order_id	BIGINT	外部订单id
+--business_type	STRING	业务单据类型（1：线下销售单、5：电商平台销售单、、、、、、）
+--related_rma_order_id	BIGINT
+--statemachine	BIGINT	状态机当前状态
+--amt_m_discount	DOUBLE	商家优惠金额
+--channel_stock_code	STRING	渠道库存编码
+--oms_version	BIGINT	oms广播版本
+--channel_code	STRING	渠道编码（废弃）
+--member_mobile	STRING	会员手机号
+--stock_receive_code	STRING	收货逻辑仓编码
+--point_deduction	STRING	扣点(商场代收)
+--sales_platform_code	STRING	销售第三方平台编码（天猫、京东、唯品会）
+--logistics_company_no	STRING	快递物流公司编码
+--buyer_nick_name	STRING	昵称
+--made_order_time	STRING	制单号
+--audit_time	STRING	过账时间（pos特殊添加）
+--amt_discount	DOUBLE	折扣总额
+
+SELECT rs_r.id AS real_store_id
+,      rs_r.store_code AS real_store_code
+,      sum(CASE WHEN so.member_no != - 1 = TRUE THEN sop.amt_pay END) AS amt_pay_member
+,      sum(sop.amt_pay) AS amt_pay
+FROM (
+  SELECT amt_pay, sales_order_no, pay_way
+  FROM ods_sales_order_payment
+  WHERE ds = '20190920' AND REPLACE(substr(create_time, 1, 10), '-', '') BETWEEN '20180101' AND '20181231'
+) sop
+  LEFT JOIN (
+    SELECT member_no, member_grade_code, org_code, channel_endpoint_code, sales_order_no
+    FROM ods_sales_order
+    WHERE ds = '20190920'
+  ) so ON sop.sales_order_no = so.sales_order_no
+  LEFT JOIN ods_channel_endpoint ce_r ON so.channel_endpoint_code = ce_r.channel_endpoint_code AND ce_r.ds = '20190920'
+  LEFT JOIN ods_endpoint e_r ON ce_r.endpoint_code = e_r.endpoint_code AND e_r.ds = '20190920'
+  LEFT JOIN ods_real_store rs_r ON e_r.entity_code = rs_r.store_code AND rs_r.ds = '20190920'
+WHERE sop.pay_way = 'COUPON'
+GROUP BY rs_r.store_code, rs_r.id;
+
+
+
+
+
+SELECT *
+FROM a so
+  LEFT JOIN ods_channel_endpoint ce_r ON so.channel_endpoint_code = ce_r.channel_endpoint_code AND ce_r.ds = '20190920'
+  LEFT JOIN ods_endpoint e_r ON ce_r.endpoint_code = e_r.endpoint_code AND e_r.ds = '20190920'
+  LEFT JOIN ods_real_store rs_r ON e_r.entity_code = rs_r.store_code AND rs_r.ds = '20190920';
+
+
+
+
+
+
+
+SELECT so.org_code, so.channel_endpoint_code, sum(so.amt_total)
+FROM ods_sales_order so
+GROUP BY so.org_code, so.channel_endpoint_code;
+
+
+SELECT so.org_code, so.channel_endpoint_code, sum(sop.amt_pay)
+FROM ods_sales_order_payment sop
+  LEFT JOIN ods_sales_order so ON sop.sales_order_no = so.sales_order_no
+WHERE sop.pay_way = 'COUPON'
+GROUP BY so.org_code, so.channel_endpoint_code;
+
+
+
+SELECT so.org_code
+, so.channel_endpoint_code
+, sum(so.amt_total) AS amt_total
+, coalesce(sum(sop.amt_pay), 0) AS amt_pay
+FROM ods_sales_order so
+  LEFT JOIN ods_sales_order_payment sop ON sop.sales_order_no = so.sales_order_no
+WHERE sop.pay_way = 'COUPON' AND
+GROUP BY so.org_code, so.channel_endpoint_code;
+
+
+
+
+
+
+
+SELECT a.store_code, --店铺编号
+       a.company_code, --公司代码
+       a.website, --网点分类
+       a.store_name, --店铺名称
+       c.org_code, --品牌编码
+       c.operation_code, --渠道代码
+       c.operation_name   --渠道名称
+FROM ods_online_store a
+  INNER JOIN ods_endpoint b ON a.store_code = b.entity_code
+  INNER JOIN ods_channel_endpoint c ON b.endpoint_code = c.endpoint_code
+  LEFT OUTER JOIN (
+    SELECT so.org_code, so.channel_endpoint_code
+    ,      coalesce(sum(so.amt_total), 0) AS amt_total   --销售金额原
+    ,      coalesce(sum(CASE WHEN sop.pay_way = 'COUPON' THEN sop.amt_pay END), 0) AS amt_pay  --券
+    FROM ods_sales_order so
+      LEFT OUTER JOIN (
+        SELECT *
+        FROM ods_sales_order_payment
+        WHERE ds = '20190920') sop ON sop.sales_order_no = so.sales_order_no
+    WHERE so.ds = '20190920'
+    GROUP BY so.org_code, so.channel_endpoint_code
+  ) d ON c.channel_endpoint_code = d.channel_endpoint_code
+  LEFT OUTER JOIN (
+    SELECT so.org_code, so.channel_endpoint_code, sum(soi.qty_product)
+    FROM ods_sales_order_item soi
+      LEFT JOIN (
+        SELECT *
+        FROM ods_sales_order
+        WHERE ds = '20190920'
+      ) so ON soi.sales_order_no = so.sales_order_no
+    WHERE soi.price_discount > 0 AND soi.ds = '20190920' AND soi.qty_product > 0
+    GROUP BY so.org_code, so.channel_endpoint_code
+  ) e ON c.channel_endpoint_code = e.channel_endpoint_code
+WHERE a.ds = '20190911' AND b.ds = '20190920' AND c.ds = '20190920';
+
+
+
+
+
+
+
+
+
