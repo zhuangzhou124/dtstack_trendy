@@ -6,8 +6,8 @@
 select
   t1.real_store_id,
   t1.real_store_code,
-  coalesce(t1.pro_cnt,0),--会员销售件数
-  coalesce(t2.f_pro_cnt,0)--非会员销售件数
+  coalesce(t1.pro_cnt,0) as m_sl_cnt,--会员销售件数
+  coalesce(t2.f_pro_cnt,0) as fm_sl_cnt--非会员销售件数
 from (
   select rs_r.store_code as real_store_code
   ,      rs_r.id as real_store_id
@@ -22,10 +22,7 @@ from (
       from ods_sales_order
       where ds = '20190920' and member_no != -1 and replace(substr(create_time,1,10),'-','') = '20190920'
     ) so on soi.sales_order_no = so.sales_order_no
-    left join ods_channel_endpoint ce_r on so.channel_endpoint_code = ce_r.channel_endpoint_code
-    and ce_r.ds = '20190920'
-    left join ods_endpoint e_r on ce_r.endpoint_code = e_r.endpoint_code and e_r.ds = '20190920'
-    left join ods_real_store rs_r on e_r.entity_code = rs_r.store_code and rs_r.ds = '20190920'
+    join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
   where soi.price_discount > 0 and soi.qty_product > 0
   group by rs_r.store_code
   , rs_r.id,
@@ -44,10 +41,7 @@ from (
       from ods_sales_order
       where ds = '20190920' and member_no = -1 and replace(substr(create_time,1,10),'-','') = '20190920'
     ) so on soi.sales_order_no = so.sales_order_no
-    left join ods_channel_endpoint ce_r on so.channel_endpoint_code = ce_r.channel_endpoint_code
-    and ce_r.ds = '20190920'
-    left join ods_endpoint e_r on ce_r.endpoint_code = e_r.endpoint_code and e_r.ds = '20190920'
-    left join ods_real_store rs_r on e_r.entity_code = rs_r.store_code and rs_r.ds = '20190920'
+    join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
   where soi.price_discount > 0 and soi.qty_product > 0
   group by rs_r.store_code
   , rs_r.id,

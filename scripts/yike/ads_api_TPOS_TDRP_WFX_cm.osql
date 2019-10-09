@@ -1,0 +1,46 @@
+--name:ads_api_TPOS_TDRP_WFX_cm
+--author:yike
+--create time:2019-10-09 14:51
+create table if not exists ads_api_TPOS_TDRP_WFX_cm(
+brand_code                    string comment '品牌编号',
+store_code                    string comment '门店编号',
+month                         bigint comment '月份',
+year                          bigint comment '年份',
+monthlyRealityMoney           double comment '本月累计销售金额',
+monthlyInitTargetMoney        double comment '本月目标销售金额',
+monthlyCumulateTargetMoney    double comment '预估完成销售金额',
+mtdEstimatedReach             double comment 'MTD预估达成率',
+mtdSaleTargetTop              bigint comment 'MTD销售达成排名',
+mtdTop                        bigint comment '月累计全国排名'
+) comment '月销售目标' partitioned by (
+ds string
+);
+INSERT OVERWRITE TABLE ads_api_TPOS_TDRP_WFX_cm PARTITION(ds)
+select
+  ts.brand_code,
+  ts.store_code,
+  cast(ts.month as bigint),
+  cast(ts.year as bigint),
+  ts.monthly_reality_money,
+  ts.monthly_init_target_money,
+  ts.monthly_cumulate_target_money,
+  ts.mtdEstimatedReach,
+  rank()OVER (PARTITION BY ts.brand_code,ts.year,ts.month ORDER BY ts.mtdEstimatedReach DESC) AS mtdSaleTargetTop,
+  rank()OVER (PARTITION BY ts.brand_code,ts.year,ts.month ORDER BY ts.monthly_reality_money DESC) AS mtdTop,
+  ts.ds
+from (
+  select
+  a.brand_code,
+  a.store_code,
+  a.month,
+  a.year,
+  a.monthly_reality_money,--本月累计销售金额
+  a.monthly_init_target_money,--本月目标销售金额
+  a.monthly_cumulate_target_money,--预估完成销售金额
+  case when a.monthly_reality_money is not null and a.monthly_reality_money != 0
+  then a.monthly_init_target_money/a.monthly_reality_money else null end as mtdEstimatedReach,--MTD预估达成率
+  ds
+  from ods_store_monthly_sales_analyze a
+  where a.ds = '20190920'
+)ts
+;

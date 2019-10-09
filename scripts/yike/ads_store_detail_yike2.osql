@@ -40,9 +40,7 @@ from (
       WHERE
       ds = '20190920'
       AND REPLACE ( substr( create_time, 1, 10 ), '-', '' ) = '20190920'
-    ) so left join ods_channel_endpoint ce_r on so.channel_endpoint_code  = ce_r.channel_endpoint_code and ce_r.ds = '20190920'
-      left join ods_endpoint e_r on ce_r.endpoint_code = e_r.endpoint_code and e_r.ds = '20190920'
-      left join ods_real_store rs_r on e_r.entity_code = rs_r.store_code  and rs_r.ds = '20190920'
+    ) so join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
     GROUP BY
     rs_r.store_code,
     rs_r.id,
@@ -70,9 +68,7 @@ from (
           SELECT member_no, member_grade_code, org_code, channel_endpoint_code, sales_order_no
           FROM ods_sales_order WHERE ds = '20190920'
         ) so ON sop.sales_order_no = so.sales_order_no
-        left join ods_channel_endpoint ce_r on so.channel_endpoint_code  = ce_r.channel_endpoint_code and ce_r.ds = '20190920'
-        left join ods_endpoint e_r on ce_r.endpoint_code = e_r.endpoint_code and e_r.ds = '20190920'
-        left join ods_real_store rs_r on e_r.entity_code = rs_r.store_code  and rs_r.ds = '20190920'
+        join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
       WHERE
       sop.pay_way = 'COUPON'
       GROUP BY
