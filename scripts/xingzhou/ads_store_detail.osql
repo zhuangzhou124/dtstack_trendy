@@ -1,0 +1,338 @@
+--name:ads_store_detail_register_member_amount
+--author:jinyuanmei
+--create time:2019-09-26 14:40
+--门店宽表相关指标
+
+--  register_member_amount			          Integer	当前全部会员数1
+--  consumed_member_amount			          Integer	有消费会员数  2
+--  consumed_member_amount_proportion			Float	有消费会员数占比    7
+--  unconsumed_member_amount			        Integer	未消费会员数  3
+--  unconsumed_member_amount_proportion		Float	未消费会员数占比    8
+--  new_member_amount			                Integer	新会员数
+--  new_member_amount_proportion			    Float	新会员数占比
+--  old_member_amount			                Integer	老会员数
+--  old_member_amount_proportion			    Float	老会员数占比
+--  remain_member_amount			            Integer	留存会员数   4
+--  remain_member_amount_proportion			  Float	留存会员数占比
+--  lost_member_amount			              Integer	流失会员数   5
+--  lost_member_amount_proportion			    Float	流失员数占比
+--  register_member_amount                      招募会员数     6
+--  rma_compared_with_lyst                      招募会员同比
+--  cma_compared_with_lyst                      有消费会员数同比
+--  uma_compared_with_lyst                      未消费会员数同比
+
+
+--*******************************
+--门店所有会员数
+--当前全部会员数，门店+日期粒度
+--分区是t-1，也就是说是昨天会员表的全量数据
+--通过member_manage_channel_endpoint_code分组，通过member_no去重求和，得到每一个门店的会员数量
+--截止到今天，门店会员总数有多少
+--*******************************
+
+select tt.store_code,
+       tt.store_name,
+       t.member_amount
+from (
+
+    select member_manage_channel_endpoint_code,
+       count(distinct member_no) as member_amount
+    from ods_member_card
+    WHERE ds = '${bdp.system.bizdate}'
+    group by member_manage_channel_endpoint_code
+
+) t
+  join
+(
+  select *
+  from ods_real_store
+  where ds = '${bdp.system.bizdate}'
+) tt                                      --查出门店表所有信息
+  on t.member_manage_channel_endpoint_code = tt.store_code
+;
+--*******************************
+--门店有消费会员数，未消费会员数，有消费会员数占比，无消费会员数占比
+--粒度是 日期+门店，
+--截止到今天，这个门店有消费的会员人数有多少
+--思路：会员表左联结订单表，获取会员订单相关信息，会员ID，订单ID等等
+--********************************
+SELECT  tt.member_manage_channel_endpoint_code,
+        COUNT ( DISTINCT ( tt.member_no ) ) AS member_qty,--会员总数
+        COUNT ( DISTINCT ( CASE WHEN order_fact_amount > 0 THEN tt.member_no ELSE NULL END ) ) AS consumed_member_amount,                   --有消费会员数
+        COUNT ( DISTINCT ( CASE WHEN order_fact_amount <= 0 THEN tt.member_no ELSE NULL END ) ) AS unconsumed_member_amount,                --未消费会员数
+        COUNT ( DISTINCT ( CASE WHEN order_fact_amount > 0 THEN tt.member_no ELSE NULL END ) )/COUNT ( DISTINCT ( tt.member_no ) ) as aa,   --有消费会员数占比
+        COUNT ( DISTINCT ( CASE WHEN order_fact_amount <= 0 THEN tt.member_no ELSE NULL END ) ) /COUNT ( DISTINCT ( tt.member_no ) ) as bb  --未消费会员数占比
+FROM
+(
+  SELECT T.member_manage_channel_endpoint_code,
+         T.member_no,
+         SUM(T.order_fact_amount) AS order_fact_amount
+  FROM
+  (
+    SELECT card.brand_code,
+           trim(card.member_manage_channel_endpoint_code) as member_manage_channel_endpoint_code,
+           trim(card.member_no) as member_no,
+           order.sales_order_no,
+           coalesce(order.price_amt_discount,0) as order_fact_amount
+    FROM(
+          select * from
+              ods_member_card
+          where ds = '${bdp.system.bizdate}'
+          and status > 0
+          AND CAST ( member_no AS bigint ) > 1
+    ) card
+      LEFT JOIN (
+          select * from
+          ods_sales_order where ds = '${bdp.system.bizdate}'
+    ) order
+       ON card.member_no = order.member_no
+  ) T                                          --会员和订单相关联
+  GROUP BY
+  T.member_manage_channel_endpoint_code,
+  T.member_no
+) tt  --门店，会员，会员消费金额
+GROUP BY
+tt.member_manage_channel_endpoint_code;
+
+
+--*******************************
+--留存会员数
+--粒度是 日期+门店
+--
+--思路：订单表中找到所有时间符合要求的订单，订单中找到门店信息和会员信息，根据门店分组，统计留存会员数量
+--********************************
+select  '${bdp.system.bizdate}' as report_date,
+        channel_endpoint_code,
+        count( distinct member_no) as member_qty
+
+from ods_sales_order
+where price_amt_discount > 0            --订单实际支付额
+  and cast( member_no as bigint ) > 1   --会员
+  and datediff(to_date('${bdp.system.bizdate}','yyyymmdd'),to_date(create_time,'yyyy-mm-dd hh:mi:ss'),'dd') <365
+  and ds = '${bdp.system.bizdate}'
+group by
+  org_code,
+  channel_endpoint_code;
+
+------------------------------------------------------------------------------------------------------------------------
+
+select  to.member_manage_channel_endpoint_code,
+        ors.store_name,
+        to.lost_member_amount,
+        to.remain_member_amount,
+        to.lost_member_amount/(lost_member_amount+remain_member_amount) as zb_lost,
+        to.remain_member_amount/(lost_member_amount+remain_member_amount) as zb_remain
+from(
+  select ttt.member_manage_channel_endpoint_code as member_manage_channel_endpoint_code,
+         sum(case when ttt.last_order_date is null or ttt.last_order_date>365 then 1 else 0 end) as lost_member_amount,
+         sum(case when ttt.last_order_date < 365 then 1 else 0 end) as remain_member_amount
+
+  from(
+    select tt.member_manage_channel_endpoint_code,
+           tt.member_no,
+           max(tt.days_of_order) as last_order_date
+    from(
+      select  card.member_no as member_no,
+              card.member_manage_channel_endpoint_code as member_manage_channel_endpoint_code,
+              order.days_of_order as days_of_order,--订单距离今天时间
+              order.create_time as create_time
+      from
+      (
+        select  member_no,
+                trim(member_manage_channel_endpoint_code) as member_manage_channel_endpoint_code
+        from ods_member_card
+        where ds = '${bdp.system.bizdate}'
+        and status > 0
+        AND CAST ( member_no AS bigint ) > 1
+      )card
+        left join
+        (
+          select member_no,
+                 create_time,
+                 datediff(to_date('${bdp.system.bizdate}','yyyymmdd'),to_date(create_time,'yyyy-mm-dd hh:mi:ss'),'dd') as days_of_order
+
+          from ods_sales_order
+          where ds = '${bdp.system.bizdate}'
+        )order
+          on card.member_no =order.member_no
+          where days_of_order is null or days_of_order>=0 --说明订单是统计日期之后
+    ) tt
+    group by tt.member_manage_channel_endpoint_code,tt.member_no
+  )ttt
+  --where
+  group by ttt.member_manage_channel_endpoint_code
+
+)to
+  left join ods_real_store ors
+    on to.member_manage_channel_endpoint_code = ors.store_code and ors.ds= '${bdp.system.bizdate}';
+
+select store.store_code,
+       store.store_name,
+       ca.member_manage_channel_endpoint_code,
+       ca.member_amount
+from
+(
+  select member_manage_channel_endpoint_code,
+         count(distinct member_no) as member_amount
+  from ods_member_card
+  where ds = '${bdp.system.bizdate}'
+  group by member_manage_channel_endpoint_code
+)as ca
+ left join
+(
+
+  select store_code,
+         store_name
+  from ods_real_store
+  where ds ='${bdp.system.bizdate}'
+
+)as store
+on ca.member_manage_channel_endpoint_code =store.store_code
+;
+--*******************************
+--流失会员数
+--粒度是 日期+门店，
+--
+--思路：会员表关联订单表，按会员分组，找到会员最新的订单时间，通过这个时间删选出365天之内没有消费的会员
+--********************************--------------------------------------------------------------------------------------
+--select  member_manage_channel_endpoint_code,
+--        '${bdp.system.bizdate}' as date,
+--        count(member_no) as lost_member_acount,
+--        count(*)
+--from(
+--        SELECT T.member_manage_channel_endpoint_code as member_manage_channel_endpoint_code,
+--               T.member_no as member_no,
+--               max(T.create_time) as last_order_time
+--        FROM
+--        (
+--          SELECT card.brand_code,
+--                   trim(card.member_manage_channel_endpoint_code) as member_manage_channel_endpoint_code,
+--                   trim(card.member_no) as member_no,
+--                   order.sales_order_no,
+--                   coalesce(order.price_amt_discount,0) as order_fact_amount,
+--                   order.create_time as create_time
+--            FROM(
+--              select * from
+--              ods_member_card
+--              where ds = '${bdp.system.bizdate}'
+--              and status > 0
+--              AND CAST ( member_no AS bigint ) > 1
+--            ) card
+--              JOIN (
+--                select * from
+--                ods_sales_order where ds = '${bdp.system.bizdate}'
+--              ) order
+--                ON card.member_no = order.member_no
+--        )T
+--        group by member_manage_channel_endpoint_code,member_no
+--)TT
+--where TT.last_order_time is null or datediff(to_date('${bdp.system.bizdate}','yyyymmdd'),to_date(last_order_time,'yyyy-mm-dd hh:mi:ss'),'dd') > 365
+--group by member_manage_channel_endpoint_code;
+
+------------------------------------------------------------------------------------------------------------------------
+select  '${bdp.system.bizdate}' as report_date,
+        member_manage_channel_endpoint_code,
+        count(member_no)
+from(
+    SELECT  T.member_no as member_no,
+            T.member_manage_channel_endpoint_code,
+            max(create_time) as last_order_time
+    FROM
+    (
+      SELECT card.brand_code,
+             trim(card.member_manage_channel_endpoint_code) as member_manage_channel_endpoint_code,
+             trim(card.member_no) as member_no,
+             order.sales_order_no,
+             coalesce(order.price_amt_discount,0) as order_fact_amount,
+             order.create_time as create_time
+      FROM(
+        select * from
+        ods_member_card
+        where ds = '${bdp.system.bizdate}'
+        and status > 0
+        AND CAST ( member_no AS bigint ) > 1
+      ) card
+        left JOIN(
+          select * from
+          ods_sales_order where ds = '${bdp.system.bizdate}'
+        ) order
+          ON card.member_no = order.member_no
+    )T     ----会员
+    group by member_manage_channel_endpoint_code,member_no
+)TT    --门店，会员，会员最近订单时间
+where TT.last_order_time is null or datediff(to_date('${bdp.system.bizdate}','yyyymmdd'),to_date(last_order_time,'yyyy-mm-dd hh:mi:ss'),'dd') > 365
+group by TT.member_manage_channel_endpoint_code;
+
+------------------------------------------------------------------------------------------------------------------------
+select ttt.member_manage_channel_endpoint_code as member_manage_channel_endpoint_code,
+        count(distinct member_no) as member_amount
+from(
+  select tt.member_manage_channel_endpoint_code,
+         tt.member_no,
+          max(tt.days_of_order) as last_order_date
+  from(
+  select  card.member_no as member_no,
+          card.member_manage_channel_endpoint_code as member_manage_channel_endpoint_code,
+          order.days_of_order as days_of_order,--订单距离今天时间
+          order.create_time as create_time
+  from
+  (
+    select  member_no,
+            trim(member_manage_channel_endpoint_code) as member_manage_channel_endpoint_code
+    from ods_member_card
+    where ds = '${bdp.system.bizdate}'
+    and status > 0
+    AND CAST ( member_no AS bigint ) > 1
+  )card
+  left join
+  (
+    select member_no,
+           create_time,
+           datediff(to_date('${bdp.system.bizdate}','yyyymmdd'),to_date(create_time,'yyyy-mm-dd hh:mi:ss'),'dd') as days_of_order
+
+      from ods_sales_order where ds = '${bdp.system.bizdate}'
+  )order
+    on card.member_no =order.member_no
+  ) tt
+  group by tt.member_manage_channel_endpoint_code,tt.member_no
+)ttt
+where ttt.last_order_date is null or ttt.last_order_date>365
+group by ttt.member_manage_channel_endpoint_code;
+
+
+--*******************************
+--招募会员数
+--粒度是 日期+门店，
+--定义：在当天前注册，当天消费首单就算当天的招募会员。
+--找到会员，会员首单信息，20190920统计，会员ID，会员门店，会员注册时间，会员首单时间
+--********************************
+-------------------------------------------------------------------------------
+-----------------------------------------------------------------------
+select  cc.member_manage_channel_endpoint_code as member_manage_channel_endpoint_code,
+        '${bdp.system.bizdate}' as date,
+        count(distinct cc.member_no) as new_member_acount
+
+from td_ods_dev.ods_member_info aa
+  join td_ods_dev.ods_member_card cc
+    on cc.member_no = aa.member_no
+  left join (
+    select  a.org_code
+    , a.member_no
+    , min(a.create_time) as first_order_time
+    from   td_ods_dev.ods_sales_order a
+    where  1 = 1
+    and a.ds = '${bdp.system.bizdate}'
+    and a.price_amt_discount > 0
+    and a.member_no not in ('-1', '1')
+    group by
+    a.org_code, a.member_no
+  ) bb
+    on bb.org_code = cc.org_code and
+       bb.member_no = cc.member_no
+where  1 = 1
+and   cc.ds = '${bdp.system.bizdate}'
+and   aa.ds = '${bdp.system.bizdate}'
+and   to_char(to_date(bb.first_order_time, 'yyyy-mm-dd hh:mi:ss'),'yyyymmdd') ='${bdp.system.bizdate}'
+and   aa.status > 0
+and   cc.member_no not in ('-1', '1')
+group by cc.member_manage_channel_endpoint_code;
