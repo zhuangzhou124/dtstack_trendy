@@ -1,0 +1,86 @@
+--name:ads_api_TPOS_MA_store_15mm
+--author:yike
+--create time:2019-10-09 19:07
+create table if not exists ads_api_TPOS_MA_store_15mm(
+  date_type                     string comment '日期类型',
+  date_id                       string comment '日期id',
+  storeCode                     string comment '门店列表编码',
+  orderType                     string comment '订单类型-写死1，2，3',
+  status                        string comment '订单状态-写死11',
+  orgCode                       string comment '品牌编码',
+  salesAmount                   double comment '销售总额',
+  salesSubCouponAmount          double comment '扣卷销售总额'
+) comment '门店销售排行（含券或扣券）' partitioned by (
+  ds string
+);
+
+
+  SELECT
+  'day' as date_type,
+  '20190920' as date_id,
+  a.store_code as storeCode,
+  '1,2,3' as orderType,
+  '11' as status,
+  a.org_code as orgCode,
+  sale_amt as salesAmount,--销售金额
+  sale_amt - coalesce(amt_pay,0) AS salesSubCouponAmount, --销售金额（扣券）
+  a.ds
+  FROM (
+    SELECT
+    rs_r.store_code,
+    so.ds,
+    so.org_code,
+    sum( so.amt_total ) AS sale_amt --销售金额
+    FROM
+    (
+      SELECT
+      member_no,
+      amt_total,
+      channel_endpoint_code,
+      org_code,
+      member_grade_code,
+      ds
+      FROM
+      ods_sales_order
+      WHERE
+      ds = '20190920'
+      AND REPLACE ( substr( create_time, 1, 10 ), '-', '' ) = '20190920'
+    ) so join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
+    GROUP BY
+    rs_r.store_code,
+    rs_r.id,
+    so.org_code,
+    so.ds
+  ) a
+    LEFT JOIN (
+      SELECT
+      rs_r.store_code,
+      sop.org_code,
+      sum( sop.amt_pay ) AS amt_pay
+      FROM
+      (
+        SELECT
+        amt_pay,
+        sales_order_no,
+        pay_way,
+        org_code
+        FROM ods_sales_order_payment
+        WHERE ds = '20190920' AND REPLACE ( substr( create_time, 1, 10 ), '-', '' ) = '20190920'
+        and pay_way = 'COUPON'
+      ) sop LEFT JOIN (
+          SELECT
+          member_no,
+          member_grade_code,
+          org_code,
+          channel_endpoint_code,
+          sales_order_no
+          FROM ods_sales_order
+          WHERE ds = '20190920'
+      ) so ON sop.sales_order_no = so.sales_order_no
+        join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
+      GROUP BY
+      rs_r.store_code,
+      sop.org_code,
+      rs_r.id
+    ) b ON a.store_code = b.store_code and a.org_code = b.org_code
+;
