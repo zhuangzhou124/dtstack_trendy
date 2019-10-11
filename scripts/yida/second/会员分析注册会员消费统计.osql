@@ -1,0 +1,103 @@
+--name:会员分析注册会员消费统计
+--author:zhangjunda
+--create time:2019-10-10 15:49
+
+
+
+--hour
+--day
+--week
+--month
+--year
+--7d
+--15d
+--30d
+
+
+
+
+WITH t1 AS(
+  SELECT *
+  FROM dim_time_mapping
+  WHERE ds = '${bdp.system.bizdate}'),
+     time AS(
+  SELECT ds, time_id, 'day' AS date_type, time_id AS date_id
+  FROM t1
+  WHERE is_day = 1
+  UNION ALL SELECT ds, time_id, 'week' AS date_type, week_id AS date_id
+  FROM t1
+  WHERE is_week = 1
+  UNION ALL SELECT ds, time_id, 'month' AS date_type, month_id AS date_id
+  FROM t1
+  WHERE is_month = 1
+  UNION ALL SELECT ds, time_id, 'year' AS date_type, year_id AS date_id
+  FROM t1
+  WHERE is_year = 1
+  UNION ALL SELECT ds, time_id, '7d' AS date_type, '7' AS date_id
+  FROM t1
+  WHERE is_7d = 1
+  UNION ALL SELECT ds, time_id, '15d' AS date_type, '15' AS date_id
+  FROM t1
+  WHERE is_15d = 1
+  UNION ALL SELECT ds, time_id, '30d' AS date_type, '30' AS date_id
+  FROM t1
+  WHERE is_30d = 1
+  UNION ALL SELECT ds, time_id, 'week_sale' AS date_type, week_sale_id AS date_id
+  FROM t1
+  WHERE is_week_sale = 1)
+
+
+
+
+INSERT OVERWRITE TABLE xxxxxxx PARTITION(ds)
+
+  SELECT t.date_type
+  ,      t.date_id
+  ,      t.org_code
+  ,      t.member_manage_channel_endpoint_code
+  ,      t.member_manage_clerk
+  ,      COUNT(DISTINCT (t.member_no)) AS member_qty
+  ,      COUNT(DISTINCT (CASE WHEN order_fact_amount > 0 THEN t.member_no ELSE NULL END)) AS member_actived_qty
+  FROM (
+    SELECT date_type
+    ,      date_id
+    ,      a1.org_code
+    ,      a1.member_no
+    ,      a1.member_manage_channel_endpoint_code
+    ,      a1.member_manage_clerk
+    ,      to_char(to_date(a1.member_register_time, 'yyyy-mm-dd'), 'yyyymmdd') AS member_register_time
+    FROM ods_member_card a1
+      JOIN time ON to_char(to_date(member_register_time, 'yyyy-mm-dd'), 'yyyymmdd') = time.time_id
+    WHERE a1.ds = '${bdp.system.bizdate}' AND a1.STATUS > 0 AND CAST(a1.member_no AS BIGINT) > 1 AND a1.
+    member_register_time IS NOT NULL
+  ) t
+    LEFT OUTER JOIN (
+      SELECT date_type
+      ,      date_id
+      ,      org_code
+      ,      member_no
+      ,      sum(price_amt_discount) AS order_fact_amount
+      FROM ods_sales_order a1
+        JOIN time ON to_char(to_date(create_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd') = time.time_id -- 改为过账时间audit_time
+      WHERE a1.ds = '${bdp.system.bizdate}' AND CAST(a1.member_no AS BIGINT) > 1
+
+      GROUP BY date_type
+      , date_id
+      , org_code
+      , member_no
+    ) b ON b.org_code = t.org_code AND b.member_no = t.member_no AND b.date_type = t.date_type AND b.date_id = t.date_id
+  WHERE t.org_code IS NOT NULL AND t.member_manage_channel_endpoint_code IS NOT NULL
+  GROUP BY t.date_type
+  , t.date_id
+  , t.org_code
+  , t.member_manage_channel_endpoint_code
+  , t.member_manage_clerk;
+
+
+
+
+
+
+
+
+
