@@ -13,7 +13,7 @@ CREATE TABLE ads_api_crm_ma_member_15mm(
   member_gender          STRING COMMENT '会员性别',
   wechat_id              STRING COMMENT '微信(openid)',
   member_grade           BIGINT COMMENT '会员等级',
-  member_score           STRING COMMENT '会员积分',
+  member_score           DOUBLE  COMMENT '会员积分',
   member_phone_number    STRING COMMENT '会员电话',
   member_birthday        STRING COMMENT '会员生日',
   hold_Coupon_Info       BIGINT COMMENT '是否持券',
@@ -73,6 +73,6 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_member_15mm PARTITION(ds = ${bizdate})
     AND asset.ds='20190920'
   WHERE card.ds = '20190920'
   AND gs.last_upgrade_time IS NOT NULL
-
+;
 
 
