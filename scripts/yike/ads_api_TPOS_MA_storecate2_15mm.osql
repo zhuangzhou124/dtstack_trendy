@@ -15,7 +15,7 @@ create table if not exists ads_api_TPOS_MA_storecate2_15mm(
 ) comment '店品类销售占比' partitioned by (
   ds string
 );
-
+INSERT OVERWRITE TABLE ads_api_TPOS_MA_storecate2_15mm PARTITION(ds)
 select
   'day' as date_type,
   '20190920' as date_id,
@@ -26,7 +26,8 @@ select
   a.salesAmount,
   (coalesce(a.salesAmount,0) - coalesce(b.amt_pay,0)) as salesSubCouponAmount,
   a.level2_cate_code as subCate,
-  a.pro_cnt
+  a.pro_cnt,
+  a.ds
 from (
   select rs_r.store_code as real_store_code
   ,      soi.level2_cate_code
