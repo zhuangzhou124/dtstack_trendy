@@ -1,0 +1,86 @@
+--name:ads_api_tpos_tdrp_wfx_channel_endpoint_1d
+--author:sanmu
+--create time:2019-10-09 11:29
+--drop table ads_api_tpos_tdrp_wfx_channel_endpoint_1d
+--***********************************
+-- 表   名：ads_api_tpos_tdrp_wfx_channel_endpoint_1d
+-- 功能描述：日期+门店粒度汇总表
+-- 生命周期：30天
+-- 调度周期：周期调度
+-- 创建者：  三木
+-- 创建日期：20191008
+-- 修改日志：
+--***********************************
+
+
+CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_channel_endpoint_1d(
+	biz_date                                              STRING COMMENT '统计日期',
+	channel_endpoint                                            STRING COMMENT '门店编码',
+	new_card_num_1d_store_vip                             BIGINT COMMENT 'VIP新开卡数',
+	total_card_num_td_store_vip                           BIGINT COMMENT 'VIP累计开卡数',
+	date_type                                             STRING COMMENT '日期类型',
+	date_id                                               STRING COMMENT '日期'
+)COMMENT '日期+门店粒度汇总表' PARTITIONED BY(
+	ds STRING COMMENT '时间分区');
+
+
+INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = '${bizdate}')
+	SELECT '${bizdate}' as biz_date,
+				 t4.channel_endpoint_code,
+				 t4.new_card_num_1d_store_vip,
+				 t5.total_card_num_td_store_vip,
+				 'day' as date_type,
+				 t4.order_time as date_id
+	FROM (
+		SELECT t3.channel_endpoint_code,
+					 t3.order_time,
+					 COUNT(DISTINCT (t3.member_no)) AS new_card_num_1d_store_vip
+		FROM (
+			SELECT t1.channel_endpoint_code,
+						 t1.member_no,
+						 t1.order_time,
+						 t2.is_vip
+			FROM (
+				SELECT channel_endpoint_code,
+							 member_grade_code,
+							 member_no,
+							 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time
+				FROM ods_sales_order
+				WHERE ds = '${bizdate}') t1
+				LEFT JOIN (
+					SELECT          grade_code,
+													is_vip
+					FROM ods_member_grade_info
+					WHERE ds = '${bizdate}' AND is_vip = '1') t2
+					ON t1.member_grade_code = t2.grade_code) AS t3
+		WHERE t3.is_vip = '1'
+		GROUP BY t3.channel_endpoint_code,t3.order_time) AS t4
+		LEFT OUTER JOIN (
+			SELECT t3.channel_endpoint_code,
+						 COUNT(DISTINCT (t3.member_no)) AS total_card_num_td_store_vip
+			FROM (
+				SELECT t1.channel_endpoint_code,
+							 t1.member_no,
+							 t2.is_vip
+				FROM (
+					SELECT DISTINCT channel_endpoint_code,
+													member_grade_code,
+													member_no,
+													substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time
+					FROM ods_sales_order
+					WHERE ds <= '${bizdate}') t1
+					LEFT JOIN (
+						SELECT DISTINCT grade_code,
+														is_vip
+						FROM ods_member_grade_info
+						WHERE ds <= '${bizdate}' AND is_vip = '1') t2
+						ON t1.member_grade_code = t2.grade_code) AS t3
+			WHERE t3.is_vip = '1'
+			GROUP BY t3.channel_endpoint_code) AS t5
+			ON t4.channel_endpoint_code = t5.channel_endpoint_code;
+
+
+
+
+
+
