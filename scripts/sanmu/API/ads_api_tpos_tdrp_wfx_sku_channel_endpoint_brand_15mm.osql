@@ -1,0 +1,284 @@
+--name:ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm
+--author:sanmu
+--create time:2019-10-10 18:02
+--drop table ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm
+--***********************************
+-- 表   名：ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm
+-- 功能描述：日期+门店+品牌粒度明细表
+-- 生命周期：30天
+-- 调度周期：周期调度
+-- 创建者：  三木
+-- 创建日期：20191008
+-- 修改日志：
+--***********************************
+
+
+
+CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm(
+	biz_date                                                       STRING COMMENT '统计日期',
+	org_code                                                       STRING COMMENT '品牌         ',
+	brand_code                                                     STRING COMMENT '子品牌         ',
+	channel_endpoint                                               STRING COMMENT '门店code',
+	channel_endpoint_type                                          STRING COMMENT '门店类别',
+	endpoint_code                                                  STRING COMMENT '终端代码       ',
+	endpoint_name                                                  STRING COMMENT '终端名称       ',
+	clerk_no                                                       STRING COMMENT '导购员代码      ',
+	clerk_name                                                     STRING COMMENT '导购员名称      ',
+	sales_order_no                                                 STRING COMMENT '销售单号       ',
+	ec_id                                                          STRING COMMENT 'EC单号       ',
+	outer_order_no                                                 STRING COMMENT 'OMS临时单号    ',
+	order_type                                                     STRING COMMENT '订单类型       ',
+	oms_order_no                                                   STRING COMMENT 'OMS订单号     ',
+	tracking_no                                                    STRING COMMENT '快递单号       ',
+	coupon_type                                                    STRING COMMENT '优惠券类别      ',
+	coupon_no                                                      STRING COMMENT '优惠券号       ',
+	coupon_name                                                    STRING COMMENT '优惠券名       ',
+	totla_amt_order                                                DOUBLE COMMENT '订单总额(需支付总额)',
+	stored_value_card_pay_amt                                      DOUBLE COMMENT '储值卡支付金额    ',
+	promotion_codes                                                STRING COMMENT '促销方案编码     ',
+	promotion_names                                                STRING COMMENT '促销名称       ',
+	promotion_type                                                 STRING COMMENT '促销类型       ',
+	promotion_discount                                             STRING COMMENT '促销提案折扣     ',
+	promotion_discount_points                                      STRING COMMENT '促销商场扣点     ',
+	original_order_no                                              STRING COMMENT '原单号        ',
+	price_print_type_text                                          STRING COMMENT '入机类型       ',
+	sales_amt_deduct_coupon                                        DOUBLE COMMENT '销售金额(扣券)   ',
+	sales_amt_with_coupon                                          DOUBLE COMMENT '销售金额(未扣券)  ',
+	actual_amt_deduct_coupon                                       DOUBLE COMMENT '实际成交额(扣券)  ',
+	actual_amt_with_coupon                                         DOUBLE COMMENT '实际成交额(未扣券) ',
+	original_audit_date                                            STRING COMMENT '原单营业日期     ',
+	member_id                                                      STRING COMMENT '会员id       ',
+	member_phone                                                   STRING COMMENT '会员手机号      ',
+	member_grade_code                                              STRING COMMENT '会员等级       ',
+	member_no                                                      STRING COMMENT '会员编号       ',
+	sku_code                                                       STRING COMMENT '商品编号       ',
+	sku_name                                                       STRING COMMENT '商品名称       ',
+	sku_color_code                                                 STRING COMMENT '商品颜色编码         ',
+	sku_color_name                                                 STRING COMMENT '商品颜色名称         ',
+	sku_size_code                                                  STRING COMMENT '商品尺码编码         ',
+	sku_size_name                                                  STRING COMMENT '商品尺码名称   ',
+	sku_retail_price                                               STRING COMMENT '商品吊牌价 ',
+	sku_year                                                       STRING COMMENT '商品年度         ',
+	sku_product_code                                               STRING COMMENT '商品款号         ',
+	sku_season                                                     STRING COMMENT '商品季节         ',
+	sku_band                                                       STRING COMMENT '商品波段         ',
+	sku_main_cate                                                  STRING COMMENT '商品大类   ',
+	sku_sub_cate                                                   STRING COMMENT '商品类别 ',
+	sku_leaf_cate                                                  STRING COMMENT '商品小类         ',
+	sku_series                                                     STRING COMMENT '商品系列         ',
+	sku_num                                                        BIGINT COMMENT '订单商品数量         ',
+	sku_discount_price                                             DOUBLE COMMENT '商品折后价   ',
+	sku_cash_contribution_amt                                      DOUBLE COMMENT '现金券摊分金额    ',
+	sku_retail_amt                                                 DOUBLE COMMENT '商品零售金额(吊牌价×数量) ',
+	sku_sales_amt                                                  DOUBLE COMMENT '商品销售金额(小票价×数量) ',
+	sku_discount_rate                                              DOUBLE COMMENT '商品折扣率 ',
+	rma_reason                                                     STRING COMMENT '退换货理由         ',
+	interval_time_from_riginal_to_rma                              BIGINT COMMENT '退换货订单与原订单间隔天数         ',
+	rma_contact_number                                             STRING COMMENT '退换客户电话   ',
+	sku_list_date                                                  STRING COMMENT '商品上市时间 ',
+	discount_amt_order                                             DOUBLE COMMENT '(整单)折扣金额 ',
+	total_amt_without_cash                                         DOUBLE COMMENT '(整单)折后总额(已扣券) ',
+	discount_amt_with_cash                                         DOUBLE COMMENT '(整单)折让总额(折扣减掉的钱+现金券的钱) ',
+	rma_type                                                       STRING COMMENT '退换货类型 ',
+	is_donate                                                      STRING COMMENT '是否为赠品 ',
+	is_wipe_zero                                                   STRING COMMENT '是否抹零       ',
+	member_union_id                                                STRING COMMENT 'UnionId    ',
+	pay_time                                                       STRING COMMENT '支付时间       ',
+	order_create_time                                              STRING COMMENT '订单建立时间(年月日时分秒)     ',
+	order_create_date                                              STRING COMMENT '订单建立日期（年月日）     ',
+	audit_time                                                     STRING COMMENT '营业时间       ',
+	audit_date                                                     STRING COMMENT '营业日期       '
+
+)COMMENT '日期+门店+品牌粒度明细表' PARTITIONED BY(
+	ds STRING COMMENT '时间分区')
+LIFECYCLE 30;
+
+
+INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PARTITION(ds = '${bizdate}')
+	SELECT '${bizdate}' AS biz_date,
+				 so.org_code                         --品牌编码
+	,
+				 pb.brand_code                      --子品牌编码
+	,
+				 so.channel_endpoint_code AS channel_endpoint         --门店编码
+	,
+				 rs.store_type AS channel_endpoint_type                --门店类型
+	,
+				 ace.endpoint_code AS endpoint_code                 --终端代码
+	,
+				 ace.endpoint_name AS endpoint_name                --终端名称
+	,
+				 so.shopping_guider_no AS clerk_no      --导购员代码
+	,
+				 '' AS clerk_name    --导购员名称
+	,
+				 so.sales_order_no AS sales_order_no      --销售单号
+	,
+				 so.external_order_no AS ec_id      --EC单号
+	,
+				 '' AS outer_order_no     --OMS临时单号
+	,
+				 so.order_type           --订单类型
+	,
+				 '' AS oms_order_no      --OMS订单号
+	,
+				 sdo.tracking_no AS tracking_no     --快递单号
+	,
+				 soc.coupon_type                 --优惠券类别
+	,
+				 soc.coupon_no             --优惠券编码
+	,
+				 soc.coupon_name           --优惠券名称
+	,
+				 so.amt_total AS totla_amt_order                 --订单总金额
+	,
+				 CASE
+				 WHEN sop.pay_way = 'CARD' THEN sop.amt_pay
+				 END AS stored_value_card_pay_amt --储值卡支付金额
+	,
+				 soip.promotion_code                      --促销方案编码
+	,
+				 soip.promotion_name                      --促销名称
+	,
+				 pi.promotion_type                      --促销类型
+	,
+				 ''                      --促销提案折扣
+	,
+				 so.point_deduction      --促销商场扣点
+	,
+				 so.original_order_no          --源单号
+	,
+				 so.price_print_type           --入机类型
+	,
+				 CASE
+				 WHEN sop.pay_way = 'COUPON' THEN so.amt_total - sop.amt_pay
+				 END AS sales_amt_deduct_coupon                            --销售金额(扣券)
+	,
+				 so.amt_total AS sales_amt_with_coupon              --销售金额(未扣券)
+	,
+				 CASE
+				 WHEN sop.pay_way = 'COUPON' THEN so.amt_total - sop.amt_pay
+				 END AS actual_amt_deduct_coupon                             --实际成交额(扣券)
+	,
+				 so.amt_total AS actual_amt_with_coupon              --实际成交额(未扣券)
+	,
+				 so.paid_time                         --原单营业日期
+	,
+				 mi.crm_info_id                      --会员id
+	,
+				 mi.member_mobile              --会员手机号
+	,
+				 so.member_grade_code          --会员等级
+	,
+				 so.member_no                  --会员编号
+	,
+				 soi.sku_code                           --商品编号
+	,
+				 ais.sku_cn_name             --商品名称
+	,
+				 ais.color_id                 --商品颜色
+	,
+				 ais.cn_color_desc           --商品颜色名称
+	,
+				 ais.size_id                 --商品尺寸id
+	,
+				 ais.cn_size_desc            --商品尺寸名称
+	,
+				 ais.cny_price               --商品rmb吊牌价
+	,
+				 ais.spu_code               --商品款号
+	,
+				 ais.YEAR                    --商品年份
+	,
+				 ais.quarter                 --商品季节
+	,
+				 ais.band                    --商品波段
+	,
+				 ais.level1_cate_name                          --商品大类
+	,
+				 ais.level2_cate_name                          --商品类别
+	,
+				 ais.level3_cate_name                         --商品小类
+	,
+				 ais.series                  --商品系列
+	,
+				 soi.qty_product             --商品数量
+	,
+				 soi.price_discount          --商品折后价
+	,
+				 osoip.amt_cash_coupon_contribution   --现金券摊分金额
+	,
+				 soi.price_retail * soi.qty_product  --零售金额(吊牌价×数量)
+	,
+				 (soi.price_discount - osoip.amt_cash_coupon_contribution) * soi.qty_product  --销售金额(小票价×数量)
+	,
+				 soi.discount_rate           --商品折扣率
+	,
+				 so.rma_reason               --退换货理由
+	,
+				 null                          --退换货订单与原订单间隔天数
+	,
+				 so.rma_contact_number       --退换客户电话
+	,
+				 ais.list_date               --商品上市时间
+	,
+				 so.amt_discount AS discount_amt_order            --(整单)折扣金额
+	,
+				 CASE
+				 WHEN sop.pay_way = 'CASH' THEN so.amt_discount - sop.amt_pay
+				 END AS total_amt_without_cash             --(整单)折后总额(已扣券)
+	,
+				 CASE
+				 WHEN sop.pay_way = 'CASH' THEN so.amt_discount + sop.amt_pay
+				 END AS discount_amt_with_cash             --(整单)折让总额(折扣减掉的钱+现金券的钱)
+	,
+				 ''                           --退换货类型
+	,
+				 ''                           --是否为赠品
+	,
+				 CASE
+				 WHEN soip.promotion_code IN ('DECIMAL_00', 'DECIMAL_01', 'DECIMAL_10', 'DECIMAL_11') THEN '抹零'
+				 ELSE '未抹零'
+				 END AS is_wipe_zero                --是否抹零
+	,
+				 ua.outer_user_id                        --UnionId
+	,
+				 so.paid_time                  --支付时间
+	,
+				 so.create_time              --订单建立时间(年月日时分秒)
+	,
+				 substr(so.create_time, 1, 10) --订单建立时间(年月日)
+	,
+				 so.audit_time                --营业时间
+	,
+				 substr(so.audit_time, 1, 10)   --营业日期
+	FROM ${td_ods}.ods_sales_order so
+		LEFT JOIN ${td_ods}.ods_sales_order_coupon soc
+			ON so.sales_order_no = soc.sales_order_no AND soc.ds = '20190920'
+		LEFT JOIN ${td_ods}.ods_member_info mi
+			ON so.member_no = mi.member_no AND mi.ds = '20190920'
+		LEFT JOIN ${td_ods}.ods_member_card mc
+			ON so.org_code = mc.org_code AND so.member_no = mc.member_no AND mc.ds = '20190920'
+		LEFT JOIN ${td_ods}.ods_sales_order_payment sop
+			ON so.sales_order_no = sop.sales_order_no AND sop.ds = '20190920'
+		LEFT JOIN ${td_ods}.ods_sales_order_item_promotion soip
+			ON so.sales_order_no = soip.sales_order_no AND soip.ds = '20190920'
+		LEFT JOIN ${td_ods}.ods_api_channel_endpoint ace
+			ON so.channel_endpoint_code = ace.channel_endpoint_code AND ace.ds = '20190920'
+		LEFT JOIN ${td_ods}.ods_user_auth ua
+			ON so.member_no = ua.member_no AND ua.ds = '20190920' AND ua.auth_type = 20
+		LEFT JOIN ${td_ods}.ods_sales_order_item soi
+			ON so.sales_order_no = soi.sales_order_no AND soi.ds = '20190920'
+		LEFT JOIN ${td_ods}.ods_real_store rs
+			ON so.channel_endpoint_code = rs.store_code AND rs.ds = '20190920'
+		LEFT JOIN ${td_ods}.ods_api_item_sku ais
+			ON soi.sku_code = ais.sku_code and ais.ds = '20190920'
+		LEFT JOIN ${td_ods}.ods_sales_order_item_price osoip
+			ON soi.sku_code = osoip.sku_code AND osoip.ds = '20190920'
+		LEFT JOIN ${td_ods}.ods_product_brand pb
+			ON so.org_code = pb.org_code AND pb.ds = '20190920'
+		left join ${td_ods}.ods_promotion_info pi
+			on soip.promotion_code = pi.promotion_no and pi.ds = '20190920'
+		left join ${td_ods}.ods_sales_delivery_order sdo
+			on so.sales_order_no = sdo.sales_order_no and sdo.ds = '20190920'
+	WHERE so.ds = '20190920';

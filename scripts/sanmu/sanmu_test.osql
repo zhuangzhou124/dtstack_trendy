@@ -3,66 +3,187 @@
 --create time:2019-09-26 14:45
 --drop table sanmu_test
 
+SELECT trigger_order_no,
+			 before_grade_id,
+			 after_grade_id,
+			 grade_change_time,
+			 change_reason,
+			 create_user
+FROM ods_member_grade_log
+WHERE ds = '${bizdate}' and trigger_order_no is not null;
 
-show partitions ods_stock_logic_order_in_notify;
+select * from ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d where ds = '20190920' ;
 
---qczks
-SELECT
-			 sl.channel_endpint_code,
-			 sli.sku_code,
-			 sum(sli.qty_actual)
-FROM ods_stock_logic_items where ds = '${bizdate}' sli
-	LEFT JOIN ods_stock_logic sl
-		ON sli.stock_logic_id = sl.id
-GROUP BY sl.channel_endpint_code, sli.sku_code;
-
---qczts
-SELECT sl.org_code,
-			 sl.channel_endpint_code,
-			 sli.sku_code,
-			 sum(sli.qty_transit)
-FROM ods_stock_logic_items sli
-	LEFT JOIN ods_stock_logic sl
-		ON sli.stock_logic_id = sl.id
-GROUP BY sl.org_code, sl.channel_endpint_code, sli.sku_code;
-
---ptrsl
-SELECT sum(oini.qty_received)
-FROM ods_stock_logic_order_in_notify_items oini
-	LEFT JOIN ods_stock_logic_order_in_notify oin
-		ON oini.logic_order_in_notify_id = oin.id
-WHERE oin.business_order_type IN ()
-AND oin.business_order_business_type IN ();
+SELECT org_code,
+			 sales_order_no,
+			 order_type,
+			 member_no,
+			 member_grade_code,
+			 qty_sales_item,
+			 channel_endpoint_code,
+			 amt_total,
+			 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time
+FROM ods_sales_order
+WHERE ds = '${bizdate}' and member_grade_code in ('44','14','5','9');
 
 
-select business_order_business_type from ods_stock_logic_order_in_notify where ds = '20190911';
+
+--期初在库数
+SELECT t1.org_code,
+			 t1.owner_channel_code,
+			 t1.sku_code,
+			 sum(qty) AS qty
+FROM (
+	SELECT sl.org_code,
+				 sli.owner_channel_code,
+				 sli.sku_code,
+				 sli.qty_actual AS qty
+	FROM ods_stock_logic_items sli
+		LEFT JOIN ods_stock_logic sl
+			ON sli.stock_logic_id = sl.id
+	UNION ALL
+	--出库单，加回去
+	SELECT sl.org_code,
+				 ii.owner_channel_code,
+				 ii.sku_code,
+				 ii.qty_sended AS qty
+	FROM ods_stock_logic_order_out AS o
+		INNER JOIN ods_stock_logic_order_out_items AS ii
+			ON o.id = ii.logic_order_out_id
+		LEFT JOIN ods_stock_logic sl
+			ON o.stock_logic_id = sl.id
+	WHERE o.made_order_time >= '2019-09-01 00:00:00'
+	UNION ALL
+	--入库单，库存反减回去
+	SELECT sl.org_code,
+				 ii.owner_channel_code,
+				 ii.sku_code,
+				 - 1 * ii.qty_received AS qty
+	FROM ods_stock_logic_order_in AS i
+		INNER JOIN ods_stock_logic_order_in_items AS ii
+			ON i.id = ii.logic_order_in_id
+		LEFT JOIN ods_stock_logic sl
+			ON i.stock_logic_id = sl.id
+	WHERE i.made_order_time >= '2019-09-01 00:00:00'
+
+) AS t1
+GROUP BY t1.org_code,
+t1.owner_channel_code,
+t1.sku_code;
+
+
+
+--期初在途数
+SELECT t1.org_code,
+			 t1.owner_channel_code,
+			 t1.sku_code,
+			 sum(qty) AS qty
+FROM (
+	SELECT sl.org_code,
+				 sli.owner_channel_code,
+				 sli.sku_code,
+				 sli.qty_transit AS qty
+	FROM ods_stock_logic_items sli
+		LEFT JOIN ods_stock_logic sl
+			ON sli.stock_logic_id = sl.id
+	UNION ALL
+	--根据收货通知单计算：+加上实收数，-去计划数
+	SELECT sl.org_code,
+				 ii.owner_channel_code,
+				 ii.sku_code,
+				 ii.qty_received - ii.qty_receive_plan AS qty
+	FROM ods_stock_logic_order_in_notify AS i
+		INNER JOIN ods_stock_logic_order_in_notify_items AS ii
+			ON i.id = ii.logic_order_in_notify_id
+		INNER JOIN ods_stock_logic sl
+			ON i.stock_logic_id = sl.id
+	WHERE i.made_order_time >= '2019-09-01 00:00:00'
+	UNION ALL
+	--收发差异单，+差异数
+
+	SELECT s.org_code,
+				 b.owner_channel_code,
+				 b.sku_code,
+				 b.qty_difference AS qty
+	FROM ods_stock_logic_order_difference AS a
+		INNER JOIN ods_stock_logic_order_difference_items AS b
+			ON a.id = b.logic_order_difference_id
+		INNER JOIN ods_stock_logic s
+			ON a.stock_logic_in_id = s.id
+	WHERE a.made_order_time >= '2019-09-01 00:00:00'
+
+) AS t1
+GROUP BY t1.org_code,
+			 t1.owner_channel_code,
+			 t1.sku_code;
+
+
+
+--调拨入数量
+SELECT i.org_code,
+			 b.owner_channel_code,
+			 b.sku_code,
+			 b.qty_received AS qty
+FROM ods_stock_logic_order_in AS a
+	INNER JOIN ods_stock_logic_order_in_items AS b
+		ON a.id = b.logic_order_in_id
+	INNER JOIN ods_stock_logic AS i
+		ON a.stock_logic_id = i.id
+WHERE 1 = 1 AND business_order_type = '301' AND business_order_business_type IN ('30101', '30102') AND app_id = 'TPOS'
+AND a.made_order_time >= '2019-08-01 00:00:00';
+
+
 
 
 --ptcsl
-SELECT sum(ooni.qty_sended)
-FROM ods_stock_logic_order_out_notify_items ooni
-	LEFT JOIN ods_stock_logic_order_out_notify oon
-		ON ooni.logic_order_out_notify_id = oon.id
-WHERE oon.business_order_type IN ()
-AND oon.business_order_business_type IN ();
+
+SELECT o.org_code,
+			 b.owner_channel_code,
+			 b.sku_code,
+			 b.qty_received AS qty
+FROM ods_stock_logic_order_out AS a
+	INNER JOIN ods_stock_logic_order_out_items AS b
+		ON a.id = b.logic_order_out_id
+	INNER JOIN ods_stock_logic AS o
+		ON a.stock_logic_id = i.id
+WHERE 1 = 1 AND business_order_type = '302' AND business_order_business_type IN ('30201', '30202') AND app_id = 'TPOS'
+AND a.made_order_time >= '2019-09-01 00:00:00';
+
+
+
+
 
 
 
 --pdcysl
-SELECT sum(abs(qty_change))
-FROM ods_stock_physical_order_inventory_items;
+SELECT o.org_code,
+			 b.owner_channel_code,
+			 b.sku_code,
+			 b.qty_sended AS qty
+FROM ods_stock_logic_order_out AS a
+	INNER JOIN ods_stock_logic_order_out_items AS b
+		ON a.id = b.logic_order_out_id
+	INNER JOIN ods_stock_logic AS o
+		ON a.stock_logic_id = o.id
+
+WHERE 1 = 1 AND business_order_type = '201' AND business_order_business_type = '20101' AND a.app_id = 'TDRP'
+AND a.made_order_time >= '2019-09-01 00:00:00';
 
 
 
 --qmzks
-SELECT sl.org_code,
-			 sl.channel_endpint_code,
-			 sli.sku_code,
-			 sum(sli.qty_actual)
-FROM ods_stock_logic_items sli
-	LEFT JOIN ods_stock_logic sl
-		ON sli.stock_log_id = sl.id
-GROUP BY sl.org_code, sl.channel_endpint_code, sli.sku_code;
+SELECT o.org_code,
+			 b.owner_channel_code,
+			 b.sku_code,
+			 b.qty_received AS qty
+FROM ods_stock_logic_order_in AS a
+	INNER JOIN ods_stock_logic_order_in_items AS b
+		ON a.id = b.logic_order_in_id
+	INNER JOIN ods_stock_logic AS o
+		ON a.stock_logic_id = o.id
+
+WHERE 1 = 1 AND business_order_type = '201' AND business_order_business_type = '20104' AND a.app_id = 'TDRP'
+AND a.made_order_time >= '2019-09-01 00:00:00';
 
 
 --qmzts
@@ -74,6 +195,15 @@ FROM ods_stock_logic_items sli
 	LEFT JOIN ods_stock_logic sl
 		ON sli.stock_log_id = sl.id
 GROUP BY sl.org_code, sl.channel_endpint_code, sli.sku_code;
+
+SELECT sl.org_code,
+			 sl.channel_endpint_code,
+			 sli.sku_code,
+			 sum(sli.qty_transit)
+FROM ods_stock_logic_items sli
+	LEFT JOIN ods_stock_logic sl
+		ON sli.stock_log_id = sl.id
+GROUP BY sl.org_code, sl.channel_endpint_code, sli.sku_code
 
 
 

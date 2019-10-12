@@ -1,0 +1,240 @@
+--name:ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm
+--author:sanmu
+--create time:2019-10-09 20:08
+--drop table ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm
+--***********************************
+-- 表   名：ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm
+-- 功能描述：日期+门店+品牌粒度明细表
+-- 生命周期：30天
+-- 调度周期：周期调度
+-- 创建者：  三木
+-- 创建日期：20191008
+-- 修改日志：
+--***********************************
+
+
+
+CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm(
+	biz_date                                                                STRING COMMENT '统计日期',
+	org_code                                                                STRING COMMENT '品牌         ',
+	channel_endpoint                                                        STRING COMMENT '门店code',
+	endpoint_code                                                           STRING COMMENT '终端代码       ',
+	endpoint_name                                                           STRING COMMENT '终端名称       ',
+	clerk_no                                                                STRING COMMENT '导购员代码      ',
+	clerk_name                                                              STRING COMMENT '导购员名称      ',
+	sales_order_no                                                          STRING COMMENT '销售单号       ',
+	ec_id                                                                   STRING COMMENT 'EC单号       ',
+	outer_order_no                                                          STRING COMMENT 'OMS临时单号    ',
+	order_type                                                              STRING COMMENT '订单类型       ',
+	oms_order_no                                                            STRING COMMENT 'OMS订单号     ',
+	tracking_no                                                             STRING COMMENT '快递单号       ',
+	order_item_num                                                          BIGINT COMMENT '订单商品数量     ',
+	retail_price_amt                                                        DOUBLE COMMENT '吊牌价总计      ',
+	coupon_type                                                             STRING COMMENT '优惠券类别      ',
+	coupon_no                                                               STRING COMMENT '优惠券号       ',
+	coupon_name                                                             STRING COMMENT '优惠券名       ',
+	shopping_card                                                           STRING COMMENT '商场卡        ',
+	actual_amt                                                              DOUBLE COMMENT '实收金额       ',
+	totla_amt_order                                                         DOUBLE COMMENT '订单总额(需支付总额)',
+	discount_coupon_amt                                                     DOUBLE COMMENT '现金券抵扣金额    ',
+	promotion_discount_coupon_amt                                           DOUBLE COMMENT '折扣券优惠总额    ',
+	stored_value_card_pay_amt                                               DOUBLE COMMENT '储值卡支付金额    ',
+	wxpay_amt                                                               DOUBLE COMMENT '微信         ',
+	alipay_amt                                                              DOUBLE COMMENT '支付宝        ',
+	card_amt                                                                DOUBLE COMMENT '借记卡/信用卡    ',
+	cash_amt                                                                DOUBLE COMMENT '现金         ',
+	mall_proxy_amt                                                          DOUBLE COMMENT '商场代收       ',
+	food_proxy_amt                                                          DOUBLE COMMENT '餐饮代收       ',
+	third_online_amt                                                        DOUBLE COMMENT '第三方支付方式    ',
+	pay_way                                                                 STRING COMMENT '支付方式       ',
+	order_remark                                                            STRING COMMENT '订单备注       ',
+	promotion_codes                                                         STRING COMMENT '促销方案编码     ',
+	promotion_names                                                         STRING COMMENT '促销名称       ',
+	promotion_type                                                          STRING COMMENT '促销类型       ',
+	promotion_discount                                                      STRING COMMENT '促销提案折扣     ',
+	promotion_discount_points                                               STRING COMMENT '促销商场扣点     ',
+	original_order_no                                                       STRING COMMENT '原单号        ',
+	price_print_type_text                                                   STRING COMMENT '入机类型       ',
+	sales_amt_deduct_coupon                                                 DOUBLE COMMENT '销售金额(扣券)   ',
+	sales_amt_with_coupon                                                   DOUBLE COMMENT '销售金额(未扣券)  ',
+	actual_amt_deduct_coupon                                                DOUBLE COMMENT '实际成交额(扣券)  ',
+	actual_amt_with_coupon                                                  DOUBLE COMMENT '实际成交额(未扣券) ',
+	original_audit_date                                                     STRING COMMENT '原单营业日期     ',
+	member_id                                                               STRING COMMENT '会员id       ',
+	member_phone                                                            STRING COMMENT '会员手机号      ',
+	member_grade_code                                                       STRING COMMENT '会员等级       ',
+	member_type                                                             STRING COMMENT '会员类型       ',
+	member_no                                                               STRING COMMENT '会员编号       ',
+	is_wipe_zero                                                            STRING COMMENT '是否抹零       ',
+	member_union_id                                                         STRING COMMENT 'UnionId    ',
+	pay_time                                                                STRING COMMENT '支付时间       ',
+	order_create_time                                                       STRING COMMENT '订单建立时间(年月日时分秒)     ',
+	order_create_date                                                       STRING COMMENT '订单建立日期（年月日）     ',
+	audit_time                                                              STRING COMMENT '营业时间       ',
+	audit_date                                                              STRING COMMENT '营业日期       '
+
+)COMMENT '日期+门店+品牌粒度明细表' PARTITIONED BY(
+	ds STRING COMMENT '时间分区')
+LIFECYCLE 30;
+
+
+INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm PARTITION(ds = '${bizdate}')
+	SELECT '${bizdate}' AS biz_date,
+				 so.org_code                   --品牌编码
+	,
+				 so.channel_endpoint_code AS store_code --门店编码
+	,
+				 ace.endpoint_code                      --终端代码
+	,
+				 ace.endpoint_name                      --终端名称
+	,
+				 so.shopping_guider_no         --导购员代码
+	,
+				 ''                      --导购员名称
+	,
+				 so.sales_order_no             --销售单号
+	,
+				 so.external_order_no          --EC单号
+	,
+				 ''                      --OMS临时单号
+	,
+				 so.order_type           --订单类型
+	,
+				 ''                      --OMS订单号
+	,
+				 sdo.tracking_no                      --快递单号
+	,
+				 so.qty_order_item       --订单商品数量
+	,
+				 so.price_amt_retail            --吊牌价总计
+	,
+				 soc.coupon_type                 --优惠券类别
+	,
+				 soc.coupon_no
+	,
+				 soc.coupon_name
+	,
+				 ''                      --商场卡
+	,
+				 so.price_amt_discount          --实收金额
+	,
+				 so.amt_total AS totla_amt_order                 --订单总金额
+	,
+				 CASE
+				 WHEN sop.pay_way = 'CASH' THEN sop.amt_pay
+				 END AS discount_coupon_amt --现金券抵扣金额
+	,
+				 CASE
+				 WHEN sop.pay_way = 'COUPON' THEN sop.amt_pay
+				 END AS promotion_discount_coupon_amt --折扣券优惠总额
+	,
+				 CASE
+				 WHEN sop.pay_way = 'CARD' THEN sop.amt_pay
+				 END AS stored_value_card_pay_amt --储值卡支付金额
+	,
+				 CASE
+				 WHEN sop.pay_way = 'WXPAY' THEN sop.amt_pay
+				 END AS wxpay_amt                    --微信
+	,
+				 CASE
+				 WHEN sop.pay_way = 'ALIPAY' THEN sop.amt_pay
+				 END AS alipay_amt                       --支付宝
+	,
+				 CASE
+				 WHEN sop.pay_way = 'CARD' THEN sop.amt_pay
+				 END AS card_amt                       --借记卡/信用卡
+	,
+				 CASE
+				 WHEN sop.pay_way = 'CASH' THEN sop.amt_pay
+				 END AS cash_amt                      --现金
+	,
+				 CASE
+				 WHEN sop.pay_way = 'MALLPROXY' THEN sop.amt_pay
+				 END AS mall_proxy_amt                      --商场代收
+	,
+				 CASE
+				 WHEN sop.pay_way = 'FOODPROXY' THEN sop.amt_pay
+				 END AS food_proxy_amt                      --餐饮代收
+	,
+				 CASE
+				 WHEN sop.pay_way = 'THIRD_ONLINE' THEN sop.amt_pay
+				 END AS third_online_amt                       --第三方支付方式
+	,
+				 sop.pay_way                      --支付方式
+	,
+				 so.remark               --订单备注
+	,
+				 soip.promotion_code                      --促销方案编码
+	,
+				 soip.promotion_name                      --促销名称
+	,
+				 pi.promotion_type                      --促销类型
+	,
+				 ''                      --促销提案折扣
+	,
+				 so.point_deduction      --促销商场扣点
+	,
+				 so.original_order_no          --源单号
+	,
+				 so.price_print_type           --入机类型
+	,
+				 CASE
+				 WHEN sop.pay_way = 'COUPON' THEN so.amt_total - sop.amt_pay
+				 END AS sales_amt_deduct_coupon                            --销售金额(扣券)
+	,
+				 so.amt_total AS sales_amt_with_coupon              --销售金额(未扣券)
+	,
+				 CASE
+				 WHEN sop.pay_way = 'COUPON' THEN so.amt_total - sop.amt_pay
+				 END AS actual_amt_deduct_coupon                             --实际成交额(扣券)
+	,
+				 so.amt_total AS actual_amt_with_coupon              --实际成交额(未扣券)
+	,
+				 so.paid_time                         --原单营业日期
+	,
+				 mi.crm_info_id                      --会员id
+	,
+				 mi.member_mobile              --会员手机号
+	,
+				 so.member_grade_code          --会员等级
+	,
+				 so.external_member_type       --会员类型
+	,
+				 so.member_no                  --会员编号
+	,
+				 CASE
+				 WHEN soip.promotion_code IN ('DECIMAL_00', 'DECIMAL_01', 'DECIMAL_10', 'DECIMAL_11') THEN '抹零'
+				 ELSE '未抹零'
+				 END AS is_wipe_zero                --是否抹零
+	,
+				 ua.outer_user_id                        --UnionId
+	,
+				 so.paid_time                  --支付时间
+	,
+				 so.create_time              --订单建立时间(年月日时分秒)
+	,
+				 substr(so.create_time, 1, 10) --订单建立时间(年月日)
+	,
+				 so.audit_time                --营业时间
+	,
+				 substr(so.audit_time, 1, 10)   --营业日期
+	FROM ${td_ods}.ods_sales_order so
+		LEFT JOIN ${td_ods}.ods_sales_order_coupon soc
+			ON so.sales_order_no = soc.sales_order_no AND soc.ds = '20190920'
+		LEFT JOIN ${td_ods}.ods_member_info mi
+			ON so.member_no = mi.member_no AND mi.ds = '20190920'
+		LEFT JOIN ${td_ods}.ods_member_card mc
+			ON so.org_code = mc.org_code AND so.member_no = mc.member_no AND mc.ds = '20190920'
+		LEFT JOIN ${td_ods}.ods_sales_order_payment sop
+			ON so.sales_order_no = sop.sales_order_no AND sop.ds = '20190920'
+		LEFT JOIN ${td_ods}.ods_sales_order_item_promotion soip
+			ON so.sales_order_no = soip.sales_order_no AND soip.ds = '20190920'
+		LEFT JOIN ${td_ods}.ods_api_channel_endpoint ace
+			ON so.channel_endpoint_code = ace.channel_endpoint_code AND ace.ds = '20190920'
+		LEFT JOIN ${td_ods}.ods_user_auth ua
+			ON so.member_no = ua.member_no AND ua.ds = '20190920' AND ua.auth_type = 20
+	left join ${td_ods}.ods_promotion_info pi
+	on soip.promotion_code = pi.promotion_no and pi.ds = '20190920'
+	left join ${td_ods}.ods_sales_delivery_order sdo
+	on so.sales_order_no = sdo.sales_order_no and sdo.ds = '20190920'
+	WHERE so.ds = '20190920';

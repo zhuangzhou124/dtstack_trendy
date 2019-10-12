@@ -1,0 +1,94 @@
+--name:ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d
+--author:sanmu
+--create time:2019-10-09 17:30
+--drop table ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d
+--***********************************
+-- 表   名：ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d
+-- 功能描述：日期+订单粒度明细表
+-- 生命周期：30天
+-- 调度周期：周期调度
+-- 创建者：  三木
+-- 创建日期：20191008
+-- 修改日志：
+--***********************************
+
+
+
+CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d(
+	biz_date                                                                STRING COMMENT '统计日期',
+	org_code                                                                STRING COMMENT '品牌code',
+	brand_code                                                              STRING COMMENT '子品牌',
+	channel_endpoint                                                        STRING COMMENT '门店code',
+	order_type                                                              STRING COMMENT '订单类型         ',
+	member_no                                                               STRING COMMENT '会员编号   ',
+	member_grade_code                                                       STRING COMMENT '会员等级编码   ',
+	product_code                                                            STRING COMMENT '款号         ',
+	band                                                                    STRING COMMENT '波段         ',
+	season                                                                  STRING COMMENT '季节         ',
+	sku_status                                                              STRING COMMENT '状态0草稿1上架2下架   ',
+	YEAR                                                                    STRING COMMENT '年份 ',
+	sales_num_1d_brand_channel_endpoint                                     BIGINT COMMENT '销售件数   ',
+	sales_amt_1d_brand_channel_endpoint                                     DOUBLE COMMENT '销售金额   ',
+	date_type                                                               STRING COMMENT '日期类型',
+	date_id                                                                 STRING COMMENT '日期'
+
+)COMMENT '日期+订单粒度明细表' PARTITIONED BY(
+	ds STRING COMMENT '时间分区')
+LIFECYCLE 30;
+
+
+INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d PARTITION(ds = '${bizdate}')
+	SELECT '${bizdate}' AS biz_date,
+				 t1.org_code ,
+				 t2.brand_code ,
+				 t1.channel_endpoint_code ,
+				 t1.order_type AS order_type,
+				 t1.member_no,
+				 t1.member_grade_code,
+				 t3.spu_code AS product_code,
+				 t3.band,
+				 t3.quarter AS season,
+				 t3.sku_status,
+				 t3.YEAR,
+				 t1.qty_sales_item AS sales_num_1d_brand_store,
+				 t1.amt_total AS sales_amt_1d_brand_store,
+				 'day' AS date_type,
+				 t1.order_time AS date_id
+	FROM (
+		SELECT org_code,
+					 sales_order_no,
+					 order_type,
+					 member_no,
+					 member_grade_code,
+					 qty_sales_item,
+					 channel_endpoint_code,
+					 amt_total,
+					 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time
+		FROM ${td_ods}.ods_sales_order
+		WHERE ds = '${bizdate}') AS t1
+		LEFT OUTER JOIN (
+			SELECT org_code,
+						 brand_code
+			FROM ${td_ods}.ods_product_brand
+			WHERE ds = '${bizdate}') AS t2
+			ON t1.org_code = t2.org_code
+		LEFT OUTER JOIN (
+			SELECT sales_order_no,
+						 sku_code
+			FROM ${td_ods}.ods_sales_order_item
+			WHERE ds = '${bizdate}') AS t4
+			ON t1.sales_order_no = t4.sales_order_no
+		LEFT OUTER JOIN (
+			SELECT spu_code,
+						 sku_code,
+						 quarter,
+						 band,
+						 sku_status,
+						 YEAR
+			FROM ${td_ods}.ods_api_item_sku
+			WHERE ds = '${bizdate}') AS t3
+			ON t4.sku_code = t3.sku_code;
+
+
+
+

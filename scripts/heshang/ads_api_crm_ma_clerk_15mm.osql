@@ -1,0 +1,380 @@
+create  table  if  not  EXISTS  ads_api_crm_ma_clerk_15mm(
+  brand_code  string  comment  '品牌编号',
+  store_code  string  comment  '门店编号',
+  clerk_no  string  comment  '店员编号',
+  grade_id  bigint  comment  '会员等级id',
+  date_type  string  comment  '日期类型',
+  date_id  string  comment  '日期id',
+  change_member_cnt  bigint  comment  '会员等级变更次数',
+  member_cnt  bigint  comment  '会员人数',
+  biz_date  string  comment  '插入日期'
+)partitioned  by  (ds  string);
+
+insert  overwrite  table  ads_api_crm_ma_clerk_15mm  partition(ds='${bizdate}')
+  select  coalesce(tmp1.brand_code,tmp2.brand_code)
+  ,coalesce(tmp1.store_no,tmp2.store_no)
+  ,coalesce(tmp1.clerk_no,tmp2.clerk_no)
+  ,coalesce(tmp1.grade_id,tmp2.grade_id)
+  ,coalesce(tmp1.date_type,tmp2.date_type)
+  ,coalesce(tmp1.date_id,tmp2.date_id)
+  ,tmp1.member_cnt
+  ,tmp2.member_qty
+  ,'${bizdate}'  as  biz_date
+  from(
+--天
+select  tmp.brand_code
+,tmp.store_no
+,tmp.clerk_no
+,tmp.after_grade_id  as  grade_id
+,'day'  as  date_type
+,tmp.grade_change_date  as  date_id
+,tmp.member_cnt
+from  (
+SELECT    brand_code
+                ,store_no
+,clerk_no
+,after_grade_id
+,replace(grade_change_time,'-','')  as  grade_change_date
+,count(distinct  member_no)  as  member_cnt
+FROM      ods_member_grade_log
+where  ds=20190920
+and    grade_change_time  is  not  null
+group  by  brand_code
+                ,store_no
+,clerk_no
+,after_grade_id
+,replace(grade_change_time,'-','')
+)tmp
+--month
+union  all
+select  tmp.brand_code
+,tmp.store_no
+,tmp.clerk_no
+,tmp.after_grade_id  as  grade_id
+,'month'  as  date_type
+,tmp.grade_change_month  as  date_id
+,tmp.member_cnt
+from  (
+SELECT    brand_code
+                ,store_no
+,clerk_no
+,after_grade_id
+,substr(replace(grade_change_time,'-',''),1,6)  as  grade_change_month
+,count(distinct  member_no)  as  member_cnt
+FROM      ods_member_grade_log
+where  ds=20190920
+and    grade_change_time  is  not  null
+group  by  brand_code
+                ,store_no
+,clerk_no
+,after_grade_id
+,substr(replace(grade_change_time,'-',''),1,6)
+)tmp
+--年
+union  all
+select  tmp.brand_code
+,tmp.store_no
+,tmp.clerk_no
+,tmp.after_grade_id  as  grade_id
+,'year'  as  date_type
+,tmp.grade_change_year  as  date_id
+,tmp.member_cnt
+from  (
+SELECT    brand_code
+                ,store_no
+,clerk_no
+,after_grade_id
+,substr(replace(grade_change_time,'-',''),1,4)  as  grade_change_year
+,count(distinct  member_no)  as  member_cnt
+FROM      ods_member_grade_log
+where  ds=20190920
+and    grade_change_time  is  not  null
+group  by  brand_code
+                ,store_no
+,clerk_no
+,after_grade_id
+,substr(replace(grade_change_time,'-',''),1,4)
+)tmp
+
+union  all
+--最近7天
+select  tmp.brand_code
+,tmp.store_no
+,tmp.clerk_no
+,tmp.after_grade_id  as  grade_id
+,'7d'  as  date_type
+,'7'    as  date_id
+,tmp.member_cnt
+        from(
+SELECT    brand_code
+                ,store_no
+,clerk_no
+,after_grade_id
+,count(distinct  member_no)  as  member_cnt
+FROM      ods_member_grade_log
+where  ds=20190920
+and    replace(grade_change_time,'-','')>to_char(dateadd(to_date('${bizdate}','yyyymmdd'),-7,'dd'),'yyyymmdd')
+  group  by  brand_code
+  ,store_no
+  ,clerk_no
+  ,after_grade_id
+)tmp
+  --15d
+  union  all
+  select  tmp.brand_code
+  ,tmp .store_no
+  ,tmp.clerk_no
+  ,tmp.after_grade_id as grade_id
+  ,'15d' as date_type
+  ,'15'  as date_id
+  ,tmp.member_cnt
+  from(
+    SELECT  brand_code
+    ,store_no
+    ,clerk_no
+    ,after_grade_id
+    ,count(distinct member_no) as member_cnt
+    FROM   ods_member_grade_log
+    where ds=20190920
+    and  replace(grade_change_time,'-','')>to_char(dateadd(to_date('${bizdate}','yyyymmdd'),-15,'dd'),'yyyymmdd')
+  group by brand_code
+  ,store_no
+  ,clerk_no
+  ,after_grade_id
+)tmp
+  --最近30d
+  union all
+  select tmp.brand_code
+  ,tmp.store_no
+  ,tmp.clerk_no
+  ,tmp.after_grade_id as grade_id
+  ,'30d' as date_type
+  ,'30'  as date_id
+  ,tmp.member_cnt
+  from(
+    SELECT  brand_code
+    ,store_no
+    ,clerk_no
+    ,after_grade_id
+    ,count(distinct member_no) as member_cnt
+    FROM   ods_member_grade_log
+    where ds=20190920
+    and  replace(grade_change_time,'-','')>to_char(dateadd(to_date('${bizdate}','yyyymmdd'),-30,'dd'),'yyyymmdd')
+  group by brand_code
+  ,store_no
+  ,clerk_no
+  ,after_grade_id
+)tmp
+
+  )tmp1
+
+  full outer join(
+
+
+select
+brand_code
+,member_manage_channel_endpoint_code as store_no
+,member_manage_clerk as clerk_no
+,grade_id
+,'day' as date_type
+,member_register_date as date_id
+,member_qty
+from(
+  SELECT
+  tmp1.brand_code
+  ,tmp1.member_manage_channel_endpoint_code
+  ,tmp1.member_manage_clerk
+  ,replace(tmp1.member_register_time,'-','') as member_register_date
+  ,tmp2.grade_id
+  ,COUNT ( DISTINCT tmp1.member_no ) AS member_qty
+  FROM
+  ods_member_card tmp1
+    left join ods_member_grade_state tmp2
+      on tmp1.id = tmp2.member_card_id
+    and tmp2.ds=20190920
+  WHERE tmp1.ds=20190920
+  and member_register_time is not null
+  and tmp1.status > 0
+  AND CAST ( tmp1.member_no AS bigint ) > 1
+  GROUP BY  tmp1.brand_code
+  ,tmp1.member_manage_channel_endpoint_code
+  ,tmp1.member_manage_clerk
+  ,replace(tmp1.member_register_time,'-','')
+  ,tmp2.grade_id
+)tmp
+--month
+union all
+
+select
+          brand_code
+          ,member_manage_channel_endpoint_code as store_no
+          ,member_manage_clerk as clerk_no
+          ,grade_id
+          ,'month' as date_type
+          ,member_register_month as date_id
+          ,member_qty
+from(
+  SELECT
+  tmp1.brand_code
+  ,tmp1.member_manage_channel_endpoint_code
+  ,tmp1.member_manage_clerk
+  ,substr(replace(tmp1.member_register_time,'-',''),1,6) as member_register_month
+  ,tmp2.grade_id
+  ,COUNT ( DISTINCT tmp1.member_no ) AS member_qty
+  FROM
+  ods_member_card tmp1
+    left join ods_member_grade_state tmp2
+      on tmp1.id = tmp2.member_card_id
+    and tmp2.ds=20190920
+  WHERE tmp1.ds=20190920
+  and tmp1.status > 0
+  and member_register_time is not null
+  AND CAST ( tmp1.member_no AS bigint ) > 1
+  GROUP BY  tmp1.brand_code
+  ,tmp1.member_manage_channel_endpoint_code
+  ,tmp1.member_manage_clerk
+  ,substr(replace(tmp1.member_register_time,'-',''),1,6)
+  ,tmp2.grade_id
+)tmp
+
+--year
+union all
+
+select
+brand_code
+,member_manage_channel_endpoint_code as store_no
+,member_manage_clerk as clerk_no
+,grade_id
+,'year' as date_type
+,member_register_year as date_id
+,member_qty
+from(
+  SELECT
+  tmp1.brand_code
+  ,tmp1.member_manage_channel_endpoint_code
+  ,tmp1.member_manage_clerk
+  ,substr(replace(tmp1.member_register_time,'-',''),1,4) as member_register_year
+  ,tmp2.grade_id
+  ,COUNT ( DISTINCT tmp1.member_no ) AS member_qty
+  FROM
+  ods_member_card tmp1
+    left join ods_member_grade_state tmp2
+      on tmp1.id = tmp2.member_card_id
+    and tmp2.ds=20190920
+  WHERE tmp1.ds=20190920
+  and tmp1.status > 0
+  and member_register_time is not null
+  AND CAST ( tmp1.member_no AS bigint ) > 1
+  GROUP BY  tmp1.brand_code
+  ,tmp1.member_manage_channel_endpoint_code
+  ,tmp1.member_manage_clerk
+  ,substr(replace(tmp1.member_register_time,'-',''),1,4)
+  ,tmp2.grade_id
+)tmp
+
+
+union all
+--7d
+
+select
+brand_code
+,member_manage_channel_endpoint_code as store_no
+,member_manage_clerk as clerk_no
+,grade_id
+,'7d' as date_type
+,'7' as date_id
+,member_qty
+from(
+  SELECT
+  tmp1.brand_code
+  ,tmp1.member_manage_channel_endpoint_code
+  ,tmp1.member_manage_clerk
+  ,tmp2.grade_id
+  ,COUNT ( DISTINCT tmp1.member_no ) AS member_qty
+  FROM
+  ods_member_card tmp1
+    left join ods_member_grade_state tmp2
+      on tmp1.id = tmp2.member_card_id
+    and tmp2.ds=20190920
+  WHERE tmp1.ds=20190920
+  and tmp1.status > 0
+  AND CAST ( tmp1.member_no AS bigint ) > 1
+  and replace(tmp1.member_register_time,'-','')>to_char(dateadd(to_date('${bizdate}','yyyymmdd'),-7,'dd'),'yyyymmdd')
+and replace(tmp1.member_register_time,'-','')<='${bizdate}'
+GROUP BY  tmp1.brand_code
+,tmp1.member_manage_channel_endpoint_code
+,tmp1.member_manage_clerk
+,tmp2.grade_id
+)tmp
+--15d
+union all
+select
+brand_code
+,member_manage_channel_endpoint_code as store_no
+,member_manage_clerk as clerk_no
+,grade_id
+,'15d' as date_type
+,'15' as date_id
+,member_qty
+from(
+  SELECT
+  tmp1.brand_code
+  ,tmp1.member_manage_channel_endpoint_code
+  ,tmp1.member_manage_clerk
+  ,tmp2.grade_id
+  ,COUNT ( DISTINCT tmp1.member_no ) AS member_qty
+  FROM
+  ods_member_card tmp1
+    left join ods_member_grade_state tmp2
+      on tmp1.id = tmp2.member_card_id
+    and tmp2.ds=20190920
+  WHERE tmp1.ds=20190920
+  and tmp1.status > 0
+  AND CAST ( tmp1.member_no AS bigint ) > 1
+  and replace(tmp1.member_register_time,'-','')>to_char(dateadd(to_date('${bizdate}','yyyymmdd'),-15,'dd'),'yyyymmdd')
+and replace(tmp1.member_register_time,'-','')<='${bizdate}'
+GROUP BY  tmp1.brand_code
+,tmp1.member_manage_channel_endpoint_code
+,tmp1.member_manage_clerk
+,tmp2.grade_id
+)tmp
+--30d
+union all
+
+select
+brand_code
+,member_manage_channel_endpoint_code as store_no
+,member_manage_clerk as clerk_no
+,grade_id
+,'30d' as date_type
+,'30' as date_id
+,member_qty
+from(
+  SELECT
+  tmp1.brand_code
+  ,tmp1.member_manage_channel_endpoint_code
+  ,tmp1.member_manage_clerk
+  ,tmp2.grade_id
+  ,COUNT ( DISTINCT tmp1.member_no ) AS member_qty
+  FROM
+  ods_member_card tmp1
+    left join ods_member_grade_state tmp2
+      on tmp1.id = tmp2.member_card_id
+    and tmp2.ds=20190920
+  WHERE tmp1.ds=20190920
+  and tmp1.status > 0
+  AND CAST ( tmp1.member_no AS bigint ) > 1
+  and replace(tmp1.member_register_time,'-','')>to_char(dateadd(to_date('${bizdate}','yyyymmdd'),-30,'dd'),'yyyymmdd')
+and replace(tmp1.member_register_time,'-','')<='${bizdate}'
+GROUP BY  tmp1.brand_code
+,tmp1.member_manage_channel_endpoint_code
+,tmp1.member_manage_clerk
+,tmp2.grade_id
+)tmp
+)tmp2
+  on tmp1.brand_code=tmp2.brand_code
+and tmp1.store_no=tmp2.store_no
+and tmp1.clerk_no=tmp2.clerk_no
+and tmp1.grade_id=tmp2.grade_id
+and tmp1.date_type=tmp2.date_type
+and tmp1.date_id=tmp2.date_id
