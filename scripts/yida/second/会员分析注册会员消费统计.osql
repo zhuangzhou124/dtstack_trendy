@@ -58,6 +58,7 @@ INSERT OVERWRITE TABLE xxxxxxx PARTITION(ds)
   ,      t.member_manage_clerk
   ,      COUNT(DISTINCT (t.member_no)) AS member_qty
   ,      COUNT(DISTINCT (CASE WHEN order_fact_amount > 0 THEN t.member_no ELSE NULL END)) AS member_actived_qty
+  ,'${bizdate}'  as  biz_date
   FROM (
     SELECT date_type
     ,      date_id
@@ -78,7 +79,7 @@ INSERT OVERWRITE TABLE xxxxxxx PARTITION(ds)
       ,      member_no
       ,      sum(price_amt_discount) AS order_fact_amount
       FROM ods_sales_order a1
-        JOIN time ON to_char(to_date(create_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd') = time.time_id -- 改为过账时间audit_time
+        JOIN time ON to_char(to_date(create_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd') = time.time_id -- 改为过账时间to_char(to_date(audit_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd')
       WHERE a1.ds = '${bdp.system.bizdate}' AND CAST(a1.member_no AS BIGINT) > 1
 
       GROUP BY date_type

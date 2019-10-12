@@ -1,0 +1,137 @@
+--name:dim_time_mapping
+--author:zhangjunda
+--create time:2019-10-11 11:18
+--name:dim_time_mapping
+--author:zhangjunda
+--create time:2018-12-17 14:25
+
+
+--DROP TABLE dim_time_mapping;
+CREATE TABLE IF NOT EXISTS dim_time_mapping(
+  time_id                       STRING COMMENT '时间ID'
+,
+  week_id                       STRING COMMENT '时间ID'
+,
+  week_sale_id                  STRING COMMENT '时间ID'
+,
+  month_id                      STRING COMMENT '时间ID'
+,
+  year_id                       STRING COMMENT '时间ID'
+,
+  is_day                        BIGINT COMMENT '是否当天，是为1，否为0'
+,
+  is_week                       BIGINT COMMENT '是否当周，是为1，否为0'
+,
+  is_week_sale                  BIGINT COMMENT '是否当周，是为1，否为0'
+,
+  is_month                      BIGINT COMMENT '是否当月，是为1，否为0'
+,
+  is_year                       BIGINT COMMENT '是否当年，是为1，否为0'
+,
+  is_7d                         BIGINT COMMENT '是否最近7天，是为1，否为0'
+,
+  is_15d                        BIGINT COMMENT '是否最近15天，是为1，否为0'
+,
+  is_30d                        BIGINT COMMENT '是否最近30天，是为1，否为0'
+
+)COMMENT '门店销售类目渠道指标汇总年表	' PARTITIONED BY(
+  ds   STRING COMMENT '业务时间	'
+);
+
+
+INSERT OVERWRITE TABLE dim_time_mapping PARTITION(ds)
+  SELECT /*+MAPJOIN(b) * /b.day_id
+  ,                       b.week_id
+  ,                       NULL
+  ,                       substr(b.day_id, 1, 6)
+  ,                       substr(b.day_id, 1, 4)
+  ,                       CASE WHEN a.day_id = b.day_id THEN 1 ELSE 0 END AS is_day
+  ,                       CASE WHEN a.week_id = b.week_id THEN 1 ELSE 0 END AS is_week
+  ,                       NULL
+  ,                       CASE WHEN substr(a.day_id, 1, 6) = substr(b.day_id, 1, 6) THEN 1 ELSE 0 END AS is_month
+  ,                       CASE WHEN substr(a.day_id, 1, 4) = substr(b.day_id, 1, 4) THEN 1 ELSE 0 END AS is_year
+  ,
+                          CASE WHEN to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), - 7, 'dd'), 'yyyymmdd') < b.day_id THEN 1 ELSE 0 END
+                          AS is_7d
+  ,
+                          CASE WHEN to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), - 15, 'dd'), 'yyyymmdd') < b.day_id THEN 1 ELSE 0 END
+                          AS is_15d
+  ,
+                          CASE WHEN to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), - 30, 'dd'), 'yyyymmdd') < b.day_id THEN 1 ELSE 0 END
+                          AS is_30d
+  ,                       a.day_id
+  FROM (
+    SELECT day_id, week_id, week_start_day, week_of_day
+    FROM dim_unit_day
+    WHERE id <= 1000
+  ) a
+    LEFT OUTER JOIN (
+      SELECT day_id, week_id, week_of_day
+      FROM dim_unit_day) b ON a.day_id >= b.day_id AND (
+    concat(to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), 0, 'yyyy'), 'yyyy'), '0101') <= b.day_id OR to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), - 30, 'dd'), 'yyyymmdd') <= b.day_id);
+
+
+INSERT OVERWRITE TABLE dim_time_mapping PARTITION(ds)
+  SELECT /*+MAPJOIN(b) * /b.day_id
+  ,                       b.week_id
+  ,                       NULL
+  ,                       substr(b.day_id, 1, 6)
+  ,                       substr(b.day_id, 1, 4)
+  ,                       CASE WHEN a.day_id = b.day_id THEN 1 ELSE 0 END AS is_day
+  ,                       CASE WHEN a.week_id = b.week_id THEN 1 ELSE 0 END AS is_week
+  ,                       NULL
+  ,                       CASE WHEN substr(a.day_id, 1, 6) = substr(b.day_id, 1, 6) THEN 1 ELSE 0 END AS is_month
+  ,                       CASE WHEN substr(a.day_id, 1, 4) = substr(b.day_id, 1, 4) THEN 1 ELSE 0 END AS is_year
+  ,
+                          CASE WHEN to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), - 7, 'dd'), 'yyyymmdd') < b.day_id THEN 1 ELSE 0 END
+                          AS is_7d
+  ,
+                          CASE WHEN to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), - 15, 'dd'), 'yyyymmdd') < b.day_id THEN 1 ELSE 0 END
+                          AS is_15d
+  ,
+                          CASE WHEN to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), - 30, 'dd'), 'yyyymmdd') < b.day_id THEN 1 ELSE 0 END
+                          AS is_30d
+  ,                       a.day_id
+  FROM (
+    SELECT day_id, week_id, week_start_day, week_of_day
+    FROM dim_unit_day
+    WHERE id > 1000 AND id <= 2000
+  ) a
+    LEFT OUTER JOIN (
+      SELECT day_id, week_id, week_of_day
+      FROM dim_unit_day) b ON a.day_id >= b.day_id AND (
+    concat(to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), 0, 'yyyy'), 'yyyy'), '0101') <= b.day_id OR to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), - 30, 'dd'), 'yyyymmdd') <= b.day_id);
+
+
+INSERT OVERWRITE TABLE dim_time_mapping PARTITION(ds)
+  SELECT /*+MAPJOIN(b) * /b.day_id
+  ,                       b.week_id
+  ,                       NULL
+  ,                       substr(b.day_id, 1, 6)
+  ,                       substr(b.day_id, 1, 4)
+  ,                       CASE WHEN a.day_id = b.day_id THEN 1 ELSE 0 END AS is_day
+  ,                       CASE WHEN a.week_id = b.week_id THEN 1 ELSE 0 END AS is_week
+  ,                       NULL
+  ,                       CASE WHEN substr(a.day_id, 1, 6) = substr(b.day_id, 1, 6) THEN 1 ELSE 0 END AS is_month
+  ,                       CASE WHEN substr(a.day_id, 1, 4) = substr(b.day_id, 1, 4) THEN 1 ELSE 0 END AS is_year
+  ,
+                          CASE WHEN to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), - 7, 'dd'), 'yyyymmdd') < b.day_id THEN 1 ELSE 0 END
+                          AS is_7d
+  ,
+                          CASE WHEN to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), - 15, 'dd'), 'yyyymmdd') < b.day_id THEN 1 ELSE 0 END
+                          AS is_15d
+  ,
+                          CASE WHEN to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), - 30, 'dd'), 'yyyymmdd') < b.day_id THEN 1 ELSE 0 END
+                          AS is_30d
+  ,                       a.day_id
+  FROM (
+    SELECT day_id, week_id, week_start_day, week_of_day
+    FROM dim_unit_day
+    WHERE id > 2000 AND id <= 3000
+  ) a
+    LEFT OUTER JOIN (
+      SELECT day_id, week_id, week_of_day
+      FROM dim_unit_day) b ON a.day_id >= b.day_id AND (
+    concat(to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), 0, 'yyyy'), 'yyyy'), '0101') <= b.day_id OR to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), - 30, 'dd'), 'yyyymmdd') <= b.day_id);
+
+

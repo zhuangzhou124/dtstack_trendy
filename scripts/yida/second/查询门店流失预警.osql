@@ -23,6 +23,7 @@ SELECT b.org_code
 ,
        COUNT(DISTINCT CASE WHEN datediff(to_date('${bdp.system.bizdate}', 'yyyymmdd'), to_date(last_order_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 271 AND 365 THEN t.member_no END)
        AS member_qty4
+,'${bizdate}'  as  biz_date
 
 FROM (
   SELECT '${bdp.system.bizdate}' AS report_date
