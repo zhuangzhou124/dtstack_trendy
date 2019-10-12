@@ -12,7 +12,7 @@ SELECT trigger_order_no,
 FROM ods_member_grade_log
 WHERE ds = '${bizdate}' and trigger_order_no is not null;
 
-select * from ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm where ds = '20190920' ;
+select * from ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d where ds = '20190920' ;
 
 SELECT org_code,
 			 sales_order_no,
@@ -195,6 +195,15 @@ FROM ods_stock_logic_items sli
 	LEFT JOIN ods_stock_logic sl
 		ON sli.stock_log_id = sl.id
 GROUP BY sl.org_code, sl.channel_endpint_code, sli.sku_code;
+
+SELECT sl.org_code,
+			 sl.channel_endpint_code,
+			 sli.sku_code,
+			 sum(sli.qty_transit)
+FROM ods_stock_logic_items sli
+	LEFT JOIN ods_stock_logic sl
+		ON sli.stock_log_id = sl.id
+GROUP BY sl.org_code, sl.channel_endpint_code, sli.sku_code
 
 
 

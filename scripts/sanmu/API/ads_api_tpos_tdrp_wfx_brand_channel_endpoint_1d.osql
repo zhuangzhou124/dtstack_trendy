@@ -46,7 +46,7 @@ LIFECYCLE 30;
 
 INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION(ds = '${bizdate}')
 	SELECT '${bizdate}' as biz_date,
-	'${bizdate}' as gmt_sale,
+	t1.order_time as gmt_sale,
 	       t1.org_code ,
 				 t1.channel_endpoint_code AS store_code,
 				 t5.endpoint_name as endpoint_name,
@@ -69,9 +69,9 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION
 				 t8.sales_num_1d_brand_sotre_vip,
 				 t11.sales_amt_1d_brand_store_vip,
 				 CASE
-				 WHEN t10.customer_num_1d_brand_store IS NOT NULL OR t10.customer_num_1d_brand_store <> 0
-				 THEN (t9.deal_num_1d_brand_store / t10.customer_num_1d_brand_store)
-				 ELSE 0.0
+				 WHEN t10.customer_num_1d_brand_store IS  NULL OR t10.customer_num_1d_brand_store = 0
+				 THEN 0.0
+				 ELSE (t9.deal_num_1d_brand_store / t10.customer_num_1d_brand_store)
 				 END AS deal_rate_1d_brand_store,
 				 CASE
 				 WHEN t1.retail_price_amt_1d_brand_store IS NULL OR t1.retail_price_amt_1d_brand_store = 0
@@ -85,14 +85,12 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION
 				 ELSE 0.0
 				 END AS sales_per_1d_brand_store,
 				 CASE
-				 WHEN t9.deal_num_1d_brand_store IS NOT NULL OR t9.deal_num_1d_brand_store <> 0 THEN (t12.sales_num_1d_brand_store /
-				 t9.deal_num_1d_brand_store)
-				 ELSE 0.0
+				 WHEN t9.deal_num_1d_brand_store IS  NULL OR t9.deal_num_1d_brand_store = 0 THEN 0.0
+				 ELSE (t12.sales_num_1d_brand_store / t9.deal_num_1d_brand_store)
 				 END AS joint_rate_1d_brand_store,
 				 CASE
-				 WHEN t1.sales_amt_1d_brand_store IS NOT NULL OR t1.sales_amt_1d_brand_store <> 0 THEN (t11.sales_amt_1d_brand_store_vip /
-				 t1.sales_amt_1d_brand_store)
-				 ELSE 0.0
+				 WHEN t1.sales_amt_1d_brand_store IS  NULL OR t1.sales_amt_1d_brand_store = 0 THEN 0.0
+				 ELSE (t11.sales_amt_1d_brand_store_vip / t1.sales_amt_1d_brand_store)
 				 END AS sales_ratio_1d_brand_store_vip
 	FROM (
 
@@ -100,188 +98,210 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION
 		SELECT org_code,
 					 channel_endpoint_code,
 					 sum(price_amt_retail) as retail_price_amt_1d_brand_store,
-					 sum(amt_total) as sales_amt_1d_brand_store
-		FROM ods_sales_order
+					 sum(amt_total) as sales_amt_1d_brand_store,
+					 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time
+		FROM ${td_ods}.ods_sales_order
 		WHERE ds = '${bizdate}'
-		GROUP BY org_code, channel_endpoint_code) AS t1
+		GROUP BY org_code, channel_endpoint_code,substr(regexp_replace(create_time, '-', '', 0), 1, 8)) AS t1
 		LEFT OUTER JOIN (
 
 		---------退货件数、退货金额
 			SELECT org_code,
 						 channel_endpoint_code,
 						 sum(qty_return_item) as return_num_1d_brand_store,
-						 sum(amt_return_item) as return_amt_1d_brand_store
-			FROM ods_sales_order
+						 sum(amt_return_item) as return_amt_1d_brand_store,
+						 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time
+			FROM ${td_ods}.ods_sales_order
 			WHERE order_type IN (103) AND ds = '${bizdate}'
-			GROUP BY org_code, channel_endpoint_code) AS t2
-			ON t1.channel_endpoint_code = t2.channel_endpoint_code AND t1.org_code = t2.org_code
+			GROUP BY org_code, channel_endpoint_code,substr(regexp_replace(create_time, '-', '', 0), 1, 8)) AS t2
+			ON t1.channel_endpoint_code = t2.channel_endpoint_code AND t1.org_code = t2.org_code AND t1.order_time = t2.order_time
 		LEFT OUTER JOIN (
 
 		---------净销售量
 			SELECT so.org_code,
 						 so.channel_endpoint_code,
+						 so.order_time,
 						 sum(soi.qty_product) as net_sales_num_1d_brand_store
 			FROM (
 				SELECT sales_order_no,
+							 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time,
 							 qty_product
-				FROM ods_sales_order_item
+				FROM ${td_ods}.ods_sales_order_item
 				WHERE ds = '${bizdate}' AND price_discount > 0 AND qty_product > 0) soi
 				LEFT JOIN (
 					SELECT org_code,
 								 channel_endpoint_code,
-								 sales_order_no
-					FROM ods_sales_order
+								 sales_order_no,
+								 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time
+					FROM ${td_ods}.ods_sales_order
 					WHERE ds = '${bizdate}' AND price_amt_discount > 0) so
-					ON soi.sales_order_no = so.sales_order_no
-			GROUP BY so.org_code, so.channel_endpoint_code) AS t3
-			ON t1.channel_endpoint_code = t3.channel_endpoint_code AND t1.org_code = t3.org_code
+					ON soi.sales_order_no = so.sales_order_no AND soi.order_time = so.order_time
+			GROUP BY so.org_code, so.channel_endpoint_code,so.order_time) AS t3
+			ON t1.channel_endpoint_code = t3.channel_endpoint_code AND t1.org_code = t3.org_code AND t1.order_time = t3.order_time
 		LEFT OUTER JOIN (
 
 		----------退换笔数
 			SELECT org_code,
 						 channel_endpoint_code,
+						 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time,
 						 COUNT(order_type) as rma_num_1d_brand_store
-			FROM ods_sales_order
+			FROM ${td_ods}.ods_sales_order
 			WHERE order_type IN ('103', '104') AND ds = '${bizdate}'
-			GROUP BY org_code, channel_endpoint_code) AS t4
-			ON t1.channel_endpoint_code = t4.channel_endpoint_code AND t1.org_code = t4.org_code
+			GROUP BY org_code, channel_endpoint_code,substr(regexp_replace(create_time, '-', '', 0), 1, 8)) AS t4
+			ON t1.channel_endpoint_code = t4.channel_endpoint_code AND t1.org_code = t4.org_code AND t1.order_time = t4.order_time
 		LEFT OUTER JOIN (
 
 		----------现金券金额
 			SELECT so.org_code,
 						 so.channel_endpoint_code,
+						 so.order_time,
 						 sum(sop.amt_pay) as cash_coupon_amt_1d_brand_store
 			FROM (
 				SELECT sales_order_no,
+							 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time,
 							 amt_pay
-				FROM ods_sales_order_payment
+				FROM ${td_ods}.ods_sales_order_payment
 				WHERE ds = '${bizdate}' AND pay_way = 'CASH') sop
 				LEFT JOIN (
 					SELECT org_code,
 								 sales_order_no,
+								 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time,
 								 channel_endpoint_code
-					FROM ods_sales_order
+					FROM ${td_ods}.ods_sales_order
 					WHERE ds = '${bizdate}') so
-					ON sop.sales_order_no = so.sales_order_no
-			GROUP BY so.org_code, so.channel_endpoint_code) AS t6
-			ON t1.channel_endpoint_code = t6.channel_endpoint_code AND t1.org_code = t6.org_code
+					ON sop.sales_order_no = so.sales_order_no AND sop.order_time = so.order_time
+			GROUP BY so.org_code, so.channel_endpoint_code,so.order_time) AS t6
+			ON t1.channel_endpoint_code = t6.channel_endpoint_code AND t1.org_code = t6.org_code AND t1.order_time = t6.order_time
 		LEFT OUTER JOIN (
 
 		-----------净销售额（含现金券）
 			SELECT org_code,
 						 channel_endpoint_code,
+						 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time,
 						 sum(amt_total) as net_sales_amt_1d_brand_store_coupon
-			FROM ods_sales_order
+			FROM ${td_ods}.ods_sales_order
 			WHERE ds = '${bizdate}' AND price_amt_discount > 0
-			GROUP BY org_code, channel_endpoint_code) AS t7
-			ON t1.channel_endpoint_code = t7.channel_endpoint_code AND t1.org_code = t7.org_code
+			GROUP BY org_code, channel_endpoint_code,substr(regexp_replace(create_time, '-', '', 0), 1, 8)) AS t7
+			ON t1.channel_endpoint_code = t7.channel_endpoint_code AND t1.org_code = t7.org_code AND t1.order_time = t7.order_time
 		LEFT OUTER JOIN (
 
 		------vip销售件数
 			SELECT sm.org_code,
 						 sm.channel_endpoint_code,
+						 sm.order_time,
 						 sum(sm.qty_product) as sales_num_1d_brand_sotre_vip
 			FROM(
         SELECT so.org_code,
 						 so.channel_endpoint_code,
+							 so.order_time,
 						 mgi.is_vip,
 						 soi.qty_product
 			FROM (
 				SELECT sales_order_no,
+							 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time,
 							 qty_product
-				FROM ods_sales_order_item
+				FROM ${td_ods}.ods_sales_order_item
 				WHERE ds = '${bizdate}' AND price_discount > 0 AND qty_product > 0) soi
 				LEFT JOIN (
 					SELECT channel_endpoint_code,
 								 member_grade_code,
 								 sales_order_no,
+								 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time,
 								 org_code
-					FROM ods_sales_order
+					FROM ${td_ods}.ods_sales_order
 					WHERE ds = '${bizdate}' ) so
-					ON soi.sales_order_no = so.sales_order_no
+					ON soi.sales_order_no = so.sales_order_no AND soi.order_time = so.order_time
 				LEFT JOIN (
 					SELECT grade_code,is_vip
-					FROM ods_member_grade_info
+					FROM ${td_ods}.ods_member_grade_info
 					WHERE ds = '${bizdate}' AND is_vip = '1') mgi
 					ON so.member_grade_code = mgi.grade_code) as sm
-			where sm.is_vip = '1' GROUP BY sm.org_code, sm.channel_endpoint_code) AS t8
-			ON t1.channel_endpoint_code = t8.channel_endpoint_code AND t1.org_code = t8.org_code
+			where sm.is_vip = '1' GROUP BY sm.org_code, sm.channel_endpoint_code,sm.order_time) AS t8
+			ON t1.channel_endpoint_code = t8.channel_endpoint_code AND t1.org_code = t8.org_code AND t1.order_time = t8.order_time
 		LEFT OUTER JOIN (
 
 		-------成交笔数（不减去退货笔数)
 			SELECT org_code,
 						 channel_endpoint_code,
+						 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time,
 						 COUNT(order_type) as deal_num_1d_brand_store
-			FROM ods_sales_order
+			FROM ${td_ods}.ods_sales_order
 			WHERE ds = '${bizdate}'
 			AND (order_type IN ('101', '103') OR (order_type = '104' AND (amt_total != 0 OR (amt_total = 0 AND qty_order_item
 			> 0))))
-			GROUP BY org_code, channel_endpoint_code) AS t9
-			ON t1.channel_endpoint_code = t9.channel_endpoint_code AND t1.org_code = t9.org_code
+			GROUP BY org_code, channel_endpoint_code,substr(regexp_replace(create_time, '-', '', 0), 1, 8)) AS t9
+			ON t1.channel_endpoint_code = t9.channel_endpoint_code AND t1.org_code = t9.org_code AND t1.order_time = t9.order_time
 		LEFT OUTER JOIN (
 
 		-------客流统计
 			SELECT brand_code,
 						 store_code,
+						 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time,
 						 sum(in_count) as customer_num_1d_brand_store
-			FROM ods_store_passenger_flow
+			FROM ${td_ods}.ods_store_passenger_flow
 			WHERE ds = '${bizdate}'
-			GROUP BY brand_code, store_code) AS t10
-			ON t1.channel_endpoint_code = t10.store_code AND t1.org_code = t10.brand_code
+			GROUP BY brand_code, store_code,substr(regexp_replace(create_time, '-', '', 0), 1, 8)) AS t10
+			ON t1.channel_endpoint_code = t10.store_code AND t1.org_code = t10.brand_code AND t1.order_time = t10.order_time
 		LEFT OUTER JOIN (
 
 		-------vip销售金额
 			SELECT
 						 sm.org_code,
 						 sm.channel_endpoint_code,
+						 sm.order_time,
 						 sum(sm.amt_total) as sales_amt_1d_brand_store_vip
 			FROM(
 			SELECT so.org_code,
 						 so.channel_endpoint_code,
+						 so.order_time,
 						 mgi.is_vip,
 						 so.amt_total
 			FROM (
 				SELECT channel_endpoint_code,
 							 member_grade_code,
+							 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time,
 							 amt_total,
 							 org_code
-				FROM ods_sales_order
+				FROM ${td_ods}.ods_sales_order
 				WHERE ds = '${bizdate}') so
 				LEFT JOIN (
 					SELECT grade_code,is_vip
-					FROM ods_member_grade_info
+					FROM ${td_ods}.ods_member_grade_info
 					WHERE ds = '${bizdate}' AND is_vip = '1') mgi
 					ON so.member_grade_code = mgi.grade_code) as sm
 			where sm.is_vip = '1'
-			GROUP BY sm.org_code, sm.channel_endpoint_code) AS t11
-			ON t1.channel_endpoint_code = t11.channel_endpoint_code AND t1.org_code = t11.org_code
+			GROUP BY sm.org_code, sm.channel_endpoint_code,sm.order_time) AS t11
+			ON t1.channel_endpoint_code = t11.channel_endpoint_code AND t1.org_code = t11.org_code AND t1.order_time = t11.order_time
 		LEFT OUTER JOIN (
 
 		--------销售件数
 			SELECT so.org_code,
 						 so.channel_endpoint_code,
+						 so.order_time,
 						 sum(soi.qty_product) as sales_num_1d_brand_store
 			FROM (
 				SELECT sales_order_no,
+							 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time,
 							 qty_product
-				FROM ods_sales_order_item
+				FROM ${td_ods}.ods_sales_order_item
 				WHERE ds = '${bizdate}' AND price_discount > 0 AND qty_product > 0) soi
 				LEFT JOIN (
 					SELECT org_code,
 								 channel_endpoint_code,
+								 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time,
 								 sales_order_no
-					FROM ods_sales_order
+					FROM ${td_ods}.ods_sales_order
 					WHERE ds = '${bizdate}') so
-					ON soi.sales_order_no = so.sales_order_no
-			GROUP BY so.org_code, so.channel_endpoint_code) AS t12
-			ON t1.channel_endpoint_code = t12.channel_endpoint_code AND t1.org_code = t12.org_code
+					ON soi.sales_order_no = so.sales_order_no AND soi.order_time = so.order_time
+			GROUP BY so.org_code, so.channel_endpoint_code,so.order_time) AS t12
+			ON t1.channel_endpoint_code = t12.channel_endpoint_code AND t1.org_code = t12.org_code AND t1.order_time = t12.order_time
 		LEFT OUTER JOIN (
 
 		-------endpoint_name
 			SELECT org_code,
 						 channel_endpoint_code,
 						 endpoint_name
-			FROM ods_api_channel_endpoint
+			FROM ${td_ods}.ods_api_channel_endpoint
 			WHERE ds = '${bizdate}') AS t5
 			ON t1.channel_endpoint_code = t5.channel_endpoint_code AND t1.org_code = t5.org_code;
 

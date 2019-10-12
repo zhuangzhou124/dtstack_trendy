@@ -45,12 +45,12 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = 
 							 member_grade_code,
 							 member_no,
 							 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time
-				FROM ods_sales_order
+				FROM ${td_ods}.ods_sales_order
 				WHERE ds = '${bizdate}') t1
 				LEFT JOIN (
 					SELECT          grade_code,
 													is_vip
-					FROM ods_member_grade_info
+					FROM ${td_ods}.ods_member_grade_info
 					WHERE ds = '${bizdate}' AND is_vip = '1') t2
 					ON t1.member_grade_code = t2.grade_code) AS t3
 		WHERE t3.is_vip = '1'
@@ -67,12 +67,12 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = 
 													member_grade_code,
 													member_no,
 													substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time
-					FROM ods_sales_order
+					FROM ${td_ods}.ods_sales_order
 					WHERE ds <= '${bizdate}') t1
 					LEFT JOIN (
 						SELECT DISTINCT grade_code,
 														is_vip
-						FROM ods_member_grade_info
+						FROM ${td_ods}.ods_member_grade_info
 						WHERE ds <= '${bizdate}' AND is_vip = '1') t2
 						ON t1.member_grade_code = t2.grade_code) AS t3
 			WHERE t3.is_vip = '1'

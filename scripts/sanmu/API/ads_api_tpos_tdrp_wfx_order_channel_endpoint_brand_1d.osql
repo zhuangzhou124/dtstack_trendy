@@ -64,18 +64,18 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d PAR
 					 channel_endpoint_code,
 					 amt_total,
 					 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time
-		FROM ods_sales_order
+		FROM ${td_ods}.ods_sales_order
 		WHERE ds = '${bizdate}') AS t1
 		LEFT OUTER JOIN (
 			SELECT org_code,
 						 brand_code
-			FROM ods_product_brand
+			FROM ${td_ods}.ods_product_brand
 			WHERE ds = '${bizdate}') AS t2
 			ON t1.org_code = t2.org_code
 		LEFT OUTER JOIN (
 			SELECT sales_order_no,
 						 sku_code
-			FROM ods_sales_order_item
+			FROM ${td_ods}.ods_sales_order_item
 			WHERE ds = '${bizdate}') AS t4
 			ON t1.sales_order_no = t4.sales_order_no
 		LEFT OUTER JOIN (
@@ -85,7 +85,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d PAR
 						 band,
 						 sku_status,
 						 YEAR
-			FROM ods_api_item_sku
+			FROM ${td_ods}.ods_api_item_sku
 			WHERE ds = '${bizdate}') AS t3
 			ON t4.sku_code = t3.sku_code;
 
