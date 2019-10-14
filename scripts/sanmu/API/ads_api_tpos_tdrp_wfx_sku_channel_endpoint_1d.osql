@@ -15,63 +15,118 @@
 
 
 CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d(
-	biz_date                                     STRING COMMENT '统计日期',
-	org_code                                     STRING COMMENT '品牌         ',
-	brand_code                                   STRING COMMENT '子品牌         ',
-	channel_endpoint                             STRING COMMENT '门店code',
-	channel_endpoint_name                        STRING COMMENT '门店类别',
-	sku_code                                     STRING COMMENT 'sku       ',
-	product_code                                 STRING COMMENT '商品编码       ',
-	product_name                                 STRING COMMENT '商品名称       ',
-	sku_retail_price                             STRING COMMENT '商品吊牌价 ',
-	sku_year                                     STRING COMMENT '商品年度         ',
-	sku_season                                   STRING COMMENT '商品季节         ',
-	sku_band                                     STRING COMMENT '商品波段         ',
-	sku_list_date                                STRING COMMENT '商品上市日期 ',
-	sku_main_cate                                STRING COMMENT '商品大类   ',
-	sku_main_cate_name                           STRING COMMENT '商品大类名称   ',
-	sku_sub_cate                                 STRING COMMENT '商品中类 ',
-	sku_sub_cate_name                            STRING COMMENT '商品中类名称 ',
-	sku_leaf_cate                                STRING COMMENT '商品小类         ',
-	sku_leaf_cate_name                           STRING COMMENT '商品小类名称         ',
-	sku_color_code                               STRING COMMENT '商品颜色编码         ',
-	sku_color_name                               STRING COMMENT '商品颜色名称         ',
-	sku_size_code                                STRING COMMENT '商品尺码编码         ',
-	sku_size_name                                STRING COMMENT '商品尺码名称   ',
-	sku_num_qczks                                BIGINT COMMENT '期初在库数(截止到某个时间节点前，某个或者多个仓库或者某个渠道的库存数量)',
-	sku_num_qczts                                BIGINT COMMENT '期初在途数(截止到某个时间节点前，某个或者多个仓库或者某个渠道的在途数量)',
-	sku_num_qckcs                                BIGINT COMMENT '期初库存数=期初在库数+期初在途数',
-	sku_num_bqkccss                              BIGINT COMMENT '本期库存初始数(截止范围内，某个或者多个仓库或者某个渠道的库存初始化数)',
-	sku_num_dbrsl                                BIGINT COMMENT '调拨入数量(日期范围内总部发给联营客户的数量)',
-	sku_num_dtcsl                                BIGINT COMMENT '调退出数量(日期范围内联营客户退货给总部仓的数量(单据类型为[渠道退货]))',
-	sku_num_phcsl                                BIGINT COMMENT '配货出数量(日期范围内联营客户配货给店铺的数量(单据类型为[门店配货])',
-	sku_num_ptrsl                                BIGINT COMMENT '配退入数量(日期范围内联营店铺退货给联营客户的数量(单据类型为[门店退货]))',
-	sku_num_phrsl                                BIGINT COMMENT '配货入数量(日期范围内联营客户配货给店铺的数量(单据类型为[配货]))',
-	sku_num_ptcsl                                BIGINT COMMENT '配退出数量(日期范围内联营店铺退货给联营客户的数量(单据类型为[门店退货]))',
-	sku_num_hdcsl                                BIGINT COMMENT '横调出数量(截止到某个时间节点前，某个或者多个仓库或者门店横调出货的数量)',
-	sku_num_hdrsl                                BIGINT COMMENT '横调入数量(截止到某个时间节点前，某个或者多个仓库或者门店横调入货的数量)',
-	sku_num_kqdhdcsl                             BIGINT COMMENT '跨渠道横调出数量(截止到某个时间节点前，某个或者多个仓库或者门店跨渠道横调出货的',
-	sku_num_kqdhdrsl                             BIGINT COMMENT '跨渠道横调入数量(截止到某个时间节点前，某个或者多个仓库或者门店跨渠道横调入货的',
-	sku_num_pdcysl                               BIGINT COMMENT '盘点差异数量(截止到某个时间节点前，某个或者多个仓库或者门店盘点的差异的数量)',
-	sku_num_bqxss                                BIGINT COMMENT '本期销售数(日期范围内店铺销售的数量)',
-	sku_num_bqxts                                BIGINT COMMENT '本期销退数(日期范围内店铺销售退货的数量)',
-	sku_num_bqzts                                BIGINT COMMENT '本期在途数(截止到某个时间节点前，某个或者多个仓库或者某个渠道的在途数量)',
-	sku_num_qmzks                                BIGINT COMMENT '期末在库数(截止到某个时间节点前，某个或者多个仓库或者某个渠道的在途数量)',
-	sku_num_qmzts                                BIGINT COMMENT '期末在途数(截止时间点的在途数量)=期初在途数+本期在途数',
-	sku_num_qmkcs                                BIGINT COMMENT '期末库存数(截止时间点的库存数量)=期末在途数+期末在库数',
-	date_type                                    STRING COMMENT '日期类型',
-	date_id                                      STRING COMMENT '日期'
+	biz_date                                        STRING COMMENT '统计日期',
+	org_code                                        STRING COMMENT '品牌         ',
+	brand_code                                      STRING COMMENT '子品牌         ',
+	channel_endpoint                                STRING COMMENT '门店code',
+	channel_endpoint_name                           STRING COMMENT '门店名称',
+	sku_code                                        STRING COMMENT '商品编码       ',
+	product_code                                    STRING COMMENT '商品款号       ',
+	product_name                                    STRING COMMENT '商品款号名称       ',
+	sku_retail_price                                STRING COMMENT '商品吊牌价 ',
+	sku_year                                        STRING COMMENT '商品年度         ',
+	sku_season                                      STRING COMMENT '商品季节         ',
+	sku_band                                        STRING COMMENT '商品波段         ',
+	sku_list_date                                   STRING COMMENT '商品上市日期 ',
+	sku_main_cate                                   STRING COMMENT '商品大类   ',
+	sku_main_cate_name                              STRING COMMENT '商品大类名称   ',
+	sku_sub_cate                                    STRING COMMENT '商品中类 ',
+	sku_sub_cate_name                               STRING COMMENT '商品中类名称 ',
+	sku_leaf_cate                                   STRING COMMENT '商品小类         ',
+	sku_leaf_cate_name                              STRING COMMENT '商品小类名称         ',
+	sku_color_code                                  STRING COMMENT '商品颜色编码         ',
+	sku_color_name                                  STRING COMMENT '商品颜色名称         ',
+	sku_size_code                                   STRING COMMENT '商品尺码编码         ',
+	sku_size_name                                   STRING COMMENT '商品尺码名称   ',
+	sku_num_1d_qczks                                BIGINT COMMENT '期初在库数(截止到某个时间节点前，某个或者多个仓库或者某个渠道的库存数量)',
+	sku_num_1d_qczts                                BIGINT COMMENT '期初在途数(截止到某个时间节点前，某个或者多个仓库或者某个渠道的在途数量)',
+	sku_num_1d_qckcs                                BIGINT COMMENT '期初库存数=期初在库数+期初在途数',
+	sku_num_1d_bqkccss                              BIGINT COMMENT '本期库存初始数(截止范围内，某个或者多个仓库或者某个渠道的库存初始化数)',
+	sku_num_1d_dbrsl                                BIGINT COMMENT '调拨入数量(日期范围内总部发给联营客户的数量)',
+	sku_num_1d_dtcsl                                BIGINT COMMENT '调退出数量(日期范围内联营客户退货给总部仓的数量(单据类型为[渠道退货]))',
+	sku_num_1d_phcsl                                BIGINT COMMENT '配货出数量(日期范围内联营客户配货给店铺的数量(单据类型为[门店配货])',
+	sku_num_1d_ptrsl                                BIGINT COMMENT '配退入数量(日期范围内联营店铺退货给联营客户的数量(单据类型为[门店退货]))',
+	sku_num_1d_phrsl                                BIGINT COMMENT '配货入数量(日期范围内联营客户配货给店铺的数量(单据类型为[配货]))',
+	sku_num_1d_ptcsl                                BIGINT COMMENT '配退出数量(日期范围内联营店铺退货给联营客户的数量(单据类型为[门店退货]))',
+	sku_num_1d_hdcsl                                BIGINT COMMENT '横调出数量(截止到某个时间节点前，某个或者多个仓库或者门店横调出货的数量)',
+	sku_num_1d_hdrsl                                BIGINT COMMENT '横调入数量(截止到某个时间节点前，某个或者多个仓库或者门店横调入货的数量)',
+	sku_num_1d_kqdhdcsl                             BIGINT COMMENT '跨渠道横调出数量(截止到某个时间节点前，某个或者多个仓库或者门店跨渠道横调出货的',
+	sku_num_1d_kqdhdrsl                             BIGINT COMMENT '跨渠道横调入数量(截止到某个时间节点前，某个或者多个仓库或者门店跨渠道横调入货的',
+	sku_num_1d_pdcysl                               BIGINT COMMENT '盘点差异数量(截止到某个时间节点前，某个或者多个仓库或者门店盘点的差异的数量)',
+	sku_num_1d_bqxss                                BIGINT COMMENT '本期销售数(日期范围内店铺销售的数量)',
+	sku_num_1d_bqxts                                BIGINT COMMENT '本期销退数(日期范围内店铺销售退货的数量)',
+	sku_num_1d_bqzts                                BIGINT COMMENT '本期在途数(截止到某个时间节点前，某个或者多个仓库或者某个渠道的在途数量)',
+	sku_num_1d_qmzks                                BIGINT COMMENT '期末在库数(截止到某个时间节点前，某个或者多个仓库或者某个渠道的在途数量)',
+	sku_num_1d_qmzts                                BIGINT COMMENT '期末在途数(截止时间点的在途数量)=期初在途数+本期在途数',
+	sku_num_1d_qmkcs                                BIGINT COMMENT '期末库存数(截止时间点的库存数量)=期末在途数+期末在库数',
+	date_type                                       STRING COMMENT '日期类型',
+	date_id                                         STRING COMMENT '日期'
 )COMMENT '日期+商品+门店粒度汇总表' PARTITIONED BY(
 	ds STRING COMMENT '时间分区')
 LIFECYCLE 30;
 
 
 INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(ds = '${bizdate}')
-	SELECT t3.channel_endpint_code,
+	SELECT '${cyctime}' AS biz_date,
+				 t3.org_code,
+				 t5.brand_code,
+				 t3.channel_endpint_code,
+				 t6.store_name AS channel_endpoint_name,
 				 t3.sku_code,
-				 t3.sku_num_qczks,
-				 t3.sku_num_qczts,
-				 (t3.sku_num_qczks + t3.sku_num_qczts) AS sku_num_qckcs,
+				 t4.spu_code AS product_code,
+				 t0.cn_name AS product_name,
+				 t4.cny_price AS sku_retail_price,
+				 t4.YEAR AS sku_year,
+				 t4.quarter AS sku_season,
+				 t4.band AS sku_band,
+				 t4.list_date AS sku_list_date,
+				 t4.level1_cate_code AS sku_main_cate,
+				 t4.level1_cate_name AS sku_main_cate_name,
+				 t4.level2_cate_code AS sku_sub_cate,
+				 t4.level2_cate_name AS sku_sub_cate_name,
+				 t4.level3_cate_code AS sku_leaf_cate,
+				 t4.level3_cate_name AS sku_leaf_cate_name,
+				 t4.color_id AS sku_color_code,
+				 t4.cn_color_desc AS sku_color_name,
+				 t4.size_id AS sku_size_code,
+				 t4.cn_size_desc AS sku_size_name,
+				 t7.qty AS sku_num_1d_qczks,
+				 t8.qty AS sku_num_1d_qczts,
+				 t7.qty + t8.qty AS sku_num_1d_qckcs,
+				 NULL AS sku_num_1d_bqkccss,
+	--				 CASE
+	--				 WHEN t12.business_order_business_type IN ('30201', '30202') AND t12.business_order_type = '302' AND t12.app_id
+	--				 = 'TPOS' THEN t12.qty
+	--				 ELSE 0
+	--				 END AS sku_num_1d_dbrsl,
+	--				 CASE
+	--				 WHEN t11.business_order_business_type IN ('30101', '30102') AND t11.business_order_type = '301' THEN t11.qty
+	--				 ELSE 0
+	--				 END AS sku_num_1d_dtcsl,
+	--				 CASE
+	--				 WHEN t11.business_order_business_type = '20101' AND t11.business_order_type = '201' THEN t11.qty
+	--				 ELSE 0
+	--				 END AS sku_num_1d_phcsl,
+	--				 CASE
+	--				 WHEN t12.business_order_business_type = '20101' AND t12.business_order_type = '201' THEN t12.qty
+	--				 ELSE 0
+	--				 END AS sku_num_1d_ptrsl,
+	--				 CASE
+	--				 WHEN t12.business_order_business_type = '20104' AND t12.business_order_type = '201' THEN t12.qty
+	--				 ELSE 0
+	--				 END AS sku_num_1d_phrsl,
+	--				 CASE
+	--				 WHEN t11.business_order_business_type = '20104' AND t11.business_order_type = '201' THEN t11.qty
+	--				 ELSE 0
+	--				 END AS sku_num_1d_ptcsl,
+	--				 CASE
+	--				 WHEN t11.business_order_business_type = '20102' AND t11.business_order_type = '201' THEN t11.qty
+	--				 ELSE 0
+	--				 END AS sku_num_1d_hdcsl,
+	--				 CASE
+	--				 WHEN t12.business_order_business_type = '20102' AND t12.business_order_type = '201' THEN t12.qty
+	--				 ELSE 0
+	--				 END AS sku_num_1d_hdrsl,
 				 NULL,
 				 NULL,
 				 NULL,
@@ -80,70 +135,487 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 				 NULL,
 				 NULL,
 				 NULL,
-				 NULL,
-				 NULL,
-				 t6.pdcysl,
-				 NULL,
-				 NULL,
-				 NULL,
-				 t7.qmzks,
-				 t7.qmzts,
-				 (t7.qmzks + t7.qmzts) AS qmkcs,
-				 t7.qmzks AS quantity_after
+				 t9.qty AS sku_num_1d_kqdhdcsl,
+				 t10.qty AS sku_num_1d_kqdhdrsl,
+				 t13.sku_num_1d_pdcysl AS sku_num_1d_pdcysl,
+				 NULL AS sku_num_1d_bqxss,
+				 NULL AS sku_num_1d_bqxts,
+				 NULL AS sku_num_1d_bqzts,
+				 NULL AS sku_num_1d_qmzks,
+				 NULL AS sku_num_1d_qmzts,
+				 NULL AS sku_num_1d_qmkcs,
+				 'day' AS date_type,
+				 '${bizdate}' AS date_id
 	FROM (
 		SELECT t2.org_code,
 					 t2.channel_endpint_code,
-					 t1.sku_code,
-					 sum(t1.qty_actual) AS sku_num_qczks,
-					 sum(t1.qty_transit) AS sku_num_qczts
+					 t2.manager_channel_code,
+					 t1.sku_code
 		FROM (
 			SELECT stock_logic_id,
 						 sku_code,
 						 qty_actual,
 						 qty_transit
-			FROM ods_stock_logic_items
+			FROM ${td_ods}.ods_stock_logic_items
 			WHERE ds = '${bizdate}') t1
 			LEFT JOIN (
 				SELECT channel_endpint_code,
 							 org_code,
+							 manager_channel_code,
 							 id
-				FROM ods_stock_logic
+				FROM ${td_ods}.ods_stock_logic
 				WHERE ds = '${bizdate}') t2
-				ON t1.stock_logic_id = t2.id
-		GROUP BY t2.org_code,t2.channel_endpint_code, t1.sku_code) AS t3
-
+				ON t1.stock_logic_id = t2.id) AS t3
+		LEFT JOIN (
+			SELECT sku_code,
+						 sku_cn_name,
+						 spu_code,
+						 cny_price,
+						 YEAR,
+						 quarter,
+						 band,
+						 list_date,
+						 level1_cate_name,
+						 level1_cate_code,
+						 level2_cate_name,
+						 level2_cate_code,
+						 level3_cate_name,
+						 level3_cate_code,
+						 color_id,
+						 cn_color_desc,
+						 size_id,
+						 cn_size_desc
+			FROM ${td_ods}.ods_api_item_sku
+			WHERE ds = '${bizdate}') AS t4
+			ON t3.sku_code = t4.sku_code
+		LEFT OUTER JOIN (
+			SELECT org_code,
+						 brand_code
+			FROM ${td_ods}.ods_product_brand
+			WHERE ds = '${bizdate}') AS t5
+			ON t3.org_code = t5.org_code
+		LEFT OUTER JOIN (
+			SELECT store_code,
+						 store_name
+			FROM ${td_ods}.ods_real_store
+			WHERE ds = '${bizdate}') AS t6
+			ON t3.channel_endpint_code = t6.store_code
 		LEFT OUTER JOIN (
 			SELECT sku_code,
-						 sum(abs(qty_change)) AS pdcysl
-			FROM ods_stock_physical_order_inventory_items
-			WHERE ds = '${bizdate}'
-			GROUP BY sku_code) AS t6
-			ON t3.sku_code = t6.sku_code
-		LEFT OUTER JOIN (
-			SELECT t2.channel_endpint_code,
+						 cn_name
+			FROM ${td_ods}.ods_item_sku
+			WHERE ds = '${bizdate}') AS t0
+			ON t4.sku_code = t0.sku_code
+		LEFT JOIN (
+			SELECT t1.org_code,
+						 t1.owner_channel_code,
 						 t1.sku_code,
-						 sum(t1.qty_actual) AS qmzks,
-						 sum(t1.qty_transit) AS qmzts
+						 sum(qty) AS qty
+			FROM (
+				SELECT sl.org_code,
+							 sli.owner_channel_code,
+							 sli.sku_code,
+							 sli.qty_actual AS qty
+				FROM ${td_ods}.ods_stock_logic_items sli
+					LEFT JOIN ${td_ods}.ods_stock_logic sl
+						ON sli.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
+				WHERE sli.ds = '${bizdate}'
+				UNION ALL
+				--出库单，加回去
+				SELECT sl.org_code,
+							 ii.owner_channel_code,
+							 ii.sku_code,
+							 ii.qty_sended AS qty
+				FROM ${td_ods}.ods_stock_logic_order_out AS o
+					INNER JOIN ${td_ods}.ods_stock_logic_order_out_items AS ii
+						ON o.id = ii.logic_order_out_id AND ii.ds = '${bizdate}'
+					LEFT JOIN ${td_ods}.ods_stock_logic sl
+						ON o.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
+				WHERE substr(regexp_replace(o.made_order_time, '-', '', 0), 1, 8) = '${bizdate}' AND o.ds = '${bizdate}'
+				UNION ALL
+				--入库单，库存反减回去
+				SELECT sl.org_code,
+							 ii.channel_code AS owner_channel_code,
+							 ii.sku_code,
+							 - 1 * ii.qty_received AS qty
+				FROM ${td_ods}.ods_stock_logic_order_in AS i
+					INNER JOIN ${td_ods}.ods_stock_logic_order_in_items AS ii
+						ON i.id = ii.logic_order_in_id AND ii.ds = '${bizdate}'
+					LEFT JOIN ${td_ods}.ods_stock_logic sl
+						ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
+				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) = '${bizdate}' AND i.ds = '${bizdate}') AS t1
+			GROUP BY t1.org_code,
+			t1.owner_channel_code,
+			t1.sku_code) AS t7
+			ON t3.sku_code = t7.sku_code AND t3.manager_channel_code = t7.owner_channel_code AND t3.org_code = t7.org_code
+		LEFT JOIN (
+			SELECT t1.org_code,
+						 t1.owner_channel_code,
+						 t1.sku_code,
+						 sum(qty) AS qty
+			FROM (
+				SELECT sl.org_code,
+							 sli.owner_channel_code,
+							 sli.sku_code,
+							 sli.qty_transit AS qty
+				FROM ${td_ods}.ods_stock_logic_items sli
+					LEFT JOIN ${td_ods}.ods_stock_logic sl
+						ON sli.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
+				WHERE sli.ds = '${bizdate}'
+				UNION ALL
+				--根据收货通知单计算：+加上实收数，-去计划数
+				SELECT sl.org_code,
+							 ii.owner_channel_code,
+							 ii.sku_code,
+							 ii.qty_received - ii.qty_receive_plan AS qty
+				FROM ${td_ods}.ods_stock_logic_order_in_notify AS i
+					INNER JOIN ${td_ods}.ods_stock_logic_order_in_notify_items AS ii
+						ON i.id = ii.logic_order_in_notify_id AND ii.ds = '${bizdate}'
+					INNER JOIN ${td_ods}.ods_stock_logic sl
+						ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
+				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) = '${bizdate}' AND i.ds = '${bizdate}'
+				UNION ALL
+				--收发差异单，+差异数
+
+				SELECT s.org_code,
+							 b.owner_channel_code,
+							 b.sku_code,
+							 b.qty_difference AS qty
+				FROM ${td_ods}.ods_stock_logic_order_difference AS a
+					INNER JOIN ${td_ods}.ods_stock_logic_order_difference_items AS b
+						ON a.id = b.logic_order_difference_id AND b.ds = '${bizdate}'
+					INNER JOIN ${td_ods}.ods_stock_logic s
+						ON a.stock_logic_in_id = s.id AND s.ds = '${bizdate}'
+				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = '${bizdate}' AND a.ds = '${bizdate}'
+
+			) AS t1
+			GROUP BY t1.org_code,
+			t1.owner_channel_code,
+			t1.sku_code) AS t8
+			ON t3.org_code = t8.org_code AND t3.sku_code = t8.sku_code AND t3.manager_channel_code = t8.owner_channel_code
+	--		LEFT JOIN (--配货出数量、配退出数量、调退出数量
+	--			SELECT o.org_code,
+	--						 b.owner_channel_code,
+	--						 b.sku_code,
+	--						 a.business_order_business_type,
+	--						 a.business_order_type,
+	--						 b.qty_sended AS qty
+	--			FROM ${td_ods}.ods_stock_logic_order_out AS a
+	--				INNER JOIN ${td_ods}.ods_stock_logic_order_out_items AS b
+	--					ON a.id = b.logic_order_out_id AND b.ds = '${bizdate}'
+	--				INNER JOIN ${td_ods}.ods_stock_logic AS o
+	--					ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
+	--			WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = '${bizdate}' AND a.ds = '${bizdate}') AS t11
+	--			ON t3.org_code = t11.org_code AND t3.manager_channel_code = t11.owner_channel_code AND t3.sku_code = t11.sku_code
+	--		LEFT JOIN (--配货入数量、配退入数量、调拨入数量
+	--			SELECT o.org_code,
+	--						 b.channel_code AS owner_channel_code,
+	--						 b.sku_code,
+	--						 a.business_order_business_type,
+	--						 a.business_order_type,
+	--						 a.app_id,
+	--						 b.qty_received AS qty
+	--			FROM ${td_ods}.ods_stock_logic_order_in AS a
+	--				INNER JOIN ${td_ods}.ods_stock_logic_order_in_items AS b
+	--					ON a.id = b.logic_order_in_id AND b.ds = '${bizdate}'
+	--				INNER JOIN ${td_ods}.ods_stock_logic AS o
+	--					ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
+	--			WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = '${bizdate}' AND a.ds = '${bizdate}') AS t12
+	--			ON t3.org_code = t12.org_code AND t3.manager_channel_code = t12.owner_channel_code AND t3.sku_code = t11.sku_code
+		LEFT JOIN (--跨渠道横调出数量
+			SELECT o.org_code,
+						 b.owner_channel_code,
+						 b.sku_code,
+						 b.qty_sended AS qty
+			FROM ${td_ods}.ods_stock_logic_order_out AS a
+				INNER JOIN ${td_ods}.ods_stock_logic_order_out_items AS b
+					ON a.id = b.logic_order_out_id AND b.ds = '${bizdate}'
+				INNER JOIN ${td_ods}.ods_stock_logic AS o
+					ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
+				INNER JOIN ${td_ods}.ods_stock_logic_order_allocate AS e
+					ON a.business_order_no = e.order_no AND e.ds =
+				'${bizdate}'
+				INNER JOIN ${td_ods}.ods_stock_logic AS i
+					ON e.stock_logic_code_in_id = i.id AND o.manager_channel_code !=
+				i.manager_channel_code AND i.ds = '${bizdate}'
+			WHERE a.business_order_type = '201' AND a.business_order_business_type IN ('20102') AND a.ds = '${bizdate}'
+			AND substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = '${bizdate}') AS t9
+			ON t3.org_code = t9.org_code AND t3.manager_channel_code = t9.owner_channel_code AND t3.sku_code = t9.sku_code
+		LEFT JOIN (
+		--跨渠道横调入数量
+			SELECT i.org_code,
+						 b.channel_code AS owner_channel_code,
+						 b.sku_code,
+						 b.qty_received AS qty
+			FROM ${td_ods}.ods_stock_logic_order_in AS a
+				INNER JOIN ${td_ods}.ods_stock_logic_order_in_items AS b
+					ON a.id = b.logic_order_in_id AND b.ds = '${bizdate}'
+				INNER JOIN ${td_ods}.ods_stock_logic AS i
+					ON a.stock_logic_id = i.id AND i.ds = '${bizdate}'
+				INNER JOIN ${td_ods}.ods_stock_logic_order_allocate AS e
+					ON a.business_order_no = e.order_no AND e.ds =
+				'${bizdate}'
+				INNER JOIN ${td_ods}.ods_stock_logic AS o
+					ON o.manager_channel_code != i.manager_channel_code AND e.stock_logic_code_out_id = o.id
+				AND o.ds = '${bizdate}'
+			WHERE a.business_order_type = '201' AND a.business_order_business_type IN ('20102') AND a.ds = '${bizdate}'
+			AND substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = '${bizdate}') AS t10
+			ON t3.org_code = t10.org_code AND t3.manager_channel_code = t10.owner_channel_code AND t3.sku_code = t10.sku_code
+		LEFT JOIN (--盘点差异数量
+			SELECT b.sku_code,
+						 c.org_code,
+						 b.owner_channel_code,
+						 sum(abs(qty_change)) AS sku_num_1d_pdcysl
+			FROM ${td_ods}.ods_stock_physical_order_inventory AS a
+				INNER JOIN ${td_ods}.ods_stock_physical_order_inventory_items AS b
+					ON a.id = b.physical_order_inventory_id AND b.ds = '${bizdate}'
+				INNER JOIN ${td_ods}.ods_stock_logic AS c
+					ON a.inventory_logic_id = c.id AND c.ds = '${bizdate}'
+			WHERE substr(regexp_replace(a.audit_time, '-', '', 0), 1, 8) = '${bizdate}' AND a.ds = '${bizdate}'
+			GROUP BY b.sku_code,
+			c.org_code,
+			b.owner_channel_code) AS t13
+			ON t3.org_code = t13.org_code AND t3.manager_channel_code = t13.owner_channel_code AND t3.sku_code = t13.sku_code;
+
+
+INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(ds = '${bizdate}')
+	SELECT t1.biz_date
+	,
+				 t1.org_code
+	,
+				 t1.brand_code
+	,
+				 t1.channel_endpoint
+	,
+				 t1.channel_endpoint_name
+	,
+				 t1.sku_code
+	,
+				 t1.product_code
+	,
+				 t1.product_name
+	,
+				 t1.sku_retail_price
+	,
+				 t1.sku_year
+	,
+				 t1.sku_season
+	,
+				 t1.sku_band
+	,
+				 t1.sku_list_date
+	,
+				 t1.sku_main_cate
+	,
+				 t1.sku_main_cate_name
+	,
+				 t1.sku_sub_cate
+	,
+				 t1.sku_sub_cate_name
+	,
+				 t1.sku_leaf_cate
+	,
+				 t1.sku_leaf_cate_name
+	,
+				 t1.sku_color_code
+	,
+				 t1.sku_color_name
+	,
+				 t1.sku_size_code
+	,
+				 t1.sku_size_name
+	,
+				 t1.sku_num_1d_qczks
+	,
+				 t1.sku_num_1d_qczts
+	,
+				 t1.sku_num_1d_qckcs
+	,
+				 t1.sku_num_1d_bqkccss,
+				 CASE
+				 WHEN t12.business_order_business_type IN ('30201',
+				 '30202') AND t12.business_order_type = '302' AND t12.app_id = 'TPOS' THEN t12.qty
+				 ELSE 0
+				 END AS sku_num_1d_dbrsl,
+				 CASE
+				 WHEN t11.business_order_business_type IN ('30101', '30102') AND t11.business_order_type = '301' THEN t11.qty
+				 ELSE 0
+				 END AS sku_num_1d_dtcsl,
+				 CASE
+				 WHEN t11.business_order_business_type = '20101' AND t11.business_order_type = '201' THEN t11.qty
+				 ELSE 0
+				 END AS sku_num_1d_phcsl,
+				 CASE
+				 WHEN t12.business_order_business_type = '20101' AND t12.business_order_type = '201' THEN t12.qty
+				 ELSE 0
+				 END AS sku_num_1d_ptrsl,
+				 CASE
+				 WHEN t12.business_order_business_type = '20104' AND t12.business_order_type = '201' THEN t12.qty
+				 ELSE 0
+				 END AS sku_num_1d_phrsl,
+				 CASE
+				 WHEN t11.business_order_business_type = '20104' AND t11.business_order_type = '201' THEN t11.qty
+				 ELSE 0
+				 END AS sku_num_1d_ptcsl,
+				 CASE
+				 WHEN t11.business_order_business_type = '20102' AND t11.business_order_type = '201' THEN t11.qty
+				 ELSE 0
+				 END AS sku_num_1d_hdcsl,
+				 CASE
+				 WHEN t12.business_order_business_type = '20102' AND t12.business_order_type = '201' THEN t12.qty
+				 ELSE 0
+				 END AS sku_num_1d_hdrsl,
+				 t1.sku_num_1d_kqdhdcsl
+	,
+				 t1.sku_num_1d_kqdhdrsl
+	,
+				 t1.sku_num_1d_pdcysl
+	,
+				 t1.sku_num_1d_bqxss
+	,
+				 t1.sku_num_1d_bqxts
+	,
+				 t1.sku_num_1d_bqzts
+	,
+				 t1.sku_num_1d_qmzks
+	,
+				 t1.sku_num_1d_qmzts
+	,
+				 t1.sku_num_1d_qmkcs
+	,
+				 t1.date_type
+	,
+				 t1.date_id
+	FROM (
+		SELECT biz_date
+		,
+					 org_code
+		,
+					 brand_code
+		,
+					 channel_endpoint
+		,
+					 channel_endpoint_name
+		,
+					 sku_code
+		,
+					 product_code
+		,
+					 product_name
+		,
+					 sku_retail_price
+		,
+					 sku_year
+		,
+					 sku_season
+		,
+					 sku_band
+		,
+					 sku_list_date
+		,
+					 sku_main_cate
+		,
+					 sku_main_cate_name
+		,
+					 sku_sub_cate
+		,
+					 sku_sub_cate_name
+		,
+					 sku_leaf_cate
+		,
+					 sku_leaf_cate_name
+		,
+					 sku_color_code
+		,
+					 sku_color_name
+		,
+					 sku_size_code
+		,
+					 sku_size_name
+		,
+					 sku_num_1d_qczks
+		,
+					 sku_num_1d_qczts
+		,
+					 sku_num_1d_qckcs
+		,
+					 sku_num_1d_bqkccss
+		,
+					 sku_num_1d_kqdhdcsl
+		,
+					 sku_num_1d_kqdhdrsl
+		,
+					 sku_num_1d_pdcysl
+		,
+					 sku_num_1d_bqxss
+		,
+					 sku_num_1d_bqxts
+		,
+					 sku_num_1d_bqzts
+		,
+					 sku_num_1d_qmzks
+		,
+					 sku_num_1d_qmzts
+		,
+					 sku_num_1d_qmkcs
+		,
+					 date_type
+		,
+					 date_id
+		FROM ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d
+		WHERE ds = '${bizdate}') AS t1
+		LEFT JOIN (
+			SELECT t00.org_code,
+						 t00.channel_endpint_code,
+						 t00.manager_channel_code,
+						 t0.sku_code
 			FROM (
 				SELECT stock_logic_id,
 							 sku_code,
 							 qty_actual,
 							 qty_transit
-				FROM ods_stock_logic_items
-				WHERE ds = '${bizdate}') t1
+				FROM ${td_ods}.ods_stock_logic_items
+				WHERE ds = '${bizdate}') t0
 				LEFT JOIN (
 					SELECT channel_endpint_code,
+								 org_code,
+								 manager_channel_code,
 								 id
-					FROM ods_stock_logic
-					WHERE ds = '${bizdate}') t2
-					ON t1.stock_logic_id = t2.id
-			GROUP BY t2.channel_endpint_code, t1.sku_code) AS t7
-			ON t3.channel_endpint_code = t7.channel_endpint_code AND t3.sku_code = t7.sku_code;
-
-
-
-
-
-
-
+					FROM ${td_ods}.ods_stock_logic
+					WHERE ds = '${bizdate}') AS t00 ON t0.stock_logic_id = t00.id) as t2
+					ON t1.org_code = t2.org_code AND t1.sku_code = t2.sku_code AND t1.channel_endpoint = t2.channel_endpint_code
+				LEFT JOIN (--配货出数量、配退出数量、调退出数量
+					SELECT o.org_code,
+								 b.owner_channel_code,
+								 b.sku_code,
+								 a.business_order_business_type,
+								 a.business_order_type,
+								 b.qty_sended AS qty
+					FROM ${td_ods}.ods_stock_logic_order_out AS a
+						INNER JOIN ${td_ods}.ods_stock_logic_order_out_items AS b
+							ON a.id = b.logic_order_out_id AND b.ds = '${bizdate}'
+						INNER JOIN ${td_ods}.ods_stock_logic AS o
+							ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
+					WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = '${bizdate}' AND a.ds = '${bizdate}') AS
+				t11
+					ON t2.org_code = t11.org_code AND t2.sku_code = t11.sku_code
+				AND t2.manager_channel_code = t11.owner_channel_code
+				LEFT JOIN (
+				--配货入数量、配退入数量、调拨入数量
+					SELECT o.org_code,
+								 b.channel_code AS owner_channel_code,
+								 b.sku_code,
+								 a.business_order_business_type,
+								 a.business_order_type,
+								 a.app_id,
+								 b.qty_received AS qty
+					FROM ${td_ods}.ods_stock_logic_order_in AS a
+						INNER JOIN ${td_ods}.ods_stock_logic_order_in_items AS b
+							ON a.id = b.logic_order_in_id AND b.ds = '${bizdate}'
+						INNER JOIN ${td_ods}.ods_stock_logic AS o
+							ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
+					WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = '${bizdate}' AND a.ds = '${bizdate}') AS
+				t12
+					ON t2.org_code = t12.org_code AND t2.sku_code = t12.sku_code
+				AND t2.manager_channel_code = t12.owner_channel_code;
 

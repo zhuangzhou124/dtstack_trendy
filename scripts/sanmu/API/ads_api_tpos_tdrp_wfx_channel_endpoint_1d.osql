@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_channel_endpoint_1d(
 
 
 INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = '${bizdate}')
-	SELECT '${bizdate}' as biz_date,
+	SELECT '${cyctime}' AS biz_date,
 				 t4.channel_endpoint_code,
 				 t4.new_card_num_1d_store_vip,
 				 t5.total_card_num_td_store_vip,

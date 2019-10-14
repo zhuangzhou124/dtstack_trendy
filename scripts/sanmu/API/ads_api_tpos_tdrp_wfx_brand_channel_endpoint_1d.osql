@@ -45,7 +45,7 @@ LIFECYCLE 30;
 
 
 INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION(ds = '${bizdate}')
-	SELECT '${bizdate}' as biz_date,
+	SELECT '${cyctime}' AS biz_date,
 	t1.order_time as gmt_sale,
 	       t1.org_code ,
 				 t1.channel_endpoint_code AS store_code,
