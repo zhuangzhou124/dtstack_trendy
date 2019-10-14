@@ -1,7 +1,6 @@
 --name:TEST
 --author:xuzhengzhi
 --create time:2019-10-14 19:01
-
 create  table  if not exists ads_api_tpos_tdrp_wfx_store_15mm(
   brand_code string comment '品牌code',
   store_code string comment '门店code',
@@ -12,6 +11,7 @@ create  table  if not exists ads_api_tpos_tdrp_wfx_store_15mm(
   biz_date string comment '插入日期'
 )partitioned by (ds string)
 ;
+
 insert  overwrite  table  ads_api_tpos_tdrp_wfx_store_15mm partition(ds=${bizdate})
   select tmp.brand_code
   ,tmp.store_code
