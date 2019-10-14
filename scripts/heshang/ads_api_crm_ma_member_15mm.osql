@@ -1,0 +1,78 @@
+--name:dev_3
+--author:xuzhengzhi
+--create time:2019-10-12 16:43
+
+
+
+
+CREATE TABLE ads_api_crm_ma_member_15mm(
+
+  member_card            STRING COMMENT '会员卡号',
+  member_no              STRING COMMENT '会员编号',
+  member_name            STRING COMMENT '会员姓名',
+  member_gender          STRING COMMENT '会员性别',
+  wechat_id              STRING COMMENT '微信(openid)',
+  member_grade           BIGINT COMMENT '会员等级',
+  member_score           DOUBLE  COMMENT '会员积分',
+  member_phone_number    STRING COMMENT '会员电话',
+  member_birthday        STRING COMMENT '会员生日',
+  hold_Coupon_Info       BIGINT COMMENT '是否持券',
+  member_register_time   STRING COMMENT '注册时间',
+  member_register_store  STRING COMMENT '注册门店',
+  member_register_clerk  STRING COMMENT '注册店员',
+  grade_expiration       STRING COMMENT '等级到期时间',
+  brand_code             STRING COMMENT '品牌编号',
+  computing_duration     BIGINT COMMENT '最近的订单单距今消费间隔',
+  last_contact_days      BIGINT COMMENT '最近联系距今天数',
+  date_type              STRING COMMENT '日期类型',
+  date_id                STRING COMMENT '日期',
+  biz_date               STRING COMMENT '插入日期'
+)PARTITIONED BY(
+  ds STRING);
+
+
+
+
+INSERT OVERWRITE TABLE ads_api_crm_ma_member_15mm PARTITION(ds = ${bizdate})
+  SELECT card.member_card_no
+  ,      card.member_no
+  ,      info.member_name
+  ,      info.gender
+  ,      CASE WHEN ua.auth_type = 10 THEN ua.outer_user_id END AS wechat  -- 微信
+  ,      gs.grade_id
+  ,      ss.amt_full_score
+  ,      info.member_mobile
+  ,      info.member_birthday
+  ,      NULL AS is_holdcoupon                            --是否持券
+  ,      card.member_register_time
+  ,      card.member_manage_channel_endpoint_code
+  ,      card.member_manage_clerk
+  ,      gs.grade_expiration                            --等级到期时间
+  ,      card.org_code
+  ,      datediff(to_date(${bizdate}, 'yyyymmdd'), asset.last_order_time, 'dd')
+  ,      asset.last_contact_days
+  ,      'day' AS date_type
+  ,      to_char(gs.last_upgrade_time, 'yyyymmdd'）
+         , ${bizdate} AS biz_date
+
+  FROM ods_member_card card
+    LEFT JOIN ods_member_info info
+      ON card.member_no = info.member_no
+    AND info.ds = '20190920'
+    LEFT JOIN ods_member_grade_state gs
+      ON gs.member_card_id = card.member_info_id
+    AND gs.ds = '20190920'
+    LEFT JOIN ods_member_score_state ss
+      ON ss.member_card_id = card.member_info_id
+    AND ss.ds = '20190920'
+    LEFT JOIN ods_user_auth ua
+      ON card.id = ua.member_card_id
+    AND ua.ds= '20190920'
+    LEFT OUTER JOIN ods_feedback_member_asset asset
+      ON card.member_no=asset.user_id
+    AND asset.ds='20190920'
+  WHERE card.ds = '20190920'
+  AND gs.last_upgrade_time IS NOT NULL
+;
+
+

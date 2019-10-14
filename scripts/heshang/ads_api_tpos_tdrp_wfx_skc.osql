@@ -1,0 +1,49 @@
+--name:ads_api_tpos_tdrp_wfx_skc
+--author:xuzhengzhi
+--create time:2019-10-14 14:48
+
+
+
+
+CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_skc(
+  brand_code             STRING COMMENT '品牌编号',
+  brand_name             STRING COMMENT '品牌名称',
+  skc_code               STRING COMMENT 'skc编号',
+  week_sales_item_amount DOUBLE COMMENT '销售金额',
+  rank                   BIGINT COMMENT '排名',
+  create_time            STRING COMMENT '创建日期',
+  biz_date               STRING COMMENT '插入日期'
+)PARTITIONED BY(
+  ds STRING);
+
+INSERT OVERWRITE  TABLE ads_api_tpos_tdrp_wfx_skc PARTITION(ds=${bizdate})
+  SELECT  org_code AS brande_code
+  ,NULL AS brand_name
+  ,skc_code
+  ,sub_coupon_amount AS weekSalesItemAmount
+  ,row_number() OVER(PARTITION BY org_code,skc_code ORDER BY sub_coupon_amount DESC) AS rank
+  ,${bizdate} AS create_time
+  ,${bizdate} AS biz_date
+  FROM (
+    SELECT  a.org_code,sku.skc_code,
+            sum( ( b.price_sales - b.amt_freight_contribution ) - d.amt_cash_coupon_contribution ) AS sub_coupon_amount
+    FROM   ods_sales_order a
+      LEFT OUTER JOIN   ods_sales_order_item b
+        ON  b.sales_order_no = a.sales_order_no
+      AND b.ds=20190920
+      LEFT OUTER JOIN ods_item_sku sku
+        ON b.sku_code=sku.sku_code
+      AND sku.ds=20190920
+      LEFT OUTER JOIN ods_sales_order_item_price d
+        ON b.sales_order_no = d.sales_order_no
+      AND d.ds=20190920
+      LEFT OUTER JOIN   ods_member_card c
+        ON    c.org_code = a.org_code
+      AND c.ds=20190920
+      AND   c.STATUS IN (1,0)
+      AND   c.member_no = a.member_no
+    WHERE  a.ds=20190920
+    AND to_char(a.create_time,'yyyymmdd')>to_char(dateadd(to_date(${bizdate},'yyyymmdd'),-7,'dd'),'yyyymmdd')
+  AND   a.member_no NOT IN ( '-1', '1' )
+  GROUP BY a.org_code,sku.skc_code
+  )tmp;
