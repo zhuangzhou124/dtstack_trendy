@@ -12,6 +12,7 @@ create  table  if not exists ads_api_tpos_tdrp_wfx_store_15mm(
 )partitioned by (ds string)
 ;
 
+
 insert  overwrite  table  ads_api_tpos_tdrp_wfx_store_15mm partition(ds=${bizdate})
   select tmp.brand_code
   ,tmp.store_code
