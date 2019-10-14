@@ -22,6 +22,7 @@ create table if not exists ods_member_log_detail_1d_2(
   ds string comment '时间分区');
 
 
+
 select user_id
 ,      lastOrderTime
 ,      lastOrderStore
@@ -51,6 +52,7 @@ from (
   ,      a.new_event_count as newEventCount--新事件计数
   ,      a.last_order_id as orderItemQuantity--最近订单No
   --,      a.last_order_time as lastOrderTime--上次消费时间
+  ,      a.brand_code
   --select a.brand_code,a.org_code,endpoint_name
   from (
     select user_id, aa.brand_code, last_order_time, store_code, last_order_amount, last_order_id, last_contact_days,
@@ -82,6 +84,7 @@ where endpoint_name is not null
     ,      a.store_code as lastContactStore--最近回访门店NO
     ,      c.clerk_name as lastContactClerkName--最近回访店员姓名
     ,      a.contact_log_id as lastContactLogId--最近联系日志ID
+    ,      a.brand_code
     from (
       select          feedback_time, contact_log_id, user_id, brand_code, store_code
       from ods_feedback_customer_contact_log
