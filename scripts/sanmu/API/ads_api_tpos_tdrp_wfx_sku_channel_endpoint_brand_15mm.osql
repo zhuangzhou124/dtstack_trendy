@@ -280,3 +280,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 		LEFT JOIN ods_sales_order_item_price osoip
 			ON soi.sku_code = osoip.sku_code AND osoip.ds = '20190920'
 	WHERE so.ds = '20190920';
+
+
+
+---soi、pb、osoip、ais

@@ -11,9 +11,10 @@ AND business_order_business_type IN ('20102') AND business_order_type = '201' ;
 
 
 
+INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PARTITION(ds)
+select * from td_ods_dev.ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm where ds = '20190920';
 
-select * from ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm where ds = '20190920';
-
+select count(*) from td_ods_dev.ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm where ds = '20190920';
 
 
 SELECT o.org_code,
