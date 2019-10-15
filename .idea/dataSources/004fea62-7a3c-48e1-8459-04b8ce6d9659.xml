@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dataSource name="shuzhan_test">
-  <database-model serializer="dbm" rdbms="MYSQL" format-version="4.9">
+  <database-model serializer="dbm" dbms="MYSQL" family-id="MYSQL" format-version="4.15">
     <root id="1">
       <ServerVersion>5.7.20</ServerVersion>
       <DefaultEngine>InnoDB</DefaultEngine>
@@ -1201,7 +1201,9 @@
     <table id="491" parent="2" name="yjfl_pro_security">
       <Comment>省内安全态势</Comment>
     </table>
-    <view id="492" parent="2" name="v_liudang_test"/>
+    <view id="492" parent="2" name="v_liudang_test">
+      <SourceTextLength>1525</SourceTextLength>
+    </view>
     <scheduled-event id="493" parent="2" name="insertRecord_10s">
       <Definer>dtstack_test@%</Definer>
       <Interval>&apos;10&apos; SECOND</Interval>
@@ -1288,7 +1290,7 @@
       <Comment>订单表</Comment>
     </table>
     <table id="564" parent="6" name="unit_day">
-      <Comment>门店销售类目渠道指标汇总年表	</Comment>
+      <Comment>门店销售类目渠道指标汇总年表</Comment>
     </table>
     <table id="565" parent="6" name="user1"/>
     <table id="566" parent="6" name="user2"/>
@@ -1327,7 +1329,6 @@
       <Definer>dtstack_test@%</Definer>
       <Interval>&apos;1&apos; DAY</Interval>
       <Starts>&apos;2019-04-19 16:25:50&apos;</Starts>
-      <Preserve>0</Preserve>
       <Status>enabled</Status>
     </scheduled-event>
     <scheduled-event id="579" parent="6" name="insertRecord_10s">
@@ -10246,37 +10247,37 @@ COLLECT_TIME</ColNames>
     </column>
     <column id="2112" parent="495" name="channel_type">
       <Position>3</Position>
-      <Comment>渠道         </Comment>
+      <Comment>渠道</Comment>
       <DataType>varchar(100)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="2113" parent="495" name="member_type">
       <Position>4</Position>
-      <Comment>会员类型         </Comment>
+      <Comment>会员类型</Comment>
       <DataType>varchar(100)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="2114" parent="495" name="member_quantity">
       <Position>5</Position>
-      <Comment>会员人数         </Comment>
+      <Comment>会员人数</Comment>
       <DataType>int(10)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="2115" parent="495" name="kpi">
       <Position>6</Position>
-      <Comment>kpi     </Comment>
+      <Comment>kpi</Comment>
       <DataType>varchar(100)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="2116" parent="495" name="mtd">
       <Position>7</Position>
-      <Comment>实际(MTD) </Comment>
+      <Comment>实际(MTD)</Comment>
       <DataType>decimal(10,2 digit)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="2117" parent="495" name="mtd_tg">
       <Position>8</Position>
-      <Comment>目标(MTD) </Comment>
+      <Comment>目标(MTD)</Comment>
       <DataType>decimal(10,2 digit)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
@@ -10288,37 +10289,37 @@ COLLECT_TIME</ColNames>
     </column>
     <column id="2119" parent="495" name="mtd_ly">
       <Position>10</Position>
-      <Comment>同期(MTD) </Comment>
+      <Comment>同期(MTD)</Comment>
       <DataType>decimal(10,2 digit)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="2120" parent="495" name="mtd_ly_cp">
       <Position>11</Position>
-      <Comment>同比(MTD) </Comment>
+      <Comment>同比(MTD)</Comment>
       <DataType>decimal(10,2 digit)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="2121" parent="495" name="mtd_lm">
       <Position>12</Position>
-      <Comment>上月(MTD) </Comment>
+      <Comment>上月(MTD)</Comment>
       <DataType>decimal(10,2 digit)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="2122" parent="495" name="mtd_lm_cp">
       <Position>13</Position>
-      <Comment>环比(MTD) </Comment>
+      <Comment>环比(MTD)</Comment>
       <DataType>decimal(10,2 digit)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="2123" parent="495" name="qtd">
       <Position>14</Position>
-      <Comment>实际(QTD) </Comment>
+      <Comment>实际(QTD)</Comment>
       <DataType>decimal(10,2 digit)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="2124" parent="495" name="qtd_tg">
       <Position>15</Position>
-      <Comment>目标(QTD) </Comment>
+      <Comment>目标(QTD)</Comment>
       <DataType>decimal(10,2 digit)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
@@ -10330,25 +10331,25 @@ COLLECT_TIME</ColNames>
     </column>
     <column id="2126" parent="495" name="qtd_ly">
       <Position>17</Position>
-      <Comment>同期(QTD) </Comment>
+      <Comment>同期(QTD)</Comment>
       <DataType>decimal(10,2 digit)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="2127" parent="495" name="qtd_ly_cp">
       <Position>18</Position>
-      <Comment>同比(QTD) </Comment>
+      <Comment>同比(QTD)</Comment>
       <DataType>decimal(10,2 digit)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="2128" parent="495" name="ytd">
       <Position>19</Position>
-      <Comment>实际(YTD) </Comment>
+      <Comment>实际(YTD)</Comment>
       <DataType>decimal(10,2 digit)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="2129" parent="495" name="ytd_tg">
       <Position>20</Position>
-      <Comment>目标(YTD) </Comment>
+      <Comment>目标(YTD)</Comment>
       <DataType>decimal(10,2 digit)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
@@ -10360,25 +10361,25 @@ COLLECT_TIME</ColNames>
     </column>
     <column id="2131" parent="495" name="ytd_ly">
       <Position>22</Position>
-      <Comment>同期(YTD) </Comment>
+      <Comment>同期(YTD)</Comment>
       <DataType>decimal(10,2 digit)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="2132" parent="495" name="ytd_ly_cp">
       <Position>23</Position>
-      <Comment>同比(YTD) </Comment>
+      <Comment>同比(YTD)</Comment>
       <DataType>decimal(10,2 digit)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="2133" parent="495" name="year">
       <Position>24</Position>
-      <Comment>报告年份         </Comment>
+      <Comment>报告年份</Comment>
       <DataType>int(10)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
     <column id="2134" parent="495" name="month">
       <Position>25</Position>
-      <Comment>报告月份         </Comment>
+      <Comment>报告月份</Comment>
       <DataType>int(10)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
@@ -11830,7 +11831,7 @@ COLLECT_TIME</ColNames>
     </column>
     <column id="2406" parent="536" name="industry">
       <Position>10</Position>
-      <Comment>从事行业 </Comment>
+      <Comment>从事行业</Comment>
       <DataType>varchar(100)|0s</DataType>
       <ColumnKind>normal</ColumnKind>
     </column>
