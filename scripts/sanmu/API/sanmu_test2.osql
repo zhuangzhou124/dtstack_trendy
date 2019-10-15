@@ -8,7 +8,7 @@
 DROP TABLE IF EXISTS ods_stock_logic_order_reserve;
 
 
-CREATE TABLE IF NOT EXISTS ods_stock_logic_order_reserve(
+CREATE TABLE   ods_stock_logic_order_reserve(
 	id                    BIGINT COMMENT 'ID',
 	stock_logic_id        BIGINT COMMENT '逻辑库存id',
 	order_no              STRING COMMENT '单据编码',
@@ -37,7 +37,7 @@ ALTER TABLE ods_stock_logic_order_reserve SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_stock_logic_order_reserve_items;
 
-CREATE TABLE IF NOT EXISTS ods_stock_logic_order_reserve_items(
+CREATE TABLE   ods_stock_logic_order_reserve_items(
 	id                     BIGINT COMMENT 'ID',
 	logic_order_reserve_id BIGINT COMMENT '预留单id',
 	owner_channel_code     STRING COMMENT '货权渠道编码',
@@ -61,7 +61,7 @@ ALTER TABLE ods_stock_logic_order_reserve_items SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_stock_physical;
 
-CREATE TABLE IF NOT EXISTS ods_stock_physical(
+CREATE TABLE   ods_stock_physical(
 	id                          BIGINT COMMENT 'id',
 	stock_physical_code         STRING COMMENT '物理库区编码',
 	stock_physical_name         STRING COMMENT '物理库区名称',
@@ -90,7 +90,7 @@ ALTER TABLE ods_stock_physical SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_stock_physical_items;
 
-CREATE TABLE IF NOT EXISTS ods_stock_physical_items(
+CREATE TABLE   ods_stock_physical_items(
 	id                    BIGINT COMMENT 'ID',
 	stock_physical_id     BIGINT COMMENT '物理库区id',
 	sku_code              STRING COMMENT '商品sku',
@@ -111,7 +111,7 @@ ALTER TABLE ods_stock_physical_items SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_stock_physical_order_in;
 
-CREATE TABLE IF NOT EXISTS ods_stock_physical_order_in(
+CREATE TABLE   ods_stock_physical_order_in(
 	id                           BIGINT COMMENT 'ID',
 	stock_physical_id            BIGINT COMMENT '物理库区id',
 	physical_order_in_notify_id  BIGINT COMMENT '入库通知单id',
@@ -149,7 +149,7 @@ ALTER TABLE ods_stock_physical_order_in SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_stock_physical_order_in_items;
 
-CREATE TABLE IF NOT EXISTS ods_stock_physical_order_in_items(
+CREATE TABLE   ods_stock_physical_order_in_items(
 	id                    BIGINT COMMENT 'ID',
 	physical_order_in_id  BIGINT COMMENT '入库结果单id',
 	sku_code              STRING COMMENT '商品sku',
@@ -176,7 +176,7 @@ ALTER TABLE ods_stock_physical_order_in_items SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_stock_physical_order_in_notify;
 
-CREATE TABLE IF NOT EXISTS ods_stock_physical_order_in_notify(
+CREATE TABLE   ods_stock_physical_order_in_notify(
 	id                           BIGINT COMMENT 'ID',
 	stock_physical_id            BIGINT COMMENT '物理库区id',
 	logic_order_in_notify_id     BIGINT COMMENT '收货通知单id',
@@ -215,7 +215,7 @@ ALTER TABLE ods_stock_physical_order_in_notify SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_stock_physical_order_in_notify_items;
 
-CREATE TABLE IF NOT EXISTS ods_stock_physical_order_in_notify_items(
+CREATE TABLE   ods_stock_physical_order_in_notify_items(
 	id                          BIGINT COMMENT 'ID',
 	physical_order_in_notify_id BIGINT COMMENT '入库通知单id',
 	sku_code                    STRING COMMENT '商品sku',
@@ -242,7 +242,7 @@ ALTER TABLE ods_stock_physical_order_in_notify_items SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_stock_physical_order_inventory;
 
-CREATE TABLE IF NOT EXISTS ods_stock_physical_order_inventory(
+CREATE TABLE   ods_stock_physical_order_inventory(
 	id                      BIGINT COMMENT 'ID',
 	stock_physical_id       BIGINT COMMENT '物理库区id',
 	order_no                STRING COMMENT '单据编码',
@@ -275,7 +275,7 @@ ALTER TABLE ods_stock_physical_order_inventory SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_stock_physical_order_inventory_items;
 
-CREATE TABLE IF NOT EXISTS ods_stock_physical_order_inventory_items(
+CREATE TABLE   ods_stock_physical_order_inventory_items(
 	id                          BIGINT COMMENT 'ID',
 	physical_order_inventory_id BIGINT COMMENT '盘点通知单id',
 	sku_code                    STRING COMMENT '商品sku',
@@ -308,7 +308,7 @@ ALTER TABLE ods_stock_physical_order_inventory_items SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_stock_physical_order_moving;
 
-CREATE TABLE IF NOT EXISTS ods_stock_physical_order_moving(
+CREATE TABLE   ods_stock_physical_order_moving(
 	id                    BIGINT COMMENT 'ID',
 	order_no              STRING COMMENT '单据编码',
 	out_physical_id       BIGINT COMMENT '移出物理库区id',
@@ -340,7 +340,7 @@ ALTER TABLE ods_stock_physical_order_moving SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_stock_physical_order_moving_items;
 
-CREATE TABLE IF NOT EXISTS ods_stock_physical_order_moving_items(
+CREATE TABLE   ods_stock_physical_order_moving_items(
 	id                       BIGINT COMMENT 'ID',
 	physical_order_moving_id BIGINT COMMENT '移库结果单id',
 	sku_code                 STRING COMMENT '商品sku',
@@ -365,7 +365,7 @@ ALTER TABLE ods_stock_physical_order_moving_items SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_stock_physical_order_out;
 
-CREATE TABLE IF NOT EXISTS ods_stock_physical_order_out(
+CREATE TABLE   ods_stock_physical_order_out(
 	id                           BIGINT COMMENT 'ID',
 	physical_order_out_notify_id BIGINT COMMENT '出库通知单id',
 	stock_physical_id            BIGINT COMMENT '物理库区id',
@@ -404,7 +404,7 @@ ALTER TABLE ods_stock_physical_order_out SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_stock_physical_order_out_items;
 
-CREATE TABLE IF NOT EXISTS ods_stock_physical_order_out_items(
+CREATE TABLE   ods_stock_physical_order_out_items(
 	id                    BIGINT COMMENT 'ID',
 	physical_order_out_id BIGINT COMMENT '出库结果单id',
 	sku_code              STRING COMMENT '商品sku',
@@ -429,7 +429,7 @@ ALTER TABLE ods_stock_physical_order_out_items SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_stock_physical_order_out_notify;
 
-CREATE TABLE IF NOT EXISTS ods_stock_physical_order_out_notify(
+CREATE TABLE   ods_stock_physical_order_out_notify(
 	id                           BIGINT COMMENT 'ID',
 	stock_physical_id            BIGINT COMMENT '物理库区id',
 	logic_order_out_notify_id    BIGINT COMMENT '发货通知单id',
@@ -470,7 +470,7 @@ ALTER TABLE ods_stock_physical_order_out_notify SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_stock_physical_order_out_notify_items;
 
-CREATE TABLE IF NOT EXISTS ods_stock_physical_order_out_notify_items(
+CREATE TABLE   ods_stock_physical_order_out_notify_items(
 	id                           BIGINT COMMENT 'ID',
 	physical_order_out_notify_id BIGINT COMMENT '出库通知单id',
 	sku_code                     STRING COMMENT '商品sku',
@@ -495,7 +495,7 @@ ALTER TABLE ods_stock_physical_order_out_notify_items SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_stock_physical_rel;
 
-CREATE TABLE IF NOT EXISTS ods_stock_physical_rel(
+CREATE TABLE   ods_stock_physical_rel(
 	id                      BIGINT COMMENT 'ID',
 	stock_physical_id       BIGINT COMMENT '物理库区id',
 	ref_warehouse_area_code STRING COMMENT '关系库区编码',
@@ -521,7 +521,7 @@ ALTER TABLE ods_stock_physical_rel SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_stock_physical_warehouse;
 
-CREATE TABLE IF NOT EXISTS ods_stock_physical_warehouse(
+CREATE TABLE   ods_stock_physical_warehouse(
 	id                            BIGINT COMMENT 'ID',
 	stock_physical_warehouse_code STRING COMMENT '物理仓库编码',
 	stock_physical_warehouse_name STRING COMMENT '物理仓库名称',
@@ -547,7 +547,7 @@ ALTER TABLE ods_stock_physical_warehouse SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_stock_warehouse_rel;
 
-CREATE TABLE IF NOT EXISTS ods_stock_warehouse_rel(
+CREATE TABLE   ods_stock_warehouse_rel(
 	id                            BIGINT COMMENT 'ID',
 	stock_physical_warehouse_id   BIGINT COMMENT '物理仓库id',
 	stock_physical_warehouse_code STRING COMMENT '物理仓库编码',
@@ -571,7 +571,7 @@ ALTER TABLE ods_stock_warehouse_rel SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_stock_physical;
 
-CREATE TABLE IF NOT EXISTS ods_stock_physical(
+CREATE TABLE   ods_stock_physical(
 	id                          BIGINT COMMENT 'ID',
 	stock_physical_code         STRING COMMENT '物理库区编码',
 	stock_physical_name         STRING COMMENT '物理库区名称',
@@ -602,7 +602,7 @@ ALTER TABLE ods_stock_physical SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_coupon_use;
 
-CREATE TABLE IF NOT EXISTS ods_coupon_use(
+CREATE TABLE   ods_coupon_use(
 	id                     INT COMMENT '主键',
 	coupon_no              STRING COMMENT '券号',
 	channel_code           STRING COMMENT '渠道号',
@@ -635,7 +635,7 @@ ALTER TABLE ods_coupon_use SET LIFECYCLE 365;
 
 DROP TABLE IF EXISTS ods_promotion_info;
 
-CREATE TABLE IF NOT EXISTS ods_promotion_info(
+CREATE TABLE   ods_promotion_info(
 	id                               BIGINT COMMENT '主键',
 	promotion_no                     STRING COMMENT '营销活动编号',
 	promotion_name                   STRING COMMENT '营销活动名称',
