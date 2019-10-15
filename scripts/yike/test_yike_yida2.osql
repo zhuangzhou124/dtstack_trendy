@@ -1,4 +1,5 @@
-create table if not exists ods_stock_address(
+drop table if exists ods_stock_address;
+create table ods_stock_address(
   id                    bigint comment 'ID',
   country_code          string comment '国家编码',
   country               string comment '国家',
@@ -23,7 +24,8 @@ create table if not exists ods_stock_address(
 comment '' partitioned by(
   ds string comment '时间分区');
 
-create table if not exists ods_stock_channel(
+drop table if exists ods_stock_channel;
+create table ods_stock_channel(
   id                    bigint comment 'ID',
   stock_channel_code    string comment '渠道库存编码',
   stock_channel_name    string comment '渠道库存名称',
@@ -42,7 +44,8 @@ create table if not exists ods_stock_channel(
 comment '' partitioned by(
   ds string comment '时间分区');
 
-create table if not exists ods_stock_channel_items(
+drop table if exists ods_stock_channel_items;
+create table ods_stock_channel_items(
   id                    bigint comment 'ID',
   stock_channel_id      bigint comment '渠道库存id',
   sku_code              string comment '商品sku',
@@ -61,7 +64,8 @@ create table if not exists ods_stock_channel_items(
 comment '' partitioned by(
   ds string comment '时间分区');
 
-create table if not exists ods_stock_logic(
+drop table if exists ods_stock_logic;
+create table ods_stock_logic(
   id                          bigint comment 'ID',
   stock_physical_id           bigint comment '物理库区id',
   stock_logic_code            string comment '逻辑库存编码',
@@ -96,7 +100,8 @@ create table if not exists ods_stock_logic(
 comment '' partitioned by(
   ds string comment '时间分区');
 
-create table if not exists ods_stock_logic_items(
+drop table if exists ods_stock_logic_items;
+create table ods_stock_logic_items(
   id                    bigint comment 'ID',
   stock_logic_id        bigint comment '逻辑库存id',
   owner_channel_code    string comment '货权渠道',
@@ -120,7 +125,8 @@ create table if not exists ods_stock_logic_items(
 comment '' partitioned by(
   ds string comment '时间分区');
 
-create table if not exists ods_stock_logic_order_allocate(
+drop table if exists ods_stock_logic_order_allocate;
+create table ods_stock_logic_order_allocate(
   id                      bigint comment 'ID',
   stock_logic_code_in_id  bigint comment '收货逻辑库存id',
   stock_logic_code_out_id bigint comment '发货逻辑库存id',
@@ -152,7 +158,8 @@ create table if not exists ods_stock_logic_order_allocate(
 comment '' partitioned by(
   ds string comment '时间分区');
 
-create table if not exists ods_stock_logic_order_allocate_items(
+drop table if exists ods_stock_logic_order_allocate_items;
+create table ods_stock_logic_order_allocate_items(
   id                      bigint comment 'ID',
   logic_order_allocate_id bigint comment '调配单id',
   owner_channel_code      string comment '货权渠道编码',
@@ -174,7 +181,8 @@ create table if not exists ods_stock_logic_order_allocate_items(
 comment '' partitioned by(
   ds string comment '时间分区');
 
-create table if not exists ods_stock_logic_order_difference(
+drop table if exists ods_stock_logic_order_difference;
+create table ods_stock_logic_order_difference(
   id                            bigint comment 'ID',
   logic_order_allocate_id       bigint comment '调配单id',
   stock_logic_in_id             bigint comment '调入逻辑库存id',
@@ -198,7 +206,8 @@ create table if not exists ods_stock_logic_order_difference(
 comment '' partitioned by(
   ds string comment '时间分区');
 
-create table if not exists ods_stock_logic_order_difference_items(
+drop table if exists ods_stock_logic_order_difference_items;
+create table ods_stock_logic_order_difference_items(
   id                        bigint comment 'ID',
   logic_order_difference_id bigint comment '收发差异单(逻辑层)id',
   owner_channel_code        string comment '货权渠道编码',
@@ -218,7 +227,8 @@ create table if not exists ods_stock_logic_order_difference_items(
 comment '' partitioned by(
   ds string comment '时间分区');
 
-create table if not exists ods_stock_logic_order_disposal(
+drop table if exists ods_stock_logic_order_disposal;
+create table ods_stock_logic_order_disposal(
   id                    bigint comment 'ID',
   stock_logic_id        bigint comment '逻辑库存id',
   business_type         bigint comment '业务类型',
@@ -247,7 +257,8 @@ create table if not exists ods_stock_logic_order_disposal(
 comment '' partitioned by(
   ds string comment '时间分区');
 
-create table if not exists ods_stock_logic_order_disposal_items(
+drop table if exists ods_stock_logic_order_disposal_items;
+create table ods_stock_logic_order_disposal_items(
   id                      bigint comment 'ID',
   logic_order_disposal_id bigint comment '库存处置单id',
   owner_channel_code      string comment '货权渠道编码',
@@ -267,7 +278,8 @@ create table if not exists ods_stock_logic_order_disposal_items(
 comment '' partitioned by(
   ds string comment '时间分区');
 
-create table if not exists ods_stock_logic_order_in(
+drop table if exists ods_stock_logic_order_in;
+create table ods_stock_logic_order_in(
   id                           bigint comment 'ID',
   logic_order_in_notify_id     bigint comment '收货通知单id',
   physical_order_in_id         bigint comment '入库结果单id',
@@ -301,7 +313,8 @@ create table if not exists ods_stock_logic_order_in(
 comment '' partitioned by(
   ds string comment '时间分区');
 
-create table if not exists ods_stock_logic_order_in_items(
+drop table if exists ods_stock_logic_order_in_items;
+create table ods_stock_logic_order_in_items(
   id                    bigint comment 'ID',
   logic_order_in_id     bigint comment '收货结果单id',
   owner_channel_code    string comment '货权渠道编码',
@@ -324,7 +337,8 @@ create table if not exists ods_stock_logic_order_in_items(
 comment '' partitioned by(
   ds string comment '时间分区');
 
-create table if not exists ods_stock_logic_order_in_notify(
+drop table if exists ods_stock_logic_order_in_notify;
+create table ods_stock_logic_order_in_notify(
   id                           bigint comment 'ID',
   stock_logic_id               bigint comment '逻辑库存id',
   order_no                     string comment '单据编码',
@@ -356,7 +370,8 @@ create table if not exists ods_stock_logic_order_in_notify(
 comment '' partitioned by(
   ds string comment '时间分区');
 
-create table if not exists ods_stock_logic_order_in_notify_items(
+drop table if exists ods_stock_logic_order_in_notify_items;
+create table ods_stock_logic_order_in_notify_items(
   id                       bigint comment 'ID',
   logic_order_in_notify_id bigint comment '收货通知单id',
   owner_channel_code       string comment '货权渠道编码',
@@ -379,7 +394,8 @@ create table if not exists ods_stock_logic_order_in_notify_items(
 comment '' partitioned by(
   ds string comment '时间分区');
 
-create table if not exists ods_stock_logic_order_out(
+drop table if exists ods_stock_logic_order_out;
+create table ods_stock_logic_order_out(
   id                           bigint comment 'ID',
   stock_logic_id               bigint comment '逻辑库区id',
   logic_order_out_notify_id    bigint comment '发货通知单id',
@@ -414,7 +430,8 @@ create table if not exists ods_stock_logic_order_out(
 comment '' partitioned by(
   ds string comment '时间分区');
 
-create table if not exists ods_stock_logic_order_out_items(
+drop table if exists ods_stock_logic_order_out_items;
+create table ods_stock_logic_order_out_items(
   id                    bigint comment 'ID',
   logic_order_out_id    bigint comment '发货结果单id',
   sku_code              string comment '商品sku',
@@ -431,5 +448,62 @@ create table if not exists ods_stock_logic_order_out_items(
   last_update_user_name string comment '最后更新用户名（冗余）',
   last_update_time      string comment '最后更新时间',
   deleted               string comment '软删除')
+comment '' partitioned by(
+  ds string comment '时间分区');
+
+drop table if exists ods_stock_logic_order_out_notify;
+create table ods_stock_logic_order_out_notify(
+  id                           bigint comment 'ID',
+  stock_logic_id               bigint comment '逻辑仓库id',
+  order_no                     string comment '单据编码',
+  order_status                 bigint comment '单据状态',
+  order_business_status        bigint comment '单据业务状态',
+  order_hangup_status          bigint comment '单据挂起状态',
+  business_order_business_type bigint comment '业务单据业务类型',
+  business_order_no            string comment '业务单据编码',
+  made_order_time              string comment '制单时间',
+  process_type                 bigint comment '处理类型（内部/外部处理）',
+  delivery_mode                bigint comment '配送方式（物流、自提、快递）',
+  express_company              string comment '快递公司',
+  express_waybill_no           string comment '快递运单号',
+  receiver_id                  bigint comment '收货方信息',
+  sender_id                    bigint comment '发货方信息',
+  app_id                       string comment '应用ID',
+  org_code                     string comment '销售组织编码',
+  remark                       string comment '备注',
+  create_user_id               bigint comment '创建用户编码',
+  create_user_name             string comment '创建用户名（冗余）',
+  create_time                  string comment '创建时间',
+  last_update_user_id          bigint comment '最后更新用户编码',
+  last_update_user_name        string comment '最后更新用户名（冗余）',
+  last_update_time             string comment '最后更新时间',
+  deleted                      string comment '软删除',
+  online_store_order_no        string comment '网店单号',
+  external_order_no            string comment '外部单据编码',
+  inventory_control            bigint comment '负库存控制',
+  stock_logic_id_in            bigint comment '收货逻辑仓id',
+  business_order_type          bigint comment '业务单据类型',
+  stock_check                  bigint comment '发货校验')
+comment '' partitioned by(
+  ds string comment '时间分区');
+
+drop table if exists ods_stock_logic_order_out_notify_items;
+create table ods_stock_logic_order_out_notify_items(
+  id                        bigint comment 'ID',
+  logic_order_out_notify_id bigint comment '发货通知单id',
+  owner_channel_code        string comment '货权渠道编码',
+  sku_code                  string comment '商品sku',
+  qty_sendable              bigint comment '计划发货数量',
+  qty_sended                bigint comment '实际发货数量',
+  app_id                    string comment '应用ID',
+  org_code                  string comment '销售组织编码',
+  remark                    string comment '备注',
+  create_user_id            bigint comment '创建用户编码',
+  create_user_name          string comment '创建用户名（冗余）',
+  create_time               string comment '创建时间',
+  last_update_user_id       bigint comment '最后更新用户编码',
+  last_update_user_name     string comment '最后更新用户名（冗余）',
+  last_update_time          string comment '最后更新时间',
+  deleted                   string comment '软删除')
 comment '' partitioned by(
   ds string comment '时间分区');
