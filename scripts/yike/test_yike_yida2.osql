@@ -23,6 +23,7 @@ create table ods_stock_address(
   deleted               string comment '软删除')
 comment '' partitioned by(
   ds string comment '时间分区');
+ALTER TABLE ods_stock_address SET lifecycle 365;
 
 drop table if exists ods_stock_channel;
 create table ods_stock_channel(
@@ -43,6 +44,7 @@ create table ods_stock_channel(
   status                string comment '状态(1-启用/0-禁用)')
 comment '' partitioned by(
   ds string comment '时间分区');
+ALTER TABLE ods_stock_channel SET lifecycle 365;
 
 drop table if exists ods_stock_channel_items;
 create table ods_stock_channel_items(
@@ -63,6 +65,7 @@ create table ods_stock_channel_items(
   deleted               string comment '软删除')
 comment '' partitioned by(
   ds string comment '时间分区');
+ALTER TABLE ods_stock_channel_items SET lifecycle 365;
 
 drop table if exists ods_stock_logic;
 create table ods_stock_logic(
@@ -99,6 +102,7 @@ create table ods_stock_logic(
   ability_replenishment       bigint comment '补货能力')
 comment '' partitioned by(
   ds string comment '时间分区');
+ALTER TABLE ods_stock_logic SET lifecycle 365;
 
 drop table if exists ods_stock_logic_items;
 create table ods_stock_logic_items(
@@ -124,6 +128,7 @@ create table ods_stock_logic_items(
   deleted               string comment '软删除')
 comment '' partitioned by(
   ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_items SET lifecycle 365;
 
 drop table if exists ods_stock_logic_order_allocate;
 create table ods_stock_logic_order_allocate(
@@ -157,6 +162,7 @@ create table ods_stock_logic_order_allocate(
   stock_check             bigint comment '发货校验')
 comment '' partitioned by(
   ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_allocate SET lifecycle 365;
 
 drop table if exists ods_stock_logic_order_allocate_items;
 create table ods_stock_logic_order_allocate_items(
@@ -180,6 +186,7 @@ create table ods_stock_logic_order_allocate_items(
   deleted                 string comment '软删除')
 comment '' partitioned by(
   ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_allocate_items SET lifecycle 365;
 
 drop table if exists ods_stock_logic_order_difference;
 create table ods_stock_logic_order_difference(
@@ -205,6 +212,7 @@ create table ods_stock_logic_order_difference(
   inventory_control             bigint comment '负库存控制')
 comment '' partitioned by(
   ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_difference SET lifecycle 365;
 
 drop table if exists ods_stock_logic_order_difference_items;
 create table ods_stock_logic_order_difference_items(
@@ -226,6 +234,7 @@ create table ods_stock_logic_order_difference_items(
   deleted                   string comment '软删除')
 comment '' partitioned by(
   ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_difference_items SET lifecycle 365;
 
 drop table if exists ods_stock_logic_order_disposal;
 create table ods_stock_logic_order_disposal(
@@ -256,6 +265,7 @@ create table ods_stock_logic_order_disposal(
   made_order_time       string comment '制单时间')
 comment '' partitioned by(
   ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_disposal SET lifecycle 365;
 
 drop table if exists ods_stock_logic_order_disposal_items;
 create table ods_stock_logic_order_disposal_items(
@@ -277,6 +287,7 @@ create table ods_stock_logic_order_disposal_items(
   deleted                 string comment '软删除')
 comment '' partitioned by(
   ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_disposal_items SET lifecycle 365;
 
 drop table if exists ods_stock_logic_order_in;
 create table ods_stock_logic_order_in(
@@ -312,6 +323,7 @@ create table ods_stock_logic_order_in(
   business_order_type          bigint comment '业务单据类型')
 comment '' partitioned by(
   ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_in SET lifecycle 365;
 
 drop table if exists ods_stock_logic_order_in_items;
 create table ods_stock_logic_order_in_items(
@@ -336,6 +348,7 @@ create table ods_stock_logic_order_in_items(
   deleted               string comment '软删除')
 comment '' partitioned by(
   ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_in_items SET lifecycle 365;
 
 drop table if exists ods_stock_logic_order_in_notify;
 create table ods_stock_logic_order_in_notify(
@@ -369,6 +382,7 @@ create table ods_stock_logic_order_in_notify(
   business_order_type          bigint comment '业务单据类型')
 comment '' partitioned by(
   ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_in_notify SET lifecycle 365;
 
 drop table if exists ods_stock_logic_order_in_notify_items;
 create table ods_stock_logic_order_in_notify_items(
@@ -393,6 +407,7 @@ create table ods_stock_logic_order_in_notify_items(
   deleted                  string comment '软删除')
 comment '' partitioned by(
   ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_in_notify_items SET lifecycle 365;
 
 drop table if exists ods_stock_logic_order_out;
 create table ods_stock_logic_order_out(
@@ -429,6 +444,7 @@ create table ods_stock_logic_order_out(
   business_order_type          bigint comment '业务单据类型')
 comment '' partitioned by(
   ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_out SET lifecycle 365;
 
 drop table if exists ods_stock_logic_order_out_items;
 create table ods_stock_logic_order_out_items(
@@ -450,6 +466,7 @@ create table ods_stock_logic_order_out_items(
   deleted               string comment '软删除')
 comment '' partitioned by(
   ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_out_items SET lifecycle 365;
 
 drop table if exists ods_stock_logic_order_out_notify;
 create table ods_stock_logic_order_out_notify(
@@ -486,6 +503,7 @@ create table ods_stock_logic_order_out_notify(
   stock_check                  bigint comment '发货校验')
 comment '' partitioned by(
   ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_out_notify SET lifecycle 365;
 
 drop table if exists ods_stock_logic_order_out_notify_items;
 create table ods_stock_logic_order_out_notify_items(
@@ -507,3 +525,34 @@ create table ods_stock_logic_order_out_notify_items(
   deleted                   string comment '软删除')
 comment '' partitioned by(
   ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_out_notify_items SET lifecycle 365;
+
+drop table if exists ods_person_address;
+create table ods_person_address(
+  id                    bigint comment 'ID',
+  country               string comment '国家',
+  province              string comment '省份',
+  city                  string comment '城市',
+  area_code             string comment '地区编码',
+  area                  string comment '地区',
+  street_code           string comment '街道编码',
+  street                string comment '街道',
+  address               string comment '详细地址',
+  name                  string comment '联系人姓名',
+  contact               string comment '联系电话',
+  zip                   bigint comment '邮政编码',
+  remark                string comment '备注',
+  create_user_id        string comment '创建用户编码',
+  create_user_name      string comment '创建用户名（冗余）',
+  create_time           string comment '创建时间',
+  last_update_user_id   string comment '最后更新用户编码',
+  last_update_user_name string comment '最后更新用户名（冗余）',
+  last_update_time      string comment '最后更新时间',
+  deleted               string comment '软删除',
+  country_code          string comment '国家编码',
+  province_code         string comment '省份编码',
+  city_code             string comment '渠道编码',
+  tel                   string comment '电话')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_person_address SET lifecycle 365;
