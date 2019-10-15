@@ -4,6 +4,7 @@
 --drop table sanmu_test2
 
 --毅达
+ds=${bizdate}
 
 DROP TABLE IF EXISTS ods_stock_logic_order_reserve;
 
@@ -58,34 +59,6 @@ COMMENT '' PARTITIONED BY(
 
 ALTER TABLE ods_stock_logic_order_reserve_items SET LIFECYCLE 365;
 
-
-DROP TABLE IF EXISTS ods_stock_physical;
-
-CREATE TABLE   ods_stock_physical(
-	id                          BIGINT COMMENT 'id',
-	stock_physical_code         STRING COMMENT '物理库区编码',
-	stock_physical_name         STRING COMMENT '物理库区名称',
-	stock_physical_warehouse_id BIGINT COMMENT '关联物理仓库id',
-	business_type               STRING COMMENT '业务形态',
-	deliver_period              BIGINT COMMENT '发货周期',
-	operating_hours_start       STRING COMMENT '作业起始时间',
-	operating_hours_close       STRING COMMENT '作业结束时间',
-	manager_name                STRING COMMENT '管理员姓名',
-	contract                    STRING COMMENT '联系电话',
-	remark                      STRING COMMENT '备注',
-	create_user_id              BIGINT COMMENT '创建用户编码',
-	create_user_name            STRING COMMENT '创建用户名（冗余）',
-	create_time                 STRING COMMENT '创建时间',
-	last_update_user_id         BIGINT COMMENT '最后更新用户编码',
-	last_update_user_name       STRING COMMENT '最后更新用户名（冗余）',
-	last_update_time            STRING COMMENT '最后更新时间',
-	deleted                     STRING COMMENT '软删除',
-	STATUS                      STRING COMMENT '状态(启用/禁用)'
-)COMMENT '库存中心-物理库区表' PARTITIONED BY(
-	ds STRING COMMENT '时间分区');
-
---修改生命周期
-ALTER TABLE ods_stock_physical SET LIFECYCLE 365;
 
 
 DROP TABLE IF EXISTS ods_stock_physical_items;
