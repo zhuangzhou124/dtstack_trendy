@@ -1,0 +1,66 @@
+
+drop table if exists ods_coupon_info;
+create table ods_coupon_info(
+  id                     int comment '主键',
+  coupon_no              string comment '券号',
+  coupon_name            string comment '券名',
+  coupon_template_no     string comment '券模板编号',
+  coupon_batch_no        string comment '券批次号',
+  denomination           double comment '面额',
+  password               string comment '密码',
+  start_time             datetime comment '开始时间',
+  end_time               datetime comment '结束时间',
+  member_brand_code      string comment '会员品牌号',
+  member_no              string comment '会员号',
+  bind_member_time       datetime comment '绑定时间',
+  status                 int comment '状态',
+  last_update_user_id    int comment '最后更新用户编码',
+  create_time            datetime comment '创建时间',
+  create_user_name       string comment '创建用户名（冗余）',
+  create_user_id         int comment '创建用户编码',
+  last_update_time       datetime comment '最后更新时间',
+  last_update_user_name  string comment '最后更新用户名（冗余）',
+  remark                 string comment '备注',
+  deleted                string comment '软删除：1-已删除、0-未删除',
+  coupon_type_code       string comment '券类型',
+  coupon_category        string comment '券类别',
+  describe               string comment '面额描述',
+  app_id                 string comment '应用ID',
+  org_code               string comment '组织编码'
+)comment '券信息' partitioned by(
+  ds string comment '时间分区');
+
+drop table if exists ods_coupon_template;
+create table ods_coupon_template(
+  id                       int comment '主键',
+  promotion_no             string comment '营销编号',
+  coupon_template_no       string comment '券模板编号',
+  coupon_template_name     string comment '券模板名称',
+  coupon_template_desc     string comment '券模板描述',
+  encrypt_type             int comment '编码生成类型',
+  expire_type              int comment '失效类型 1 时间段 2 时间区间',
+  bind_delay_days          int comment '绑定延迟时间',
+  bind_expire_days         int comment '绑定失效时间',
+  start_time               datetime comment '开始时间',
+  end_time                 datetime comment '结束时间',
+  has_password             boolean comment '需要密码',
+  max_issue_count          int comment '最大发行量',
+  qty_issued               int comment '已发行量',
+  status                   int comment '状态',
+  last_update_user_id      int comment '更新人ID',
+  create_time              datetime comment '创建时间',
+  create_user_name         string comment '创建人名',
+  create_user_id           int comment '创建人ID',
+  last_update_time         datetime comment '更新时间',
+  last_update_user_name    string comment '更新人名',
+  remark                   string comment '备注',
+  deleted                  string comment '删除：1-已删除、0-未删除',
+  coupon_type_code         string comment '券类型',
+  coupon_category          string comment '券类别',
+  cost_center_name         string comment '成本中心名称',
+  cost_center_description  string comment '成本中心描述',
+  app_id                   string comment '应用ID',
+  org_code                 string comment '组织编码',
+  denomination             double comment '券模板编号'
+)comment '券头/券模板' partitioned by(
+  ds string comment '时间分区');
