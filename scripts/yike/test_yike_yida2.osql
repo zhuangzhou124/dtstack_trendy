@@ -1,0 +1,558 @@
+drop table if exists ods_stock_address;
+create table ods_stock_address(
+  id                    bigint comment 'ID',
+  country_code          string comment '国家编码',
+  country               string comment '国家',
+  province_code         string comment '省份编码',
+  province              string comment '省份',
+  city_code             string comment '城市编码',
+  city                  string comment '城市',
+  area_code             string comment '地区编码',
+  area                  string comment '地区',
+  street_code           string comment '街道编码',
+  street                string comment '街道',
+  address               string comment '详细地址',
+  zip                   bigint comment '邮政编码',
+  remark                string comment '备注',
+  create_user_id        bigint comment '创建用户编码',
+  create_user_name      string comment '创建用户名（冗余）',
+  create_time           string comment '创建时间',
+  last_update_user_id   bigint comment '最后更新用户编码',
+  last_update_user_name string comment '最后更新用户名（冗余）',
+  last_update_time      string comment '最后更新时间',
+  deleted               string comment '软删除')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_stock_address SET lifecycle 365;
+
+drop table if exists ods_stock_channel;
+create table ods_stock_channel(
+  id                    bigint comment 'ID',
+  stock_channel_code    string comment '渠道库存编码',
+  stock_channel_name    string comment '渠道库存名称',
+  app_id                string comment '应用ID',
+  org_code              string comment '销售组织编码',
+  remark                string comment '备注',
+  create_user_id        bigint comment '创建用户编码',
+  create_user_name      string comment '创建用户名（冗余）',
+  create_time           string comment '创建时间',
+  last_update_user_id   bigint comment '最后更新用户编码',
+  last_update_user_name string comment '最后更新用户名（冗余）',
+  last_update_time      string comment '最后更新时间',
+  deleted               string comment '软删除',
+  rel_type              bigint comment '关联类型（标签）',
+  status                string comment '状态(1-启用/0-禁用)')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_stock_channel SET lifecycle 365;
+
+drop table if exists ods_stock_channel_items;
+create table ods_stock_channel_items(
+  id                    bigint comment 'ID',
+  stock_channel_id      bigint comment '渠道库存id',
+  sku_code              string comment '商品sku',
+  qty_available         bigint comment '可用库存数',
+  qty_occupy            bigint comment '库存占用数',
+  app_id                string comment '应用ID',
+  org_code              string comment '销售组织编码',
+  remark                string comment '备注',
+  create_user_id        bigint comment '创建用户编码',
+  create_user_name      string comment '创建用户名（冗余）',
+  create_time           string comment '创建时间',
+  last_update_user_id   bigint comment '最后更新用户编码',
+  last_update_user_name string comment '最后更新用户名（冗余）',
+  last_update_time      string comment '最后更新时间',
+  deleted               string comment '软删除')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_stock_channel_items SET lifecycle 365;
+
+drop table if exists ods_stock_logic;
+create table ods_stock_logic(
+  id                          bigint comment 'ID',
+  stock_physical_id           bigint comment '物理库区id',
+  stock_logic_code            string comment '逻辑库存编码',
+  stock_logic_name            string comment '逻辑仓库名称',
+  manager_channel_code        string comment '管理渠道',
+  stock_type                  string comment '仓库类型(主仓/副仓)',
+  ability_sell                bigint comment '销售能力',
+  ability_purchase            bigint comment '采购能力',
+  ability_transfer            bigint comment '调拨能力',
+  ability_inventory           bigint comment '盘点能力',
+  ability_reject              bigint comment '退货能力',
+  ability_hold_for_store      bigint comment '预留能力',
+  ability_hold_for_sell       bigint comment '预售能力',
+  ability_exceed              bigint comment '越库能力',
+  status                      string comment '状态(1-启用/0-禁用)',
+  quality                     string comment '品相（正品、次品）',
+  remark                      string comment '备注',
+  create_user_id              bigint comment '创建用户编码',
+  create_user_name            string comment '创建用户名（冗余）',
+  create_time                 string comment '创建时间',
+  last_update_user_id         bigint comment '最后更新用户编码',
+  last_update_user_name       string comment '最后更新用户名（冗余）',
+  last_update_time            string comment '最后更新时间',
+  deleted                     string comment '软删除',
+  ability_omnichannel_deliver bigint comment '全渠道发货能力',
+  channel_endpoint_code       string comment '渠道终端编码',
+  priority_level              bigint comment '优先级',
+  org_code                    string comment '销售组织编码',
+  ability_division            bigint comment '分货能力',
+  ability_distribution        bigint comment '配货能力',
+  ability_replenishment       bigint comment '补货能力')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_stock_logic SET lifecycle 365;
+
+drop table if exists ods_stock_logic_items;
+create table ods_stock_logic_items(
+  id                    bigint comment 'ID',
+  stock_logic_id        bigint comment '逻辑库存id',
+  owner_channel_code    string comment '货权渠道',
+  sku_code              string comment '商品sku',
+  qty_receivable_send   bigint comment '预收库存待发货数（相对于预收库存）',
+  qty_actual            bigint comment '实际库存数',
+  qty_receivable        bigint comment '预收库存数（可越库数）',
+  qty_pre_deliver       bigint comment '待发货库存数',
+  qty_hold              bigint comment '预留库存数',
+  qty_transit           bigint comment '在途库存数',
+  qty_available         bigint comment '可用库存数',
+  qty_pre_receive       bigint comment '待收货库存数',
+  remark                string comment '备注',
+  create_user_id        bigint comment '创建用户编码',
+  create_user_name      string comment '创建用户名（冗余）',
+  create_time           string comment '创建时间',
+  last_update_user_id   bigint comment '最后更新用户编码',
+  last_update_user_name string comment '最后更新用户名（冗余）',
+  last_update_time      string comment '最后更新时间',
+  deleted               string comment '软删除')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_items SET lifecycle 365;
+
+drop table if exists ods_stock_logic_order_allocate;
+create table ods_stock_logic_order_allocate(
+  id                      bigint comment 'ID',
+  stock_logic_code_in_id  bigint comment '收货逻辑库存id',
+  stock_logic_code_out_id bigint comment '发货逻辑库存id',
+  order_no                string comment '单据编码',
+  business_type           bigint comment '业务类型',
+  order_business_status   bigint comment '单据业务状态',
+  out_status              bigint comment '发货状态',
+  in_status               bigint comment '收货状态',
+  remark                  string comment '备注',
+  create_user_id          bigint comment '创建用户编码',
+  create_user_name        string comment '创建用户名（冗余）',
+  create_time             string comment '创建时间',
+  last_update_user_id     bigint comment '最后更新用户编码',
+  last_update_user_name   string comment '最后更新用户名（冗余）',
+  last_update_time        string comment '最后更新时间',
+  deleted                 string comment '软删除',
+  app_id                  string comment '应用ID',
+  org_code                string comment '销售组织编码',
+  external_order_no       string comment '外部单据编码',
+  order_status            bigint comment '单据状态',
+  responsible_party       bigint comment '承担方(1--发货方,2--收货方)',
+  support_diff            bigint comment '是否支持差异处理(1--支持,0--不支持)',
+  made_order_time         string comment '制单时间',
+  batch_no                string comment '批次号',
+  inventory_control       bigint comment '负库存控制',
+  out_time                string comment '发货时间，第一次发货时间',
+  in_time                 string comment '收货时间，最后一次收货时间',
+  stock_check             bigint comment '发货校验')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_allocate SET lifecycle 365;
+
+drop table if exists ods_stock_logic_order_allocate_items;
+create table ods_stock_logic_order_allocate_items(
+  id                      bigint comment 'ID',
+  logic_order_allocate_id bigint comment '调配单id',
+  owner_channel_code      string comment '货权渠道编码',
+  sku_code                string comment '商品sku',
+  price_retail            double comment '吊牌价',
+  qty_plan                bigint comment '计划数量',
+  qty_reality             bigint comment '实际数量',
+  qty_actual_receive      bigint comment '实际收货数量',
+  app_id                  string comment '应用ID',
+  org_code                string comment '销售组织编码',
+  remark                  string comment '备注',
+  create_user_id          bigint comment '创建用户编码',
+  create_user_name        string comment '创建用户名（冗余）',
+  create_time             string comment '创建时间',
+  last_update_user_id     bigint comment '最后更新用户编码',
+  last_update_user_name   string comment '最后更新用户名（冗余）',
+  last_update_time        string comment '最后更新时间',
+  deleted                 string comment '软删除')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_allocate_items SET lifecycle 365;
+
+drop table if exists ods_stock_logic_order_difference;
+create table ods_stock_logic_order_difference(
+  id                            bigint comment 'ID',
+  logic_order_allocate_id       bigint comment '调配单id',
+  stock_logic_in_id             bigint comment '调入逻辑库存id',
+  stock_logic_out_id            bigint comment '调出逻辑库存id',
+  stock_logic_responsibility_id bigint comment '差异承担逻辑库存id',
+  order_no                      string comment '单据编码',
+  made_order_time               string comment '制单时间',
+  order_status                  bigint comment '单据状态',
+  app_id                        string comment '应用ID',
+  org_code                      string comment '品牌编码',
+  remark                        string comment '备注',
+  create_user_id                bigint comment '创建用户编码',
+  create_user_name              string comment '创建用户名（冗余）',
+  create_time                   string comment '创建时间',
+  last_update_user_id           bigint comment '最后更新用户编码',
+  last_update_user_name         string comment '最后更新用户名（冗余）',
+  last_update_time              string comment '最后更新时间',
+  deleted                       string comment '软删除',
+  external_order_no             string comment '外部单据编码',
+  inventory_control             bigint comment '负库存控制')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_difference SET lifecycle 365;
+
+drop table if exists ods_stock_logic_order_difference_items;
+create table ods_stock_logic_order_difference_items(
+  id                        bigint comment 'ID',
+  logic_order_difference_id bigint comment '收发差异单(逻辑层)id',
+  owner_channel_code        string comment '货权渠道编码',
+  sku_code                  string comment '商品sku',
+  difference_type           bigint comment '差异类型',
+  qty_difference            bigint comment '差异数量',
+  app_id                    string comment '应用ID',
+  org_code                  string comment '品牌编码',
+  remark                    string comment '备注',
+  create_user_id            bigint comment '创建用户编码',
+  create_user_name          string comment '创建用户名（冗余）',
+  create_time               string comment '创建时间',
+  last_update_user_id       bigint comment '最后更新用户编码',
+  last_update_user_name     string comment '最后更新用户名（冗余）',
+  last_update_time          string comment '最后更新时间',
+  deleted                   string comment '软删除')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_difference_items SET lifecycle 365;
+
+drop table if exists ods_stock_logic_order_disposal;
+create table ods_stock_logic_order_disposal(
+  id                    bigint comment 'ID',
+  stock_logic_id        bigint comment '逻辑库存id',
+  business_type         bigint comment '业务类型',
+  order_no              string comment '单据编码',
+  order_status          bigint comment '单据状态',
+  order_business_status bigint comment '单据业务状态',
+  process_type          bigint comment '处理类型（内部/外部处理）',
+  delivery_mode         bigint comment '配送方式（物流、自提、快递）',
+  express_company       string comment '快递公司',
+  express_waybill_no    string comment '快递运单号',
+  receiver_id           bigint comment '收货方信息(关联联系人信息表)',
+  sender_id             bigint comment '发货方信息(关联联系人信息表)',
+  app_id                string comment '应用ID',
+  org_code              string comment '销售组织编码',
+  remark                string comment '备注',
+  create_user_id        bigint comment '创建用户编码',
+  create_user_name      string comment '创建用户名（冗余）',
+  create_time           string comment '创建时间',
+  last_update_user_id   bigint comment '最后更新用户编码',
+  last_update_user_name string comment '最后更新用户名（冗余）',
+  last_update_time      string comment '最后更新时间',
+  deleted               string comment '软删除',
+  external_order_no     string comment '外部单据编码',
+  inventory_control     bigint comment '负库存控制',
+  made_order_time       string comment '制单时间')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_disposal SET lifecycle 365;
+
+drop table if exists ods_stock_logic_order_disposal_items;
+create table ods_stock_logic_order_disposal_items(
+  id                      bigint comment 'ID',
+  logic_order_disposal_id bigint comment '库存处置单id',
+  owner_channel_code      string comment '货权渠道编码',
+  sku_code                string comment '商品sku',
+  qty_disposalable        bigint comment '计划处置商品数量',
+  qty_disposaled          bigint comment '实际处置商品数量',
+  app_id                  string comment '应用ID',
+  org_code                string comment '销售组织编码',
+  remark                  string comment '备注',
+  create_user_id          bigint comment '创建用户编码',
+  create_user_name        string comment '创建用户名（冗余）',
+  create_time             string comment '创建时间',
+  last_update_user_id     bigint comment '最后更新用户编码',
+  last_update_user_name   string comment '最后更新用户名（冗余）',
+  last_update_time        string comment '最后更新时间',
+  deleted                 string comment '软删除')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_disposal_items SET lifecycle 365;
+
+drop table if exists ods_stock_logic_order_in;
+create table ods_stock_logic_order_in(
+  id                           bigint comment 'ID',
+  logic_order_in_notify_id     bigint comment '收货通知单id',
+  physical_order_in_id         bigint comment '入库结果单id',
+  stock_logic_id               bigint comment '逻辑库存id',
+  order_no                     string comment '单据编码',
+  order_status                 bigint comment '单据状态',
+  order_business_status        bigint comment '单据业务状态',
+  in_type                      bigint comment '入库类型(实收、预收)',
+  business_order_business_type bigint comment '业务单据业务类型',
+  business_order_no            string comment '业务单据编码',
+  made_order_time              string comment '制单时间',
+  online_store_order_no        string comment '网店单号',
+  delivery_mode                bigint comment '配送方式（物流、自提、快递）',
+  express_company              string comment '快递公司',
+  express_waybill_no           string comment '快递运单号',
+  receiver_id                  bigint comment '收货方信息(关联联系人信息表)',
+  sender_id                    bigint comment '发货方信息(关联联系人信息表)',
+  app_id                       string comment '应用ID',
+  org_code                     string comment '销售组织编码',
+  remark                       string comment '备注',
+  create_user_id               bigint comment '创建用户编码',
+  create_user_name             string comment '创建用户名（冗余）',
+  create_time                  string comment '创建时间',
+  last_update_user_id          bigint comment '最后更新用户编码',
+  last_update_user_name        string comment '最后更新用户名（冗余）',
+  last_update_time             string comment '最后更新时间',
+  deleted                      string comment '软删除',
+  external_order_no            string comment '外部单据编码',
+  logic_order_in_notify_no     string comment '收货通知单编码',
+  business_order_type          bigint comment '业务单据类型')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_in SET lifecycle 365;
+
+drop table if exists ods_stock_logic_order_in_items;
+create table ods_stock_logic_order_in_items(
+  id                    bigint comment 'ID',
+  logic_order_in_id     bigint comment '收货结果单id',
+  owner_channel_code    string comment '货权渠道编码',
+  sku_code              string comment '商品sku',
+  qty_receivable        bigint comment '计划入库数',
+  qty_received          bigint comment '实际入库数',
+  qty_receive_max       bigint comment '最大可收数',
+  qty_receive_plan      bigint comment '预收数',
+  qty_receive_send      bigint comment '预收消费数',
+  app_id                string comment '应用ID',
+  org_code              string comment '销售组织编码',
+  remark                string comment '备注',
+  create_user_id        bigint comment '创建用户编码',
+  create_user_name      string comment '创建用户名（冗余）',
+  create_time           string comment '创建时间',
+  last_update_user_id   bigint comment '最后更新用户编码',
+  last_update_user_name string comment '最后更新用户名（冗余）',
+  last_update_time      string comment '最后更新时间',
+  deleted               string comment '软删除')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_in_items SET lifecycle 365;
+
+drop table if exists ods_stock_logic_order_in_notify;
+create table ods_stock_logic_order_in_notify(
+  id                           bigint comment 'ID',
+  stock_logic_id               bigint comment '逻辑库存id',
+  order_no                     string comment '单据编码',
+  business_order_business_type bigint comment '业务单据业务类型',
+  business_order_no            string comment '业务单据编码',
+  made_order_time              string comment '制单时间',
+  order_status                 bigint comment '单据状态',
+  order_business_status        bigint comment '单据业务状态',
+  process_type                 bigint comment '处理类型（内部/外部处理）',
+  delivery_mode                bigint comment '配送方式（物流、自提、快递）',
+  express_company              string comment '快递公司',
+  express_waybill_no           string comment '快递运单号',
+  receiver_id                  bigint comment '收货方信息(关联联系人信息表)',
+  sender_id                    bigint comment '发货方信息(关联联系人信息表)',
+  app_id                       string comment '应用ID',
+  org_code                     string comment '销售组织编码',
+  remark                       string comment '备注',
+  create_user_id               bigint comment '创建用户编码',
+  create_user_name             string comment '创建用户名（冗余）',
+  create_time                  string comment '创建时间',
+  last_update_user_id          bigint comment '最后更新用户编码',
+  last_update_user_name        string comment '最后更新用户名（冗余）',
+  last_update_time             string comment '最后更新时间',
+  deleted                      string comment '软删除',
+  online_store_order_no        string comment '网店单号',
+  external_order_no            string comment '外部单据编码',
+  stock_logic_id_out           bigint comment '发货逻辑仓id',
+  business_order_type          bigint comment '业务单据类型')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_in_notify SET lifecycle 365;
+
+drop table if exists ods_stock_logic_order_in_notify_items;
+create table ods_stock_logic_order_in_notify_items(
+  id                       bigint comment 'ID',
+  logic_order_in_notify_id bigint comment '收货通知单id',
+  owner_channel_code       string comment '货权渠道编码',
+  sku_code                 string comment '商品sku',
+  qty_receivable           bigint comment '计划收货数（应收）',
+  qty_received             bigint comment '实际收货数（实际入库）',
+  qty_receive_max          bigint comment '最大可收数',
+  qty_receive_plan         bigint comment '预收数（越库）',
+  qty_receive_send         bigint comment '预收消费数（越库）',
+  app_id                   string comment '应用ID',
+  org_code                 string comment '销售组织编码',
+  remark                   string comment '备注',
+  create_user_id           bigint comment '创建用户编码',
+  create_user_name         string comment '创建用户名（冗余）',
+  create_time              string comment '创建时间',
+  last_update_user_id      bigint comment '最后更新用户编码',
+  last_update_user_name    string comment '最后更新用户名（冗余）',
+  last_update_time         string comment '最后更新时间',
+  deleted                  string comment '软删除')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_in_notify_items SET lifecycle 365;
+
+drop table if exists ods_stock_logic_order_out;
+create table ods_stock_logic_order_out(
+  id                           bigint comment 'ID',
+  stock_logic_id               bigint comment '逻辑库区id',
+  logic_order_out_notify_id    bigint comment '发货通知单id',
+  physical_order_out_id        bigint comment '出库结果单id',
+  order_no                     string comment '单据编码',
+  order_status                 bigint comment '单据状态',
+  order_business_status        bigint comment '单据业务状态',
+  business_order_business_type bigint comment '业务单据业务类型',
+  business_order_no            string comment '业务单据编码',
+  made_order_time              string comment '制单时间',
+  online_store_order_no        string comment '网店单号',
+  process_type                 bigint comment '处理类型（内部/外部处理）',
+  delivery_mode                bigint comment '配送方式（物流、自提、快递）',
+  express_company              string comment '快递公司',
+  express_waybill_no           string comment '快递运单号',
+  receiver_id                  bigint comment '收货方信息(关联联系人信息表)',
+  sender_id                    bigint comment '发货方信息(关联联系人信息表)',
+  app_id                       string comment '应用ID',
+  org_code                     string comment '销售组织编码',
+  remark                       string comment '备注',
+  create_user_id               bigint comment '创建用户编码',
+  create_user_name             string comment '创建用户名（冗余）',
+  create_time                  string comment '创建时间',
+  last_update_user_id          bigint comment '最后更新用户编码',
+  last_update_user_name        string comment '最后更新用户名（冗余）',
+  last_update_time             string comment '最后更新时间',
+  deleted                      string comment '软删除',
+  external_order_no            string comment '外部单据编码',
+  logic_order_out_notify_no    string comment '发货通知单编码',
+  inventory_control            bigint comment '负库存控制',
+  business_order_type          bigint comment '业务单据类型')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_out SET lifecycle 365;
+
+drop table if exists ods_stock_logic_order_out_items;
+create table ods_stock_logic_order_out_items(
+  id                    bigint comment 'ID',
+  logic_order_out_id    bigint comment '发货结果单id',
+  sku_code              string comment '商品sku',
+  owner_channel_code    string comment '货权渠道编码',
+  qty_sendable          bigint comment '计划出库数量',
+  qty_sended            bigint comment '实际出库数量',
+  app_id                string comment '应用ID',
+  org_code              string comment '销售组织编码',
+  remark                string comment '备注',
+  create_user_id        bigint comment '创建用户编码',
+  create_user_name      string comment '创建用户名（冗余）',
+  create_time           string comment '创建时间',
+  last_update_user_id   bigint comment '最后更新用户编码',
+  last_update_user_name string comment '最后更新用户名（冗余）',
+  last_update_time      string comment '最后更新时间',
+  deleted               string comment '软删除')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_out_items SET lifecycle 365;
+
+drop table if exists ods_stock_logic_order_out_notify;
+create table ods_stock_logic_order_out_notify(
+  id                           bigint comment 'ID',
+  stock_logic_id               bigint comment '逻辑仓库id',
+  order_no                     string comment '单据编码',
+  order_status                 bigint comment '单据状态',
+  order_business_status        bigint comment '单据业务状态',
+  order_hangup_status          bigint comment '单据挂起状态',
+  business_order_business_type bigint comment '业务单据业务类型',
+  business_order_no            string comment '业务单据编码',
+  made_order_time              string comment '制单时间',
+  process_type                 bigint comment '处理类型（内部/外部处理）',
+  delivery_mode                bigint comment '配送方式（物流、自提、快递）',
+  express_company              string comment '快递公司',
+  express_waybill_no           string comment '快递运单号',
+  receiver_id                  bigint comment '收货方信息',
+  sender_id                    bigint comment '发货方信息',
+  app_id                       string comment '应用ID',
+  org_code                     string comment '销售组织编码',
+  remark                       string comment '备注',
+  create_user_id               bigint comment '创建用户编码',
+  create_user_name             string comment '创建用户名（冗余）',
+  create_time                  string comment '创建时间',
+  last_update_user_id          bigint comment '最后更新用户编码',
+  last_update_user_name        string comment '最后更新用户名（冗余）',
+  last_update_time             string comment '最后更新时间',
+  deleted                      string comment '软删除',
+  online_store_order_no        string comment '网店单号',
+  external_order_no            string comment '外部单据编码',
+  inventory_control            bigint comment '负库存控制',
+  stock_logic_id_in            bigint comment '收货逻辑仓id',
+  business_order_type          bigint comment '业务单据类型',
+  stock_check                  bigint comment '发货校验')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_out_notify SET lifecycle 365;
+
+drop table if exists ods_stock_logic_order_out_notify_items;
+create table ods_stock_logic_order_out_notify_items(
+  id                        bigint comment 'ID',
+  logic_order_out_notify_id bigint comment '发货通知单id',
+  owner_channel_code        string comment '货权渠道编码',
+  sku_code                  string comment '商品sku',
+  qty_sendable              bigint comment '计划发货数量',
+  qty_sended                bigint comment '实际发货数量',
+  app_id                    string comment '应用ID',
+  org_code                  string comment '销售组织编码',
+  remark                    string comment '备注',
+  create_user_id            bigint comment '创建用户编码',
+  create_user_name          string comment '创建用户名（冗余）',
+  create_time               string comment '创建时间',
+  last_update_user_id       bigint comment '最后更新用户编码',
+  last_update_user_name     string comment '最后更新用户名（冗余）',
+  last_update_time          string comment '最后更新时间',
+  deleted                   string comment '软删除')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_stock_logic_order_out_notify_items SET lifecycle 365;
+
+drop table if exists ods_person_address;
+create table ods_person_address(
+  id                    bigint comment 'ID',
+  country               string comment '国家',
+  province              string comment '省份',
+  city                  string comment '城市',
+  area_code             string comment '地区编码',
+  area                  string comment '地区',
+  street_code           string comment '街道编码',
+  street                string comment '街道',
+  address               string comment '详细地址',
+  name                  string comment '联系人姓名',
+  contact               string comment '联系电话',
+  zip                   bigint comment '邮政编码',
+  remark                string comment '备注',
+  create_user_id        string comment '创建用户编码',
+  create_user_name      string comment '创建用户名（冗余）',
+  create_time           string comment '创建时间',
+  last_update_user_id   string comment '最后更新用户编码',
+  last_update_user_name string comment '最后更新用户名（冗余）',
+  last_update_time      string comment '最后更新时间',
+  deleted               string comment '软删除',
+  country_code          string comment '国家编码',
+  province_code         string comment '省份编码',
+  city_code             string comment '渠道编码',
+  tel                   string comment '电话')
+comment '' partitioned by(
+  ds string comment '时间分区');
+ALTER TABLE ods_person_address SET lifecycle 365;

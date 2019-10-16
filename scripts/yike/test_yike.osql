@@ -1,0 +1,1581 @@
+create table if not exists ods_(  comment '')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_address(id bigint comment 'ID
+',country_code string comment '国家编码
+',country string comment '国家
+',province_code string comment '省份编码
+',province string comment '省份
+',city_code string comment '城市编码
+',city string comment '城市
+',area_code string comment '地区编码
+',area string comment '地区
+',street_code string comment '街道编码
+',street string comment '街道
+',address string comment '详细地址
+',zip bigint comment '邮政编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_channel(id bigint comment 'ID
+',stock_channel_code string comment '渠道库存编码
+',stock_channel_name string comment '渠道库存名称
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',rel_type bigint comment '关联类型（标签）
+',status string comment '状态(1-启用/0-禁用)
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_channel_endpoint_rel(id bigint comment 'ID
+',stock_channel_id bigint comment '渠道库存id
+',channel_endpoint_code string comment '销售渠道终端编码
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_channel_hold(id bigint comment 'ID
+',stock_channel_id bigint comment '渠道库存id
+',order_type bigint comment '单据类型
+',order_no string comment '单据编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',external_order_no string comment '外部单据编码
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_channel_hold_items(id bigint comment 'ID
+',channel_hold_id bigint comment '渠道库存商品预占表id
+',sku_code string comment '商品sku
+',qty_hold bigint comment '预占数量
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_channel_hold_records(id bigint comment 'ID
+',channel_hold_order_no string comment '渠道库存预占单编码
+',business_order_no string comment '业务单据编码
+',external_order_no string comment '外部单据编码
+',sku_code string comment '商品sku
+',item_key string comment '商品sku预占唯一key
+',hold_status bigint comment '预占状态
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_channel_items(id bigint comment 'ID
+',stock_channel_id bigint comment '渠道库存id
+',sku_code string comment '商品sku
+',qty_available bigint comment '可用库存数
+',qty_occupy bigint comment '库存占用数
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic(id bigint comment 'ID
+',stock_physical_id bigint comment '物理库区id
+',stock_logic_code string comment '逻辑库存编码
+',stock_logic_name string comment '逻辑仓库名称
+',manager_channel_code string comment '管理渠道
+',stock_type string comment '仓库类型(主仓/副仓)
+',ability_sell bigint comment '销售能力
+',ability_purchase bigint comment '采购能力
+',ability_transfer bigint comment '调拨能力
+',ability_inventory bigint comment '盘点能力
+',ability_reject bigint comment '退货能力
+',ability_hold_for_store bigint comment '预留能力
+',ability_hold_for_sell bigint comment '预售能力
+',ability_exceed bigint comment '越库能力
+',status string comment '状态(1-启用/0-禁用)
+',quality string comment '品相（正品、次品）
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',ability_omnichannel_deliver bigint comment '全渠道发货能力
+',channel_endpoint_code string comment '渠道终端编码
+',priority_level bigint comment '优先级
+',org_code string comment '销售组织编码
+',ability_division bigint comment '分货能力
+',ability_distribution bigint comment '配货能力
+',ability_replenishment bigint comment '补货能力
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_ability_ext(id bigint comment 'ID
+',stock_logic_id bigint comment '逻辑库存id
+',description string comment '显示名称
+',ext_key bigint comment '扩展能力类型
+',ext_value string comment '扩展能力
+',remark string comment '备注
+',create_user_id string comment '创建用户编码
+',create_user string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id string comment '最后更新用户编码
+',last_update_user string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_hold(id bigint comment 'ID
+',stock_logic_id bigint comment '逻辑库存id
+',business_order_no string comment '业务单据编码
+',business_order_type bigint comment '业务单据类型
+',hold_status bigint comment '预占状态
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_hold_items(id bigint comment 'ID
+',logic_hold_id bigint comment '逻辑库存商品预占表id
+',owner_channel_code string comment '货权渠道编码
+',sku_code string comment '商品sku
+',qty_hold bigint comment '预占数量
+',hold_type bigint comment '预占类型
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_items(id bigint comment 'ID
+',stock_logic_id bigint comment '逻辑库存id
+',owner_channel_code string comment '货权渠道
+',sku_code string comment '商品sku
+',qty_receivable_send bigint comment '预收库存待发货数（相对于预收库存）
+',qty_actual bigint comment '实际库存数
+',qty_receivable bigint comment '预收库存数（可越库数）
+',qty_pre_deliver bigint comment '待发货库存数
+',qty_hold bigint comment '预留库存数
+',qty_transit bigint comment '在途库存数
+',qty_available bigint comment '可用库存数
+',qty_pre_receive bigint comment '待收货库存数
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_items_channel_redo(id bigint comment 'id
+',stock_logic_id bigint comment '逻辑仓ID
+',sku_code string comment '商品sku
+',remark string comment '
+',trans_flag string comment '传输标记
+',beg_time string comment '开始时间
+',finish_time string comment '完成时间
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_items_logs(id bigint comment 'ID
+',stock_logic_id bigint comment '逻辑库存id
+',business_order_no string comment '业务单据编码
+',order_no string comment '单据编码
+',order_type bigint comment '单据类型
+',sku_code string comment '商品sku
+',qty bigint comment '变化量
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',owner_channel_code string comment '货权渠道
+',ref_order_id bigint comment '
+',qty_receivable_send_before bigint comment '预收库存待发货数（相对于预收库存）_之前
+',qty_actual_before bigint comment '实际库存数_之前
+',qty_receivable_before bigint comment '预收库存数（可越库数）_之前
+',qty_pre_deliver_before bigint comment '待发货库存数_之前
+',qty_hold_before bigint comment '预留库存数_之前
+',qty_transit_before bigint comment '在途库存数_之前
+',qty_available_before bigint comment '可用库存数_之前
+',qty_pre_receive_before bigint comment '待收货库存数_之前
+',qty_receivable_send bigint comment '预收库存待发货数（相对于预收库存）_之后
+',qty_actual bigint comment '实际库存数_之后
+',qty_receivable bigint comment '预收库存数（可越库数）_之后
+',qty_pre_deliver bigint comment '待发货库存数_之后
+',qty_hold bigint comment '预留库存数_之后
+',qty_transit bigint comment '在途库存数_之后
+',qty_available bigint comment '可用库存数_之后
+',qty_pre_receive bigint comment '待收货库存数_之后
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_items_special_logs(id bigint comment 'ID
+',stock_logic_id bigint comment '逻辑库存id
+',sku_code string comment '商品sku
+',owner_channel_code string comment '货权渠道编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_order_adjustment(id bigint comment 'ID
+',stock_logic_id bigint comment '逻辑仓id
+',order_no string comment '单据编码
+',order_business_status bigint comment '单据业务状态
+',order_status bigint comment '单据状态
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',external_order_no string comment '外部单据编码
+',inventory_control bigint comment '负库存控制
+',made_order_time string comment '制单时间
+',audit_time string comment '审核时间
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_order_adjustment_items(id bigint comment 'ID
+',logic_order_adjustment_id bigint comment '库存调整单id
+',sku_code string comment '商品sku
+',qty_adjustment bigint comment '变动数量（有正负）
+',app_id string comment '应用ID
+',org_code string comment '销售组织
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',owner_channel_code string comment '货权渠道编码
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_order_allocate(id bigint comment 'ID
+',stock_logic_code_in_id bigint comment '收货逻辑库存id
+',stock_logic_code_out_id bigint comment '发货逻辑库存id
+',order_no string comment '单据编码
+',business_type bigint comment '业务类型
+',order_business_status bigint comment '单据业务状态
+',out_status bigint comment '发货状态
+',in_status bigint comment '收货状态
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',external_order_no string comment '外部单据编码
+',order_status bigint comment '单据状态
+',responsible_party bigint comment '承担方(1--发货方,2--收货方)
+',support_diff bigint comment '是否支持差异处理(1--支持,0--不支持)
+',made_order_time string comment '制单时间
+',batch_no string comment '批次号
+',inventory_control bigint comment '负库存控制
+',out_time string comment '发货时间，第一次发货时间
+',in_time string comment '收货时间，最后一次收货时间
+',stock_check bigint comment '发货校验
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_order_allocate_items(id bigint comment 'ID
+',logic_order_allocate_id bigint comment '调配单id
+',owner_channel_code string comment '货权渠道编码
+',sku_code string comment '商品sku
+',price_retail double comment '吊牌价
+',qty_plan bigint comment '计划数量
+',qty_reality bigint comment '实际数量
+',qty_actual_receive bigint comment '实际收货数量
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_order_allocate_logs(id bigint comment 'ID
+',content_order  comment '单据内容
+',content_items  comment '单据商品内容
+',order_no string comment '单据编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_order_difference(id bigint comment 'ID
+',logic_order_allocate_id bigint comment '调配单id
+',stock_logic_in_id bigint comment '调入逻辑库存id
+',stock_logic_out_id bigint comment '调出逻辑库存id
+',stock_logic_responsibility_id bigint comment '差异承担逻辑库存id
+',order_no string comment '单据编码
+',made_order_time string comment '制单时间
+',order_status bigint comment '单据状态
+',app_id string comment '应用ID
+',org_code string comment '品牌编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',external_order_no string comment '外部单据编码
+',inventory_control bigint comment '负库存控制
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_order_difference_items(id bigint comment 'ID
+',logic_order_difference_id bigint comment '收发差异单(逻辑层)id
+',owner_channel_code string comment '货权渠道编码
+',sku_code string comment '商品sku
+',difference_type bigint comment '差异类型
+',qty_difference bigint comment '差异数量
+',app_id string comment '应用ID
+',org_code string comment '品牌编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_order_disposal(id bigint comment 'ID
+',stock_logic_id bigint comment '逻辑库存id
+',business_type bigint comment '业务类型
+',order_no string comment '单据编码
+',order_status bigint comment '单据状态
+',order_business_status bigint comment '单据业务状态
+',process_type bigint comment '处理类型（内部/外部处理）
+',delivery_mode bigint comment '配送方式（物流、自提、快递）
+',express_company string comment '快递公司
+',express_waybill_no string comment '快递运单号
+',receiver_id bigint comment '收货方信息(关联联系人信息表)
+',sender_id bigint comment '发货方信息(关联联系人信息表)
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',external_order_no string comment '外部单据编码
+',inventory_control bigint comment '负库存控制
+',made_order_time string comment '制单时间
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_order_disposal_items(id bigint comment 'ID
+',logic_order_disposal_id bigint comment '库存处置单id
+',owner_channel_code string comment '货权渠道编码
+',sku_code string comment '商品sku
+',qty_disposalable bigint comment '计划处置商品数量
+',qty_disposaled bigint comment '实际处置商品数量
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_order_in(id bigint comment 'ID
+',logic_order_in_notify_id bigint comment '收货通知单id
+',physical_order_in_id bigint comment '入库结果单id
+',stock_logic_id bigint comment '逻辑库存id
+',order_no string comment '单据编码
+',order_status bigint comment '单据状态
+',order_business_status bigint comment '单据业务状态
+',in_type bigint comment '入库类型(实收、预收)
+',business_order_business_type bigint comment '业务单据业务类型
+',business_order_no string comment '业务单据编码
+',made_order_time string comment '制单时间
+',online_store_order_no string comment '网店单号
+',delivery_mode bigint comment '配送方式（物流、自提、快递）
+',express_company string comment '快递公司
+',express_waybill_no string comment '快递运单号
+',receiver_id bigint comment '收货方信息(关联联系人信息表)
+',sender_id bigint comment '发货方信息(关联联系人信息表)
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',external_order_no string comment '外部单据编码
+',logic_order_in_notify_no string comment '收货通知单编码
+',business_order_type bigint comment '业务单据类型
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_order_in_items(id bigint comment 'ID
+',logic_order_in_id bigint comment '收货结果单id
+',owner_channel_code string comment '货权渠道编码
+',sku_code string comment '商品sku
+',qty_receivable bigint comment '计划入库数
+',qty_received bigint comment '实际入库数
+',qty_receive_max bigint comment '最大可收数
+',qty_receive_plan bigint comment '预收数
+',qty_receive_send bigint comment '预收消费数
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_order_in_notify(id bigint comment 'ID
+',stock_logic_id bigint comment '逻辑库存id
+',order_no string comment '单据编码
+',business_order_business_type bigint comment '业务单据业务类型
+',business_order_no string comment '业务单据编码
+',made_order_time string comment '制单时间
+',order_status bigint comment '单据状态
+',order_business_status bigint comment '单据业务状态
+',process_type bigint comment '处理类型（内部/外部处理）
+',delivery_mode bigint comment '配送方式（物流、自提、快递）
+',express_company string comment '快递公司
+',express_waybill_no string comment '快递运单号
+',receiver_id bigint comment '收货方信息(关联联系人信息表)
+',sender_id bigint comment '发货方信息(关联联系人信息表)
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',online_store_order_no string comment '网店单号
+',external_order_no string comment '外部单据编码
+',stock_logic_id_out bigint comment '发货逻辑仓id
+',business_order_type bigint comment '业务单据类型
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_order_in_notify_items(id bigint comment 'ID
+',logic_order_in_notify_id bigint comment '收货通知单id
+',owner_channel_code string comment '货权渠道编码
+',sku_code string comment '商品sku
+',qty_receivable bigint comment '计划收货数（应收）
+',qty_received bigint comment '实际收货数（实际入库）
+',qty_receive_max bigint comment '最大可收数
+',qty_receive_plan bigint comment '预收数（越库）
+',qty_receive_send bigint comment '预收消费数（越库）
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_order_out(id bigint comment 'ID
+',stock_logic_id bigint comment '逻辑库区id
+',logic_order_out_notify_id bigint comment '发货通知单id
+',physical_order_out_id bigint comment '出库结果单id
+',order_no string comment '单据编码
+',order_status bigint comment '单据状态
+',order_business_status bigint comment '单据业务状态
+',business_order_business_type bigint comment '业务单据业务类型
+',business_order_no string comment '业务单据编码
+',made_order_time string comment '制单时间
+',online_store_order_no string comment '网店单号
+',process_type bigint comment '处理类型（内部/外部处理）
+',delivery_mode bigint comment '配送方式（物流、自提、快递）
+',express_company string comment '快递公司
+',express_waybill_no string comment '快递运单号
+',receiver_id bigint comment '收货方信息(关联联系人信息表)
+',sender_id bigint comment '发货方信息(关联联系人信息表)
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',external_order_no string comment '外部单据编码
+',logic_order_out_notify_no string comment '发货通知单编码
+',inventory_control bigint comment '负库存控制
+',business_order_type bigint comment '业务单据类型
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_order_out_items(id bigint comment 'ID
+',logic_order_out_id bigint comment '发货结果单id
+',sku_code string comment '商品sku
+',owner_channel_code string comment '货权渠道编码
+',qty_sendable bigint comment '计划出库数量
+',qty_sended bigint comment '实际出库数量
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_order_out_notify(id bigint comment 'ID
+',stock_logic_id bigint comment '逻辑仓库id
+',order_no string comment '单据编码
+',order_status bigint comment '单据状态
+',order_business_status bigint comment '单据业务状态
+',order_hangup_status bigint comment '单据挂起状态
+',business_order_business_type bigint comment '业务单据业务类型
+',business_order_no string comment '业务单据编码
+',made_order_time string comment '制单时间
+',process_type bigint comment '处理类型（内部/外部处理）
+',delivery_mode bigint comment '配送方式（物流、自提、快递）
+',express_company string comment '快递公司
+',express_waybill_no string comment '快递运单号
+',receiver_id bigint comment '收货方信息
+',sender_id bigint comment '发货方信息
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',online_store_order_no string comment '网店单号
+',external_order_no string comment '外部单据编码
+',inventory_control bigint comment '负库存控制
+',stock_logic_id_in bigint comment '收货逻辑仓id
+',business_order_type bigint comment '业务单据类型
+',stock_check bigint comment '发货校验
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_order_out_notify_items(id bigint comment 'ID
+',logic_order_out_notify_id bigint comment '发货通知单id
+',owner_channel_code string comment '货权渠道编码
+',sku_code string comment '商品sku
+',qty_sendable bigint comment '计划发货数量
+',qty_sended bigint comment '实际发货数量
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_order_reserve(id bigint comment 'ID
+',stock_logic_id bigint comment '逻辑库存id
+',order_no string comment '单据编码
+',order_status bigint comment '单据状态
+',order_business_status bigint comment '单据业务状态
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',external_order_no string comment '外部单据编码
+',effect_time string comment '生效时间
+',failure_time string comment '失效时间
+',inventory_control bigint comment '负库存控制
+',made_order_time string comment '制单时间
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_logic_order_reserve_items(id bigint comment 'ID
+',logic_order_reserve_id bigint comment '预留单id
+',owner_channel_code string comment '货权渠道编码
+',sku_code string comment '商品sku
+',qty_pre_hold bigint comment '预留商品数量
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_order_temp(id bigint comment 'ID
+',order_kind bigint comment '单据类型
+',content  comment '单据内容
+',order_no string comment '单据编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_physical(id bigint comment 'ID
+',stock_physical_code string comment '物理库区编码
+',stock_physical_name string comment '物理库区名称
+',stock_physical_warehouse_id bigint comment '关联物理仓库id
+',business_type string comment '业务形态
+',deliver_period bigint comment '发货周期
+',operating_hours_start string comment '作业起始时间
+',operating_hours_close string comment '作业结束时间
+',manager_name string comment '管理员姓名
+',contract string comment '联系电话
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',status string comment '状态(1启用/0禁用)
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_physical_items(id bigint comment 'ID
+',stock_physical_id bigint comment '物理库区id
+',sku_code string comment '商品sku
+',qty_receivable bigint comment '预收库存数
+',qty_received bigint comment '实际库存数
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_physical_items_logs(id bigint comment 'ID
+',stock_physical_id bigint comment '物理库区id
+',business_order_no string comment '业务单据编码
+',online_store_order_no string comment '网店单据编码
+',order_no string comment '单据编码
+',order_type bigint comment '单据类型
+',sku_code string comment '商品sku
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',ref_order_id bigint comment '
+',qty bigint comment '变化量_之前
+',qty_receivable_before bigint comment '预收库存数_之前
+',qty_received_before bigint comment '实际库存数_之前
+',qty_receivable bigint comment '预收库存数
+',qty_received bigint comment '实际库存数
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_physical_order_in(id bigint comment 'ID
+',stock_physical_id bigint comment '物理库区id
+',physical_order_in_notify_id bigint comment '入库通知单id
+',order_no string comment '单据编码
+',order_status bigint comment '单据状态
+',order_business_status bigint comment '单据业务状态
+',in_type bigint comment '入库类型(实收、预收)
+',business_order_business_type bigint comment '业务单据业务类型
+',business_order_no string comment '业务单据编码
+',made_order_time string comment '制单时间
+',online_store_order_no string comment '网店单号
+',delivery_mode bigint comment '配送方式（物流、自提、快递）
+',express_company string comment '快递公司
+',express_waybill_no string comment '快递运单号
+',receiver_id bigint comment '收货方信息(关联联系人信息表)
+',sender_id bigint comment '发货方信息(关联联系人信息表)
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',external_order_no string comment '外部单据编码
+',physical_order_in_notify_no string comment '入库通知单编码
+',business_order_type bigint comment '业务单据类型
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_physical_order_inventory(id bigint comment 'ID
+',stock_physical_id bigint comment '物理库区id
+',order_no string comment '单据编码
+',business_type bigint comment '盘点类型（全盘、部分盘）
+',made_order_time string comment '制单时间
+',order_business_status bigint comment '单据业务状态
+',order_status bigint comment '单据状态
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',inventory_logic_id bigint comment '盘点生效逻辑仓库id
+',external_inventory_code string comment '外部盘点单据编码
+',effect_status bigint comment '生效状态
+',adjust_type bigint comment '库存调整类型
+',inventory_control bigint comment '负库存控制
+',audit_time string comment '审核时间
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_physical_order_inventory_items(id bigint comment 'ID
+',physical_order_inventory_id bigint comment '盘点通知单id
+',sku_code string comment '商品sku
+',price_retail double comment '吊牌价（去商品中心查）
+',qty_store bigint comment '账面商品数量
+',qty_reality bigint comment '实际商品数量（回写才有的）
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',qty_change bigint comment '差异数
+',qty_scanning bigint comment '扫码数
+',compensation_price double comment '折损单价
+',compensation_rate double comment '折损价比例(对比吊牌价)
+',compensation_base_on string comment '基于什么进行折损计价
+',compensation_base_on_desc string comment '折损计价选取规则描述
+',owner_channel_code string comment '货权渠道编码
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_physical_order_in_items(id bigint comment 'ID
+',physical_order_in_id bigint comment '入库结果单id
+',sku_code string comment '商品sku
+',qty_receivable bigint comment '计划入库数
+',qty_received bigint comment '实际入库数
+',qty_receive_max bigint comment '最大可收数
+',qty_receive_plan bigint comment '预收数
+',qty_receive_send bigint comment '预收消费数
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_physical_order_in_notify(id bigint comment 'ID
+',stock_physical_id bigint comment '物理库区id
+',logic_order_in_notify_id bigint comment '收货通知单id
+',order_no string comment '单据编码（库存中心生成）
+',order_status bigint comment '单据状态
+',order_business_status bigint comment '单据业务状态
+',business_order_business_type bigint comment '业务单据业务类型
+',business_order_no string comment '业务单据编码
+',made_order_time string comment '制单时间
+',online_store_order_no string comment '网店单号
+',process_type bigint comment '处理类型（内部/外部处理）
+',delivery_mode bigint comment '配送方式（物流、自提、快递）
+',express_company string comment '快递公司
+',express_waybill_no string comment '快递运单号
+',receiver_id bigint comment '收货方信息(关联联系人信息表)
+',sender_id bigint comment '发货方信息(关联联系人信息表)
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',external_order_no string comment '外部单据编码
+',logic_order_in_notify_no string comment '收货通知单编码
+',business_order_type bigint comment '业务单据类型
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_physical_order_in_notify_items(id bigint comment 'ID
+',physical_order_in_notify_id bigint comment '入库通知单id
+',sku_code string comment '商品sku
+',qty_receivable bigint comment '计划入库数（应收）
+',qty_received bigint comment '实际入库数（实际入库）
+',qty_receive_max bigint comment '最大可收数
+',qty_receive_plan bigint comment '预收数（越库）
+',qty_receive_send bigint comment '预收消费数（越库）
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_physical_order_moving(id bigint comment 'ID
+',order_no string comment '单据编码
+',out_physical_id bigint comment '移出物理库区id
+',in_physical_id bigint comment '移入物理库区id
+',out_time string comment '移出时间
+',in_time string comment '移入时间
+',order_business_status bigint comment '单据业务状态
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',external_order_no string comment '外部单据编码
+',effect_status bigint comment '生效状态
+',inventory_control bigint comment '负库存控制
+',out_logic_id bigint comment '移出逻辑仓ID
+',in_logic_id bigint comment '移入逻辑仓ID
+',made_order_time string comment '制单时间
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_physical_order_moving_items(id bigint comment 'ID
+',physical_order_moving_id bigint comment '移库结果单id
+',sku_code string comment '商品sku
+',qty_out bigint comment '移出数量
+',qty_in bigint comment '移入数量
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',owner_channel_code string comment '货权渠道编码
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_physical_order_out(id bigint comment 'ID
+',physical_order_out_notify_id bigint comment '出库通知单id
+',stock_physical_id bigint comment '物理库区id
+',order_no string comment '单据编码
+',order_status bigint comment '单据状态
+',order_business_status bigint comment '单据业务状态
+',business_order_business_type bigint comment '业务单据业务类型
+',business_order_no string comment '业务单据编码
+',made_order_time string comment '制单时间
+',online_store_order_no string comment '网店单号
+',process_type bigint comment '处理类型（内部/外部处理）
+',delivery_mode bigint comment '配送方式（物流、自提、快递）
+',express_company string comment '快递公司
+',express_waybill_no string comment '快递运单号
+',receiver_id bigint comment '收货方信息(关联联系人信息表)
+',sender_id bigint comment '发货方信息(关联联系人信息表)
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',external_order_no string comment '外部单据编码
+',physical_order_out_notify_no string comment '出库通知单编码
+',inventory_control bigint comment '负库存控制
+',business_order_type bigint comment '业务单据类型
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_physical_order_out_items(id bigint comment 'ID
+',physical_order_out_id bigint comment '出库结果单id
+',sku_code string comment '商品sku
+',qty_sendable bigint comment '计划出库数量
+',qty_sended bigint comment '实际出库数量
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_physical_order_out_notify(id bigint comment 'ID
+',stock_physical_id bigint comment '物理库区id
+',logic_order_out_notify_id bigint comment '发货通知单id
+',order_no string comment '单据编码
+',order_status bigint comment '单据状态
+',order_business_status bigint comment '单据业务状态
+',order_hangup_status bigint comment '单据挂起状态
+',business_order_business_type bigint comment '业务类型
+',business_order_no string comment '业务单据编码
+',made_order_time string comment '制单时间
+',online_store_order_no string comment '网店单号
+',process_type string comment '处理类型（内部/外部处理）
+',delivery_mode bigint comment '配送方式（物流、自提、快递）
+',express_company string comment '快递公司
+',express_waybill_no string comment '快递运单号
+',receiver_id bigint comment '收货方信息(关联联系人信息表)
+',sender_id bigint comment '发货方信息(关联联系人信息表)
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',external_order_no string comment '外部单据编码
+',logic_order_out_notify_no string comment '发货通知单编码
+',inventory_control bigint comment '负库存控制
+',business_order_type bigint comment '业务单据类型
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_physical_order_out_notify_items(id bigint comment 'ID
+',physical_order_out_notify_id bigint comment '出库通知单id
+',sku_code string comment '商品sku
+',qty_sendable bigint comment '计划出库数量
+',qty_sended bigint comment '实际出库数量
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_physical_rel(id bigint comment 'ID
+',stock_physical_id bigint comment '物理库区id
+',ref_warehouse_area_code string comment '关系库区编码
+',ref_warehouse_area_name string comment '关系库区名称
+',rel_type bigint comment '关系类型
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',sku_type string comment '商品类型
+',move_stloc string comment '移入、移出仓
+',wms_warehouse_code string comment 'wms仓库编码
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_physical_warehouse(id bigint comment 'ID
+',stock_physical_warehouse_code string comment '物理仓库编码
+',stock_physical_warehouse_name string comment '物理仓库名称
+',terminal_code string comment '终端编码
+',address_id bigint comment '关联地址id
+',manager_name string comment '管理员姓名
+',contract string comment '联系电话
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',status string comment '状态(1-启用/0-禁用)
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_sync_analysis_monitor(id bigint comment 'ID
+',stock_sync_msg_id bigint comment '消息监控表ID
+',exception_message string comment '异常信息
+',status string comment '状态，1-异常，2-重试成功，3-重试失败, 4-不可重试
+',retry_cnt bigint comment '重试次数
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',sku_prefix string comment '商品sku前缀
+',source_type bigint comment '来源类型，区分单据来源系统
+',order_type bigint comment '单据类型
+',external_order_no string comment '外部单据编码
+',analysis_time bigint comment '解析耗时（毫秒）
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_sync_msg(id bigint comment '全局唯一标识
+',msg_id string comment '消息ID
+',msg_app_id string comment '消息发送方应用ID
+',transport_number string comment '传输单据编号
+',msg_queue_from string comment '消息接收来源队列
+',msg_queue_to string comment '消息发送目标队列
+',msg_body string comment '消息内容
+',transport_type string comment '传输方式
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除：1-已删除、0-未删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_sync_msg_monitor(id bigint comment '全局唯一标识
+',msg_ref_id bigint comment '关联消息主表ID
+',msg_id string comment '消息ID
+',msg_app_id_from string comment '消息发送方应用ID
+',transport_number string comment '传输单据号
+',msg_queue_from string comment '消息接收来源队列
+',msg_queue_to string comment '消息发送目标队列
+',transport_type string comment '传输方式
+',status string comment '状态，1-异常，2-重试成功，3-重试失败, 4-不可重试
+',retry_cnt bigint comment '重试次数
+',remark string comment '备注
+',create_user_id string comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id string comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除：1-已删除、0-未删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_sync_order_msg(id bigint comment '全局唯一标识
+',id bigint comment '全局唯一标识
+',msg_id string comment '
+',msg_id string comment '消息ID
+',record_number string comment '传输单据编号
+',record_number string comment '传输单据编号
+',record_type string comment '单据类型
+',record_type string comment '单据类型
+',msg_queue_from string comment '消息接收来源队列
+',msg_queue_from string comment '消息接收来源队列
+',msg_body string comment '消息内容
+',msg_body string comment '消息内容
+',remark string comment '备注
+',remark string comment '备注
+',create_time string comment '
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_sync_renewal_msg(id bigint comment '全局唯一标识
+',msg_id string comment '消息ID
+',record_number string comment '传输单据编号
+',record_type string comment '单据类型
+',msg_queue_from string comment '消息接收来源队列
+',msg_body string comment '消息内容
+',remark string comment '备注
+',retry_qty bigint comment '重试次数
+',finish_time string comment '完成时间
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除：1-已删除、0-未删除
+',random_id string comment '随机数
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_sync_renewal_msg_his(id bigint comment '
+',msg_id string comment '
+',record_number string comment '
+',record_type string comment '
+',msg_queue_from string comment '
+',msg_body string comment '
+',remark string comment '
+',retry_qty bigint comment '
+',finish_time string comment '
+',create_user_id bigint comment '
+',create_user_name string comment '
+',create_time string comment '
+',last_update_user_id bigint comment '
+',last_update_user_name string comment '
+',last_update_time string comment '
+',deleted string comment '
+',random_id string comment '
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_sync_wss_handler(id bigint comment '
+',system_type string comment '
+',method_name string comment '
+',order_type string comment '
+',handler_code string comment '
+',handler_name string comment '
+',create_user_id bigint comment '
+',create_time string comment '
+',create_user_name string comment '
+',last_update_user_id bigint comment '
+',last_update_user_name string comment '
+',last_update_time string comment '
+',deleted string comment '
+',remark string comment '
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_sync_wss_msg(id bigint comment 'ID
+',meg_body string comment '消息内容
+',system_type string comment '请求系统
+',request_type string comment '请求类型
+',ref_id bigint comment '关联id
+',business_no string comment '业务编码
+',transfer_type string comment '传输类型
+',status bigint comment '请求状态
+',type_id bigint comment '报文类型(0:不解析 1:解析本条数据 2:关联解析)
+',create_user_name string comment '创建用户名
+',create_time string comment '创建时间
+',last_update_time string comment '最后更新时间
+',method_name string comment '接口名
+',create_user_id bigint comment '
+',last_update_user_id bigint comment '
+',last_update_user_name bigint comment '
+',deleted string comment '
+',remark string comment '
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_sync_wss_order_type(id bigint comment '
+',mapping_id bigint comment '
+',move_type string comment '
+',order_type string comment '
+',handler_code string comment '
+',move_type_remark string comment '
+',order_flow bigint comment '
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_syn_msg_correlation(id bigint comment '
+',order_no string comment '标准单据中台编码
+',stock_sync_msg_id bigint comment '队列消息id
+',order_type bigint comment '单据类型（中台哪张表）
+',msg_app_id string comment '消息发送方应用ID
+',sync_msg_body_model string comment '解析后的对象(json的string串)
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除：1-已删除、0-未删除
+',outer_order_type string comment '外部单据类型
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_sys_status_conf(id bigint comment '
+',order_type string comment '
+',order_type_val bigint comment '
+',app_order_status bigint comment '
+',order_status bigint comment '
+',business_order_status bigint comment '
+',in_status bigint comment '
+',out_status bigint comment '
+',effect_status bigint comment '
+',app_id string comment '
+',submit_status bigint comment '
+',remark string comment '
+',msg_process_flag string comment '
+',center_order_type string comment '
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_virtual(id bigint comment 'ID
+',stock_virtual_code string comment '虚拟库存编码
+',stock_virtual_name string comment '虚拟库存名称
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',status string comment '状态(1启用/0禁用)
+',rel_type bigint comment '关联类型（标签）
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_virtual_channel_rel(id bigint comment 'ID
+',stock_channel_id bigint comment '渠道库存id
+',stock_virtual_id bigint comment '虚拟库存id
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_virtual_items(id bigint comment 'ID
+',stock_virtual_id bigint comment '虚拟库存id
+',sku_code string comment '商品sku
+',qty_available bigint comment '可用库存数
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_virtual_policy(id bigint comment 'ID
+',stock_virtual_policy_group_id bigint comment '虚拟库存策略组id
+',policy_rel_type bigint comment '策略关系类型（逻-虚，虚-虚）
+',stock_id_from bigint comment '策略分配源库存id
+',stock_id_to bigint comment '策略分配目的库存id
+',sku_code string comment '商品sku
+',policy_type bigint comment '策略类型
+',policy_value  comment '策略值（比例）
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',stock_virtual_policy_detail_id bigint comment '虚拟库存策略明细id
+',qty_current bigint comment '商品数量(当前)
+',qty_last bigint comment '商品数量(上一次)
+',effect_time string comment '生效时间
+',failure_time string comment '失效时间
+',safety_stock bigint comment '安全库存
+',special_rules bigint comment '特殊规则
+',owner_channel_code string comment '货权渠道
+',actual_or_available bigint comment '实际/可用(默认)
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_virtual_policy_detail(id bigint comment 'ID
+',virtual_policy_group_id bigint comment '虚拟库存策略组id
+',policy_type bigint comment '策略类型（只有配比）
+',policy_value  comment '策略值（小数位）
+',sku_code string comment '商品sku
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',effect_time string comment '生效时间
+',failure_time string comment '失效时间
+',safety_stock bigint comment '安全库存
+',owner_channel_code string comment '货权渠道
+',actual_or_available bigint comment '实际/可用(默认)
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_virtual_policy_group(id bigint comment 'ID
+',stock_virtual_policy_group_code string comment '虚拟库存策略组编码
+',stock_virtual_policy_group_name string comment '虚拟库存策略组名称
+',app_id string comment '应用ID
+',org_code string comment '销售组织编码
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',status string comment '状态(1启用/0禁用)
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_virtual_policy_logs(id bigint comment 'ID
+',stock_virtual_policy_group_id bigint comment '虚拟库存策略组id
+',content  comment '变更内容
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+',stock_virtual_policy_detail_id bigint comment '虚拟库存策略明细id
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_wait_allocation_order_header(id bigint comment '
+',record_no string comment '单据号
+',order_type string comment '单据类型
+',brand_no string comment '品牌
+',sender string comment '发货仓库
+',stock_sender_logic_id bigint comment '发货逻辑仓ID
+',receiver string comment '收货仓库
+',stock_receiver_logic_id bigint comment '收货逻辑仓ID
+',status bigint comment '状态
+',sender_date string comment '发货日期
+',receiver_date string comment '收货日期
+',ec_no string comment 'ec单号
+',business_no string comment '制单时间
+',order_make_date  comment '
+',app_id string comment '来源
+',random_id string comment '
+',finish_time string comment '
+',logic_order_out_notify_id bigint comment '
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_wait_allocation_order_item(id bigint comment '
+',header_id bigint comment '
+',record_no string comment '单据号
+',brand_no string comment '品牌
+',sku_code string comment 'sku
+',plan_qty bigint comment '计划数
+',send_qty bigint comment '发货数
+',receiver_qty bigint comment '收货数
+',retail_price double comment '吊牌价
+',real_price double comment '实际价
+',order_make_date  comment '制单日期
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_wait_inventory_order_header(id bigint comment '
+',record_no string comment '
+',order_type string comment '
+',brand_no string comment '
+',store_code string comment '
+',store_logic_id bigint comment '
+',status bigint comment '
+',org_code string comment '
+',channel_code string comment '
+',inventory_date string comment '
+',inventory_adjust_type string comment '
+',business_no string comment '
+',order_make_date string comment '
+',src string comment '
+',create_time string comment '
+',audit_time string comment '
+',random_id string comment '
+',finish_time string comment '
+',order_logic_id bigint comment '
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_wait_inventory_order_item(id bigint comment '
+',header_id bigint comment '
+',record_no string comment '
+',brand_no string comment '
+',sku_code string comment '
+',qty_scanning bigint comment '
+',qty_change bigint comment '
+',qty_system bigint comment '
+',qty_real bigint comment '
+',retail_price double comment '
+',real_price double comment '
+',order_make_date string comment '
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_warehouse_logic_rel(id bigint comment 'ID
+',stock_logic_id bigint comment '逻辑仓库id
+',stock_logic_code string comment '逻辑仓库编码
+',rel_logic_code string comment '映射仓库编码
+',rel_logic_name string comment '映射仓库名称
+',rel_type bigint comment '映射类型(比如1-sap)
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '外部逻辑仓表
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_warehouse_records_wms(id bigint comment 'ID
+',serial_no string comment '流水号
+',order_no string comment '订单编号
+',business_order_type bigint comment '业务单据类型
+',outer_warehouse_code string comment '外部物理仓库编码
+',message string comment '返回消息内容
+',result string comment '是否成功(S表示成功；E表示失败)
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除(0-未删除，1-已删除)
+',msg_app_id string comment '消息发送方ID
+',msg_queue_from string comment '消息来源队列
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_warehouse_rel(id bigint comment 'ID
+',stock_physical_warehouse_id bigint comment '物理仓库id
+',stock_physical_warehouse_code string comment '物理仓库编码
+',rel_warehouse_code string comment '映射仓库编码
+',rel_warehouse_name string comment '映射仓库名称
+',rel_type bigint comment '映射类型(比如1-wms)
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_stock_warehouse_store_rel(id bigint comment 'ID
+',org_code string comment '销售组织编码
+',channel_endpoint_code string comment '渠道终端编码(网店编码)
+',remark string comment '备注
+',create_user_id bigint comment '创建用户编码
+',create_user_name string comment '创建用户名（冗余）
+',create_time string comment '创建时间
+',last_update_user_id bigint comment '最后更新用户编码
+',last_update_user_name string comment '最后更新用户名（冗余）
+',last_update_time string comment '最后更新时间
+',deleted string comment '软删除
+')
+comment '' partitioned by(ds string comment '时间分区');
+create table if not exists ods_表名(列名  comment '注释
+')
+comment '' partitioned by(ds string comment '时间分区');

@@ -38,7 +38,7 @@ LIFECYCLE 30;
 
 
 INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d PARTITION(ds = '${bizdate}')
-	SELECT '${bizdate}' AS biz_date,
+	SELECT '${cyctime}' AS biz_date,
 				 t1.org_code ,
 				 t2.brand_code ,
 				 t1.channel_endpoint_code ,
@@ -50,22 +50,28 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d PAR
 				 t3.quarter AS season,
 				 t3.sku_status,
 				 t3.YEAR,
-				 t1.qty_sales_item AS sales_num_1d_brand_store,
-				 t1.amt_total AS sales_amt_1d_brand_store,
+				 t1.sales_num_1d_brand_channel_endpoint ,
+				 t1.sales_amt_1d_brand_channel_endpoint ,
 				 'day' AS date_type,
 				 t1.order_time AS date_id
 	FROM (
-		SELECT org_code,
-					 sales_order_no,
-					 order_type,
-					 member_no,
-					 member_grade_code,
-					 qty_sales_item,
+		SELECT so.org_code,
+					 so.sales_order_no,
+					 so.order_type,
+					 so.member_no,
+					 so.member_grade_code,
 					 channel_endpoint_code,
-					 amt_total,
-					 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time
-		FROM ${td_ods}.ods_sales_order
-		WHERE ds = '${bizdate}') AS t1
+					 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) AS order_time,
+					 sum(soi.price_sales * soi.qty_product) AS sales_amt_1d_brand_channel_endpoint,
+					 sum(case when (soi.price_discount <> 0 OR soi.qty_product <> 0) then 1 end) as sales_num_1d_brand_channel_endpoint
+		FROM ${td_ods}.ods_sales_order so
+			INNER JOIN ${td_ods}.ods_sales_order_item soi
+				ON soi.sales_order_no = so.sales_order_no AND soi.ds = '${bizdate}'
+		WHERE so.order_status = 1 AND so.ds = '${bizdate}'
+		GROUP BY so.org_code, so.sales_order_no,
+		so.order_type,
+		so.member_no,
+		so.member_grade_code, so.channel_endpoint_code, substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8)) AS t1
 		LEFT OUTER JOIN (
 			SELECT org_code,
 						 brand_code

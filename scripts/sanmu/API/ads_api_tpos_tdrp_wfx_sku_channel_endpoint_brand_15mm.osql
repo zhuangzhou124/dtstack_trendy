@@ -95,10 +95,10 @@ LIFECYCLE 30;
 
 
 INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PARTITION(ds = '${bizdate}')
-	SELECT '${bizdate}' AS biz_date,
+	SELECT '${cyctime}' AS biz_date,
 				 so.org_code                         --品牌编码
 	,
-				 pb.brand_code                      --子品牌编码
+				 pb.brand_code                     --子品牌编码
 	,
 				 so.channel_endpoint_code AS channel_endpoint         --门店编码
 	,
@@ -150,17 +150,13 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 	,
 				 so.price_print_type           --入机类型
 	,
-				 CASE
-				 WHEN sop.pay_way = 'COUPON' THEN so.amt_total - sop.amt_pay
-				 END AS sales_amt_deduct_coupon                            --销售金额(扣券)
+				 (soi.price_sales * soi.qty_product) - osoip.amt_cash_coupon_contribution AS sales_amt_deduct_coupon                            --销售金额(扣券)
 	,
-				 so.amt_total AS sales_amt_with_coupon              --销售金额(未扣券)
+				 soi.price_sales * soi.qty_product AS sales_amt_with_coupon              --销售金额(未扣券)
 	,
-				 CASE
-				 WHEN sop.pay_way = 'COUPON' THEN so.amt_total - sop.amt_pay
-				 END AS actual_amt_deduct_coupon                             --实际成交额(扣券)
+				 (soi.price_sales * soi.qty_product) - osoip.amt_cash_coupon_contribution AS actual_amt_deduct_coupon                             --实际成交额(扣券)
 	,
-				 so.amt_total AS actual_amt_with_coupon              --实际成交额(未扣券)
+				 soi.price_sales * soi.qty_product AS actual_amt_with_coupon              --实际成交额(未扣券)
 	,
 				 so.paid_time                         --原单营业日期
 	,
@@ -253,32 +249,34 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 	,
 				 substr(so.audit_time, 1, 10)   --营业日期
 	FROM ${td_ods}.ods_sales_order so
-		LEFT JOIN ${td_ods}.ods_sales_order_coupon soc
-			ON so.sales_order_no = soc.sales_order_no AND soc.ds = '20190920'
-		LEFT JOIN ${td_ods}.ods_member_info mi
-			ON so.member_no = mi.member_no AND mi.ds = '20190920'
-		LEFT JOIN ${td_ods}.ods_member_card mc
-			ON so.org_code = mc.org_code AND so.member_no = mc.member_no AND mc.ds = '20190920'
-		LEFT JOIN ${td_ods}.ods_sales_order_payment sop
-			ON so.sales_order_no = sop.sales_order_no AND sop.ds = '20190920'
-		LEFT JOIN ${td_ods}.ods_sales_order_item_promotion soip
-			ON so.sales_order_no = soip.sales_order_no AND soip.ds = '20190920'
-		LEFT JOIN ${td_ods}.ods_api_channel_endpoint ace
-			ON so.channel_endpoint_code = ace.channel_endpoint_code AND ace.ds = '20190920'
-		LEFT JOIN ${td_ods}.ods_user_auth ua
-			ON so.member_no = ua.member_no AND ua.ds = '20190920' AND ua.auth_type = 20
-		LEFT JOIN ${td_ods}.ods_sales_order_item soi
-			ON so.sales_order_no = soi.sales_order_no AND soi.ds = '20190920'
-		LEFT JOIN ${td_ods}.ods_real_store rs
-			ON so.channel_endpoint_code = rs.store_code AND rs.ds = '20190920'
-		LEFT JOIN ${td_ods}.ods_api_item_sku ais
-			ON soi.sku_code = ais.sku_code and ais.ds = '20190920'
-		LEFT JOIN ${td_ods}.ods_sales_order_item_price osoip
-			ON soi.sku_code = osoip.sku_code AND osoip.ds = '20190920'
 		LEFT JOIN ${td_ods}.ods_product_brand pb
-			ON so.org_code = pb.org_code AND pb.ds = '20190920'
-		left join ${td_ods}.ods_promotion_info pi
-			on soip.promotion_code = pi.promotion_no and pi.ds = '20190920'
+			ON so.org_code = pb.org_code AND pb.ds = '${bizdate}'
 		left join ${td_ods}.ods_sales_delivery_order sdo
-			on so.sales_order_no = sdo.sales_order_no and sdo.ds = '20190920'
-	WHERE so.ds = '20190920';
+			on so.sales_order_no = sdo.sales_order_no and sdo.ds = '${bizdate}'
+		LEFT JOIN ${td_ods}.ods_sales_order_coupon soc
+			ON so.sales_order_no = soc.sales_order_no AND soc.ds = '${bizdate}'
+		LEFT JOIN ${td_ods}.ods_member_info mi
+			ON so.member_no = mi.member_no AND mi.ds = '${bizdate}'
+		LEFT JOIN ${td_ods}.ods_sales_order_payment sop
+			ON so.sales_order_no = sop.sales_order_no AND sop.ds = '${bizdate}'
+		LEFT JOIN ${td_ods}.ods_sales_order_item_promotion soip
+			ON so.sales_order_no = soip.sales_order_no AND soip.ds = '${bizdate}'
+		left join ${td_ods}.ods_promotion_info pi
+			on soip.promotion_code = pi.promotion_no and pi.ds = '${bizdate}'
+		LEFT JOIN ${td_ods}.ods_api_channel_endpoint ace
+			ON so.channel_endpoint_code = ace.channel_endpoint_code AND ace.ds = '${bizdate}'
+		LEFT JOIN ${td_ods}.ods_user_auth ua
+			ON so.member_no = ua.member_no AND ua.ds = '${bizdate}' AND ua.auth_type = 20
+		LEFT JOIN ${td_ods}.ods_sales_order_item soi
+			ON so.sales_order_no = soi.sales_order_no AND soi.ds = '${bizdate}'
+	  INNER JOIN ${td_ods}.ods_sales_order_item_price osoip
+		ON osoip.sales_order_item_no = soi.sales_order_item_no and osoip.ds = '${bizdate}'
+		LEFT JOIN ${td_ods}.ods_real_store rs
+			ON so.channel_endpoint_code = rs.store_code AND rs.ds = '${bizdate}'
+		LEFT JOIN ${td_ods}.ods_api_item_sku ais
+			ON soi.sku_code = ais.sku_code and ais.ds = '${bizdate}'
+	WHERE so.ds = '${bizdate}';
+
+
+
+---soi、pb、osoip、ais

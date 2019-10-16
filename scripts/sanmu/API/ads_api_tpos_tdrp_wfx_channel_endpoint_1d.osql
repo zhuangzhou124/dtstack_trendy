@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_channel_endpoint_1d(
 
 
 INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = '${bizdate}')
-	SELECT '${bizdate}' as biz_date,
+	SELECT '${cyctime}' AS biz_date,
 				 t4.channel_endpoint_code,
 				 t4.new_card_num_1d_store_vip,
 				 t5.total_card_num_td_store_vip,
@@ -44,7 +44,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = 
 				SELECT channel_endpoint_code,
 							 member_grade_code,
 							 member_no,
-							 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time
+							 substr(regexp_replace(paid_time, '-', '', 0), 1, 8) AS order_time
 				FROM ${td_ods}.ods_sales_order
 				WHERE ds = '${bizdate}') t1
 				LEFT JOIN (
@@ -66,7 +66,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = 
 					SELECT DISTINCT channel_endpoint_code,
 													member_grade_code,
 													member_no,
-													substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time
+													substr(regexp_replace(paid_time, '-', '', 0), 1, 8) AS order_time
 					FROM ${td_ods}.ods_sales_order
 					WHERE ds <= '${bizdate}') t1
 					LEFT JOIN (

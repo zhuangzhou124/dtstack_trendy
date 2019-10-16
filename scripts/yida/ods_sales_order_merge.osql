@@ -3,226 +3,288 @@
 --create time:2019-09-26 20:20
 
 
+CREATE TABLE IF NOT EXISTS ods_sales_order_merge(
+  id                       BIGINT COMMENT '销售订单Id',
+  sales_order_no           STRING COMMENT '主单编码（XS-销售单号、TH-退货单号、TK-退款单号、HH-换货单号）',
+  app_id                   STRING COMMENT '应用ID',
+  online_store_order_no    STRING COMMENT '第三方平台订单号（EC：天猫、京东单号）',
+  original_order_no        STRING COMMENT '源销售单号（售后单需要纪录）',
+  order_type               BIGINT COMMENT '订单类型 1- 销售 2 -退款 3-退货 4-换货',
+  price_print_type         BIGINT COMMENT '入机类型，1-原价，2-折后价，3-混合入机',
+  transaction_flow_code    STRING COMMENT '订单交易流程编码（指定订单交易流程）',
+  shipping_type            BIGINT COMMENT '发货方式 1-快递；2-自提；',
+  order_status             BIGINT COMMENT '单据状态',
+  pay_status               BIGINT COMMENT '支付状态',
+  shipping_status          BIGINT COMMENT '发货状态',
+  refund_status            BIGINT COMMENT '退货状态',
+  refund_payment_status    BIGINT COMMENT '退款状态',
+  org_code                 STRING COMMENT '销售组织编码',
+  channel_endpoint_code    STRING COMMENT '销售渠道终端编码（发货门店）',
+  shopping_guider_app_code STRING COMMENT '导购平台应用编码',
+  sales_app_code           STRING COMMENT '销售平台应用编码',
+  shopping_guider_no       STRING COMMENT '导购人、微分销人员编码',
+  has_rma                  BIGINT COMMENT '是否有RMA处理，0- 无，1-有',
+  rma_contact_number       STRING COMMENT 'RMA客户联系电话',
+  rma_reason               STRING COMMENT '退货原因',
+  member_no                STRING COMMENT '会员编号（POS：会员中心编号、EC：外部系统会员账号）',
+  member_source_type       STRING COMMENT '客户类型编码（会员中心：MEMBER_CENTER，昵称：NICK_NAME）',
+  member_grade_code        STRING COMMENT '客户等级（会员中心会员等级）',
+  external_member_type     STRING COMMENT '外部会员类型（废弃）',
+  qty_order_item           BIGINT COMMENT '订单商品数（销售商品数 - 退货商品数）',
+  qty_sales_item           BIGINT COMMENT '销售商品数（销售、换出销售商品数）',
+  qty_return_item          BIGINT COMMENT '退货商品数（退、换货商品数）',
+  price_amt_retail         DOUBLE COMMENT '订单原价（吊牌价）',
+  price_amt_discount       DOUBLE COMMENT '折后价总额（促销计价后金额）',
+  amt_total                DOUBLE COMMENT '订单总额(折后入机：支付金额，原价入机：销售单原价)',
+  amt_sales_item           DOUBLE COMMENT '销售商品总额（销售、换出商品总额）',
+  amt_return_item          DOUBLE COMMENT '退货商品总额（退、换商品总额）',
+  amt_paid                 DOUBLE COMMENT '已支付金额',
+  amt_freight              DOUBLE COMMENT '运费支付金额',
+  refund_logistics_no      STRING COMMENT '退货物流单号',
+  average_discount         DOUBLE COMMENT '订单平均折扣（折后价 / 订单原价）',
+  remark                   STRING COMMENT '备注',
+  paid_time                STRING COMMENT '支付时间',
+  shipping_time            STRING COMMENT '发货时间',
+  warehouse_receiving_time STRING COMMENT '退货入仓时间',
+  customer_receiving_time  STRING COMMENT '客户收货时间',
+  create_user_id           BIGINT COMMENT '创建用户编码',
+  create_user_name         STRING COMMENT '创建用户名（冗余',
+  create_time              STRING COMMENT '创建时间',
+  last_update_user_id      BIGINT COMMENT '最后更新用户编码',
+  last_update_user_name    STRING COMMENT '最后更新用户名（冗余）',
+  last_update_time         STRING COMMENT '最后更新时间',
+  deleted                  STRING COMMENT '软删除：1-已删除、0-未删除',
+  external_order_no        STRING COMMENT '业务单据编号（ec，TPos，IPos单据编号）',
+  outer_order_id           BIGINT COMMENT '外部订单ID',
+  business_type            STRING COMMENT '业务单据类型（1：线下销售单、5：电商平台销售单	、、、、、、）',
+  related_rma_order_id     BIGINT COMMENT '(*废弃)关联售后订单（支持退转换，根据退货单生成换货单）',
+  statemachine             BIGINT COMMENT '状态机当前状态',
+  amt_m_discount           DOUBLE COMMENT '商家优惠金额（支付平台优化金额）',
+  channel_stock_code       STRING COMMENT '渠道库存编码',
+  oms_version              BIGINT COMMENT 'oms广播版本（oms交互特殊添加）',
+  member_mobile            STRING COMMENT '会员手机号',
+  stock_receive_code       STRING COMMENT '收货逻辑仓编码',
+  point_deduction          STRING COMMENT '扣点(商场代收)（pos特殊添加）',
+  sales_platform_code      STRING COMMENT '销售平台编码（天猫、京东、唯品会）（EC特殊添加）',
+  audit_time               STRING COMMENT '过账时间（POS特殊添加）',
+  amt_discount             DOUBLE COMMENT '折扣总额',
+  buyer_nick_name          STRING COMMENT '买家昵称',
+  made_order_time          STRING COMMENT '制单时间'
+)COMMENT '销售订单基本信息' PARTITIONED BY(
+  ds STRING COMMENT '时间分区');
 
 
-create table if not exists ods_sales_order_merge(
-  id                                      bigint comment '',
-  sales_order_no                          string comment '主单编码（xs-销售单号、th-退货单号、tk-退款单号、hh-换货单号）',
-  app_id                                  string comment '应用id',
-  online_store_order_no                   string comment '网单号 第三方平台订单号（ec：天猫、京东单号）',
-  original_order_no                       string comment '源销售单号（售后单需要纪录）',
-  order_type                              bigint comment '订单类型 1- 销售 2 -退款 3-退货退款 4-换货',
-  price_print_type                        bigint comment '入机类型，1-原价，2-折后价，3-混合入机',
-  transaction_flow_code                   string comment '订单交易流程编码（指定订单交易流程）',
-  shipping_type                           bigint comment '发货方式 1-快递；2-自提；',
-  order_status                            bigint comment '单据状态',
-  pay_status                              bigint comment '支付状态',
-  shipping_status                         bigint comment '发货状态',
-  refund_status                           bigint comment '退货状态',
-  refund_payment_status                   bigint comment '退款状态',
-  org_code                                string comment '销售组织编码',
-  channel_endpoint_code                   string comment '销售渠道终端编码（销售门店、网点）',
-  shopping_guider_app_code                string comment '导购平台应用编码',
-  sales_app_code                          string comment '销售平台应用编码',
-  shopping_guider_no                      string comment '导购人、微分销人员编码',
-  has_rma                                 bigint comment '是否有rma处理，0- 无，1-有',
-  rma_contact_number                      string comment 'rma客户联系电话',
-  rma_reason                              string comment '退货原因',
-  member_no                               string comment '会员编号（pos：会员中心编号、ec：外部系统会员账号）',
-  member_source_type                      string comment '客户类型编码（废弃）',
-  member_grade_code                       string comment '客户等级（会员中心会员等级）',
-  external_member_type                    string comment '外部会员类型',
-  qty_order_item                          bigint comment '订单货物数（销售商品数 - 售后商品数）-1',
-  qty_sales_item                          bigint comment '销售商品数（销售单、换货单销售商品数）',
-  qty_return_item                         bigint comment '售后商品数（退货单、换货单退换商品数）',
-  price_amt_retail                        double comment '原销售总价（吊牌价、原价）',
-  price_amt_discount                      double comment '折后价总额（促销处理后的价格）',
-  amt_total                               double comment '订单总额(折后入机：支付金额，原价入机：销售单原价)',
-  amt_sales_item                          double comment '销售商品总额（销售、换货商品总额）',
-  amt_return_item                         double comment '售后商品总额（退换商品总额）',
-  amt_paid                                double comment '已支付金额',
-  amt_freight                             double comment '运费支付金额',
-  refund_logistics_no                     string comment '退货物流单号',
-  average_discount                        double comment '订单平均折扣',
-  remark                                  string comment '备注',
-  paid_time                               string comment '支付时间',
-  shipping_time                           string comment '发货时间',
-  warehouse_receiving_time                string comment '退货入仓时间',
-  customer_receiving_time                 string comment '客户收货时间',
-  create_user_id                          bigint comment '创建用户编码',
-  create_user_name                        string comment '创建用户名（冗余）',
-  create_time                             string comment '创建时间',
-  last_update_user_id                     bigint comment '最后更新用户编码',
-  last_update_user_name                   string comment '最后更新用户名（冗余）',
-  last_update_time                        string comment '最后修改时间',
-  deleted                                 string comment '软删除：1-已删除、0-未删除',
-  external_order_no                       string comment '外部单号（ec单号）',
-  outer_order_id                          bigint comment '外部订单id', -- 看情况
-  business_type                           string comment '业务单据类型（1：线下销售单、5：电商平台销售单、、、、、、）',
-  related_rma_order_id                    bigint comment '',
-  statemachine                            bigint comment '状态机当前状态',
-  amt_m_discount                          double comment '商家优惠金额',
-  channel_stock_code                      string comment '渠道库存编码',
-  oms_version                             bigint comment 'oms广播版本',
-  channel_code                            string comment '渠道编码（废弃）',
-  member_mobile                           string comment '会员手机号',
-  stock_receive_code                      string comment '收货逻辑仓编码',
-  point_deduction                         string comment '扣点(商场代收)',
-  sales_platform_code                     string comment '销售第三方平台编码（天猫、京东、唯品会）',
-  logistics_company_no                    string comment '快递物流公司编码',
-  buyer_nick_name                         string comment '昵称',
-  made_order_time                         string comment '制单号',
+--修改生命周期
+ALTER TABLE ods_sales_order_merge SET LIFECYCLE 365;
 
 
-  audit_time                              string comment '过账时间（pos特殊添加）',
-  amt_discount                            double comment '折扣总额'
-
-)
-comment '订单主体信息' partitioned by(
-  ds string comment '时间分区');
 
 INSERT OVERWRITE TABLE ods_sales_order_merge PARTITION(ds = '${bizdate}')
-  SELECT id
-  ,      sales_order_no
-  ,      app_id
-  ,      online_store_order_no
-  ,      original_order_no
-  ,      order_type
-  ,      price_print_type
-  ,      transaction_flow_code
-  ,      shipping_type
-  ,      order_status
-  ,      pay_status
-  ,      shipping_status
-  ,      refund_status
-  ,      refund_payment_status
-  ,      org_code
-  ,      channel_endpoint_code
-  ,      shopping_guider_app_code
-  ,      sales_app_code
-  ,      shopping_guider_no
-  ,      has_rma
-  ,      rma_contact_number
-  ,      rma_reason
-  ,      member_no
-  ,      member_source_type
-  ,      member_grade_code
-  ,      external_member_type
-  ,      qty_order_item
-  ,      qty_sales_item
-  ,      qty_return_item
-  ,      price_amt_retail
-  ,      price_amt_discount
-  ,      amt_total
-  ,      amt_sales_item
-  ,      amt_return_item
-  ,      amt_paid
-  ,      amt_freight
-  ,      refund_logistics_no
-  ,      average_discount
-  ,      remark
-  ,      paid_time
-  ,      shipping_time
-  ,      warehouse_receiving_time
-  ,      customer_receiving_time
-  ,      create_user_id
-  ,      create_user_name
-  ,      create_time
-  ,      last_update_user_id
-  ,      last_update_user_name
-  ,      last_update_time
-  ,      deleted
-  ,      external_order_no
-  ,      outer_order_id
-  ,      business_type
-  ,      related_rma_order_id
-  ,      statemachine
-  ,      amt_m_discount
-  ,      channel_stock_code
-  ,      oms_version
-  ,      channel_code
-  ,      member_mobile
-  ,      stock_receive_code
-  ,      point_deduction
-  ,      sales_platform_code
-  ,      logistics_company_no
-  ,      buyer_nick_name
-  ,      made_order_time
-  ,      audit_time
-  ,      amt_discount
-  FROM ods_sales_order_merge
-  WHERE ds = to_char(dateadd(to_date('${bizdate}', 'yyyymmdd'), - 1, 'dd'), 'yyyymmdd') AND create_time <=
-  to_char(dateadd(to_date('${bizdate}', 'yyyymmdd'), - 35, 'dd'), 'yyyymmdd')
-  UNION ALL SELECT id
-  ,                sales_order_no
-  ,                app_id
-  ,                online_store_order_no
-  ,                original_order_no
-  ,                order_type
-  ,                price_print_type
-  ,                transaction_flow_code
-  ,                shipping_type
-  ,                order_status
-  ,                pay_status
-  ,                shipping_status
-  ,                refund_status
-  ,                refund_payment_status
-  ,                org_code
-  ,                channel_endpoint_code
-  ,                shopping_guider_app_code
-  ,                sales_app_code
-  ,                shopping_guider_no
-  ,                has_rma
-  ,                rma_contact_number
-  ,                rma_reason
-  ,                member_no
-  ,                member_source_type
-  ,                member_grade_code
-  ,                external_member_type
-  ,                qty_order_item
-  ,                qty_sales_item
-  ,                qty_return_item
-  ,                price_amt_retail
-  ,                price_amt_discount
-  ,                amt_total
-  ,                amt_sales_item
-  ,                amt_return_item
-  ,                amt_paid
-  ,                amt_freight
-  ,                refund_logistics_no
-  ,                average_discount
-  ,                remark
-  ,                paid_time
-  ,                shipping_time
-  ,                warehouse_receiving_time
-  ,                customer_receiving_time
-  ,                create_user_id
-  ,                create_user_name
-  ,                create_time
-  ,                last_update_user_id
-  ,                last_update_user_name
-  ,                last_update_time
-  ,                deleted
-  ,                external_order_no
-  ,                outer_order_id
-  ,                business_type
-  ,                related_rma_order_id
-  ,                statemachine
-  ,                amt_m_discount
-  ,                channel_stock_code
-  ,                oms_version
-  ,                channel_code
-  ,                member_mobile
-  ,                stock_receive_code
-  ,                point_deduction
-  ,                sales_platform_code
-  ,                logistics_company_no
-  ,                buyer_nick_name
-  ,                made_order_time
-  ,                audit_time
-  ,                amt_discount
-  FROM ods_sales_order
-  WHERE ds = '${bizdate}' AND create_time >
-  to_char(dateadd(to_date('${bizdate}', 'yyyymmdd'), - 35, 'dd'), 'yyyymmdd');
+
+  SELECT DISTINCT coalesce(t2.id, t1.id) AS id
+  ,               coalesce(t2.sales_order_no, t1.sales_order_no) AS sales_order_no
+  ,               coalesce(t2.app_id, t1.app_id) AS app_id
+  ,               coalesce(t2.online_store_order_no, t1.online_store_order_no) AS online_store_order_no
+  ,               coalesce(t2.original_order_no, t1.original_order_no) AS original_order_no
+  ,               coalesce(t2.order_type, t1.order_type) AS order_type
+  ,               coalesce(t2.price_print_type, t1.price_print_type) AS price_print_type
+  ,               coalesce(t2.transaction_flow_code, t1.transaction_flow_code) AS transaction_flow_code
+  ,               coalesce(t2.shipping_type, t1.shipping_type) AS shipping_type
+  ,               coalesce(t2.order_status, t1.order_status) AS order_status
+  ,               coalesce(t2.pay_status, t1.pay_status) AS pay_status
+  ,               coalesce(t2.shipping_status, t1.shipping_status) AS shipping_status
+  ,               coalesce(t2.refund_status, t1.refund_status) AS refund_status
+  ,               coalesce(t2.refund_payment_status, t1.refund_payment_status) AS refund_payment_status
+  ,               coalesce(t2.org_code, t1.org_code) AS org_code
+  ,               coalesce(t2.channel_endpoint_code, t1.channel_endpoint_code) AS channel_endpoint_code
+  ,               coalesce(t2.shopping_guider_app_code, t1.shopping_guider_app_code) AS shopping_guider_app_code
+  ,               coalesce(t2.sales_app_code, t1.sales_app_code) AS sales_app_code
+  ,               coalesce(t2.shopping_guider_no, t1.shopping_guider_no) AS shopping_guider_no
+  ,               coalesce(t2.has_rma, t1.has_rma) AS has_rma
+  ,               coalesce(t2.rma_contact_number, t1.rma_contact_number) AS rma_contact_number
+  ,               coalesce(t2.rma_reason, t1.rma_reason) AS rma_reason
+  ,               coalesce(t2.member_no, t1.member_no) AS member_no
+  ,               coalesce(t2.member_source_type, t1.member_source_type) AS member_source_type
+  ,               coalesce(t2.member_grade_code, t1.member_grade_code) AS member_grade_code
+  ,               coalesce(t2.external_member_type, t1.external_member_type) AS external_member_type
+  ,               coalesce(t2.qty_order_item, t1.qty_order_item) AS qty_order_item
+  ,               coalesce(t2.qty_sales_item, t1.qty_sales_item) AS qty_sales_item
+  ,               coalesce(t2.qty_return_item, t1.qty_return_item) AS qty_return_item
+  ,               coalesce(t2.price_amt_retail, t1.price_amt_retail) AS price_amt_retail
+  ,               coalesce(t2.price_amt_discount, t1.price_amt_discount) AS price_amt_discount
+  ,               coalesce(t2.amt_total, t1.amt_total) AS amt_total
+  ,               coalesce(t2.amt_sales_item, t1.amt_sales_item) AS amt_sales_item
+  ,               coalesce(t2.amt_return_item, t1.amt_return_item) AS amt_return_item
+  ,               coalesce(t2.amt_paid, t1.amt_paid) AS amt_paid
+  ,               coalesce(t2.amt_freight, t1.amt_freight) AS amt_freight
+  ,               coalesce(t2.refund_logistics_no, t1.refund_logistics_no) AS refund_logistics_no
+  ,               coalesce(t2.average_discount, t1.average_discount) AS average_discount
+  ,               coalesce(t2.remark, t1.remark) AS remark
+  ,               coalesce(t2.paid_time, t1.paid_time) AS paid_time
+  ,               coalesce(t2.shipping_time, t1.shipping_time) AS shipping_time
+  ,               coalesce(t2.warehouse_receiving_time, t1.warehouse_receiving_time) AS warehouse_receiving_time
+  ,               coalesce(t2.customer_receiving_time, t1.customer_receiving_time) AS customer_receiving_time
+  ,               coalesce(t2.create_user_id, t1.create_user_id) AS create_user_id
+  ,               coalesce(t2.create_user_name, t1.create_user_name) AS create_user_name
+  ,               coalesce(t2.create_time, t1.create_time) AS create_time
+  ,               coalesce(t2.last_update_user_id, t1.last_update_user_id) AS last_update_user_id
+  ,               coalesce(t2.last_update_user_name, t1.last_update_user_name) AS last_update_user_name
+  ,               coalesce(t2.last_update_time, t1.last_update_time) AS last_update_time
+  ,               coalesce(t2.deleted, t1.deleted) AS deleted
+  ,               coalesce(t2.external_order_no, t1.external_order_no) AS external_order_no
+  ,               coalesce(t2.outer_order_id, t1.outer_order_id) AS outer_order_id
+  ,               coalesce(t2.business_type, t1.business_type) AS business_type
+  ,               coalesce(t2.related_rma_order_id, t1.related_rma_order_id) AS related_rma_order_id
+  ,               coalesce(t2.statemachine, t1.statemachine) AS statemachine
+  ,               coalesce(t2.amt_m_discount, t1.amt_m_discount) AS amt_m_discount
+  ,               coalesce(t2.channel_stock_code, t1.channel_stock_code) AS channel_stock_code
+  ,               coalesce(t2.oms_version, t1.oms_version) AS oms_version
+  ,               coalesce(t2.member_mobile, t1.member_mobile) AS member_mobile
+  ,               coalesce(t2.stock_receive_code, t1.stock_receive_code) AS stock_receive_code
+  ,               coalesce(t2.point_deduction, t1.point_deduction) AS point_deduction
+  ,               coalesce(t2.sales_platform_code, t1.sales_platform_code) AS sales_platform_code
+  ,               coalesce(t2.audit_time, t1.audit_time) AS audit_time
+  ,               coalesce(t2.amt_discount, t1.amt_discount) AS amt_discount
+  ,               coalesce(t2.buyer_nick_name, t1.buyer_nick_name) AS buyer_nick_name
+  ,               coalesce(t2.made_order_time, t1.made_order_time) AS made_order_time
+  FROM (
+    SELECT id
+    ,      sales_order_no
+    ,      app_id
+    ,      online_store_order_no
+    ,      original_order_no
+    ,      order_type
+    ,      price_print_type
+    ,      transaction_flow_code
+    ,      shipping_type
+    ,      order_status
+    ,      pay_status
+    ,      shipping_status
+    ,      refund_status
+    ,      refund_payment_status
+    ,      org_code
+    ,      channel_endpoint_code
+    ,      shopping_guider_app_code
+    ,      sales_app_code
+    ,      shopping_guider_no
+    ,      has_rma
+    ,      rma_contact_number
+    ,      rma_reason
+    ,      member_no
+    ,      member_source_type
+    ,      member_grade_code
+    ,      external_member_type
+    ,      qty_order_item
+    ,      qty_sales_item
+    ,      qty_return_item
+    ,      price_amt_retail
+    ,      price_amt_discount
+    ,      amt_total
+    ,      amt_sales_item
+    ,      amt_return_item
+    ,      amt_paid
+    ,      amt_freight
+    ,      refund_logistics_no
+    ,      average_discount
+    ,      remark
+    ,      paid_time
+    ,      shipping_time
+    ,      warehouse_receiving_time
+    ,      customer_receiving_time
+    ,      create_user_id
+    ,      create_user_name
+    ,      create_time
+    ,      last_update_user_id
+    ,      last_update_user_name
+    ,      last_update_time
+    ,      deleted
+    ,      external_order_no
+    ,      outer_order_id
+    ,      business_type
+    ,      related_rma_order_id
+    ,      statemachine
+    ,      amt_m_discount
+    ,      channel_stock_code
+    ,      oms_version
+    ,      member_mobile
+    ,      stock_receive_code
+    ,      point_deduction
+    ,      sales_platform_code
+    ,      audit_time
+    ,      amt_discount
+    ,      buyer_nick_name
+    ,      made_order_time
+    FROM ods_sales_order_merge
+    WHERE ds = to_char(dateadd(to_date('${bizdate}', 'yyyymmdd'), - 1, 'dd'), 'yyyymmdd')) t1
+    LEFT OUTER JOIN (
+      SELECT id
+      ,      sales_order_no
+      ,      app_id
+      ,      online_store_order_no
+      ,      original_order_no
+      ,      order_type
+      ,      price_print_type
+      ,      transaction_flow_code
+      ,      shipping_type
+      ,      order_status
+      ,      pay_status
+      ,      shipping_status
+      ,      refund_status
+      ,      refund_payment_status
+      ,      org_code
+      ,      channel_endpoint_code
+      ,      shopping_guider_app_code
+      ,      sales_app_code
+      ,      shopping_guider_no
+      ,      has_rma
+      ,      rma_contact_number
+      ,      rma_reason
+      ,      member_no
+      ,      member_source_type
+      ,      member_grade_code
+      ,      external_member_type
+      ,      qty_order_item
+      ,      qty_sales_item
+      ,      qty_return_item
+      ,      price_amt_retail
+      ,      price_amt_discount
+      ,      amt_total
+      ,      amt_sales_item
+      ,      amt_return_item
+      ,      amt_paid
+      ,      amt_freight
+      ,      refund_logistics_no
+      ,      average_discount
+      ,      remark
+      ,      paid_time
+      ,      shipping_time
+      ,      warehouse_receiving_time
+      ,      customer_receiving_time
+      ,      create_user_id
+      ,      create_user_name
+      ,      create_time
+      ,      last_update_user_id
+      ,      last_update_user_name
+      ,      last_update_time
+      ,      deleted
+      ,      external_order_no
+      ,      outer_order_id
+      ,      business_type
+      ,      related_rma_order_id
+      ,      statemachine
+      ,      amt_m_discount
+      ,      channel_stock_code
+      ,      oms_version
+      ,      member_mobile
+      ,      stock_receive_code
+      ,      point_deduction
+      ,      sales_platform_code
+      ,      audit_time
+      ,      amt_discount
+      ,      buyer_nick_name
+      ,      made_order_time
+      FROM ods_sales_order
+      WHERE ds = '${bizdate}' AND sales_order_no IS NOT NULL
+    ) t2 ON t1.sales_order_no = t2.sales_order_no;
 
 

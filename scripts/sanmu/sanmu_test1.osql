@@ -1,226 +1,50 @@
---name:sanmu_test1
---author:sanmu
---create time:2019-09-28 10:31
---drop table sanmu_test1
-
-
-
-select * from (				SELECT org_code
-,
-															member_no
-,
-															substr(regexp_replace(min(create_time), '-', '', 0), 1, 8) AS first_order_time
-											 FROM ods_sales_order
-											 WHERE ds = '${bizdate}' group by org_code,member_no) as t1
-where t1.first_order_time = to_char(dateadd(to_date('${bizdate}', 'yyyymmdd'), - 1, 'mm'),'yyyymmdd')
-;
-
-select org_code,member_no,to_char(dateadd(to_date('${bizdate}', 'yyyymmdd'), - 1, 'mm'),'yyyymmdd') from ods_sales_order
-WHERE ds = '${bizdate}' and org_code = 'TRE';
-
-SELECT cc.org_code
-,
-			 cc.member_manage_channel_endpoint_code
-,
-			 cc.member_manage_clerk
-,
-			 COUNT(DISTINCT cc.member_no) AS new_member_qty
-FROM td_ods_dev.ods_member_info aa
-	JOIN td_ods_dev.ods_member_card cc
-		ON cc.member_no = aa.member_no
-	LEFT JOIN (
-		SELECT a.org_code
-		,
-					 a.member_no
-		,
-					 min(a.create_time) AS first_order_time
-		FROM td_ods_dev.ods_sales_order a
-		WHERE 1 = 1 AND a.audit_time <= '2019-09-30 23:59:59' AND a.org_code = 'TRE' AND a.channel_endpoint_code = '1201'
-		AND a.price_amt_discount > 0 AND a.member_no NOT IN ('-1', '1')
-		GROUP BY a.org_code, a.member_no
-	) bb
-		ON bb.org_code = cc.org_code AND bb.member_no = cc.member_no
-WHERE 1 = 1 AND cc.member_register_time <= '2019-09-30 23:59:59' AND cc.org_code = 'TRE'
-AND cc.member_manage_channel_endpoint_code = '1102' AND aa.STATUS > 0 AND cc.member_no NOT IN ('-1', '1')
-AND bb.first_order_time BETWEEN '2019-09-01 00:00:00' AND '2019-09-30 23:59:59'
-GROUP BY cc.org_code
-, cc.member_manage_channel_endpoint_code
-, cc.member_manage_clerk
-;
-
-
-
-
-
-
-
-
-
-
-
-
---
---客流统计
---净销售额（不含现金券）
---成交笔数（不减去退货笔数）(销售订单数)
---成交率 (销售订单数 /客流统计)
---vip销售占比
-
-
-
-
-
-CREATE TABLE IF NOT EXISTS ods_sales_delivery_order(
-	id                             BIGINT COMMENT 'id',
-	sales_delivery_order_no        STRING COMMENT '发货子单编号',
-	app_id                         STRING COMMENT '应用ID',
-	sales_order_no                 STRING COMMENT '销售订单编号',
-	shipping_order_no              STRING COMMENT '（库存中心）发货通知单编号',
-	shipping_type                  BIGINT COMMENT '发货方式 1-快递；2-自提；',
-	order_status                   BIGINT COMMENT '单据状态',
-	shipping_status                BIGINT COMMENT '发货状态',
-	org_code                       STRING COMMENT '销售组织编码',
-	shipping_channel_endpoint_code STRING COMMENT '发货渠道终端编码',
-	qty_delivery_item              BIGINT COMMENT '发货商品数',
-	amt_freight                    DOUBLE COMMENT '运费支付金额',
-	shipping_time                  STRING COMMENT '发货时间',
-	customer_receiving_time        STRING COMMENT '客户收货时间',
-	remark                         STRING COMMENT '备注',
-	create_user_id                 BIGINT COMMENT '创建用户编码',
-	create_user_name               STRING COMMENT '创建用户名（冗余）',
-	create_time                    STRING COMMENT '创建时间',
-	last_update_user_id            BIGINT COMMENT '最后更新用户编码',
-	last_update_user_name          STRING COMMENT '最后更新用户名（冗余）',
-	last_update_time               STRING COMMENT '最后修改时间',
-	deleted                        STRING COMMENT '软删除：1-已删除、0-未删除',
-	sales_order_id                 BIGINT COMMENT '销售订单ID',
-	tracking_no                    STRING COMMENT '快递单号',
-	shipping_channel_code          STRING COMMENT '发货渠道',
-	stock_shipping_code            STRING COMMENT '发货逻辑仓库编码',
-	shipping_user_id               BIGINT COMMENT '发货人编码',
-	oms_shipping_order_no          STRING COMMENT 'oms发货单编码'
-)COMMENT '发货子单' PARTITIONED BY(
-	ds STRING COMMENT '时间分区');
-
-
-
-
-create table if not exists ods_sales_delivery_order_item(
-	id bigint comment 'id',
-	app_id string comment '应用ID',
-	sales_delivery_order_item_no string comment '发货子单明细编号',
-	sales_delivery_order_no string comment '发货子单编号',
-	sales_order_item_no string comment '销售订单明细编号',
-	sales_order_no string comment '销售订单编号',
-	product_code string comment '商品编码',
-	sku_code string comment 'sku编码',
-	shipping_type bigint comment '发货方式',
-	shipping_time string comment '发货时间',
-	qty_shipping bigint comment '数量',
-	amt_freight_contribution  numeric(20,6) comment '运费摊分金额(支付为正，退款时为负)',
-remark string comment '备注',
-create_user_id bigint comment '创建用户编码',
-create_user_name string comment '创建用户名（冗余）',
-create_time string comment '创建时间',
-last_update_user_id bigint comment '最后更新用户编码',
-last_update_user_name string comment '最后更新用户名（冗余）',
-last_update_time string comment '最后修改时间',
-deleted string comment '软删除：1-已删除、0-未删除',
-sales_delivery_order_id bigint comment '发货子单ID',
-sales_order_item_id bigint comment '销售单明细ID',
-org_code string comment '销售组织编码',
-goods_channel_code string comment '货权渠道编码'
-)comment'发货子单明细' partitioned by(
-ds string comment '时间分区');
-
-
---门店开卡数
-
-
-
-
-
-
-
-
-
-
-
-drop table ods_stock_logic_order_out;
-
-
-
-
-
-
---***********************************
--- 所属系统：营销中心
--- 功能描述：促销信息表DDL
--- 生命周期：365天
--- 调度周期：手动调度
--- 创建者：  sanmu
--- 创建日期：20191012
--- 修改日志：
---***********************************
-CREATE TABLE IF NOT EXISTS ods_promotion_info(
-	id                               BIGINT COMMENT '主键',
-	promotion_no                     STRING COMMENT '营销活动编号',
-	promotion_name                   STRING COMMENT '营销活动名称',
-	promotion_desc                   STRING COMMENT '营销活动描述',
-	promotion_rules_settings         STRING COMMENT '执行规则JSON',
-	loop_type                        BIGINT COMMENT '循环类型 0 无循环 1 有限循环 2 无限循环',
-	loop_limit                       BIGINT COMMENT '循环上限',
-	priority                         BIGINT COMMENT '优先级',
-	source_settings                  STRING COMMENT '来源设置',
-	user_settings                    STRING COMMENT '用户设置',
-	other_settings                   STRING COMMENT '其他设置',
-	superposition                    STRING COMMENT '叠加设置',
-	STATUS                           BIGINT COMMENT '状态 0 禁用 1 启用',
-	remark                           STRING COMMENT '备注',
-	create_user_id                   STRING COMMENT '创建人ID',
-	create_user_name                 STRING COMMENT '创建人名',
-	create_time                      STRING COMMENT '创建时间',
-	last_update_user_id              STRING COMMENT '更新人ID',
-	last_update_user_name            STRING COMMENT '更新人名',
-	last_update_time                 STRING COMMENT '更新时间',
-	deleted                          STRING COMMENT '删除标记 0 未删 1已删',
-	promotion_type                   BIGINT COMMENT '营销活动类型',
-	promotion_template_code          STRING COMMENT '营销活动模板编号',
-	period_settings                  STRING COMMENT '活动周期设置',
-	item_settings                    STRING COMMENT '商品项设置',
-	app_id                           STRING COMMENT '应用ID',
-	org_code                         STRING COMMENT '组织编码',
-	promotion_base_on                STRING COMMENT '销活动作用范围 order product',
-	order_print_type                 BIGINT COMMENT '单据打印类型 原价入机 1 折扣入机 2',
-	effective_start_date             STRING COMMENT '生效起始时间',
-	effective_end_date               STRING COMMENT '生效结束时间'
-)COMMENT '促销信息' PARTITIONED BY(
-	ds STRING COMMENT '时间分区');
---修改生命周期
-ALTER TABLE ods_promotion_info SET LIFECYCLE 365;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+CREATE TABLE `test1` (
+  `NAME` varchar(200) DEFAULT NULL COMMENT '表名',
+  `A` varchar(200) DEFAULT NULL COMMENT '字段名',
+  `B` text COMMENT '字段类型',
+  `C` text COMMENT '字段注释',
+  `XXX` text COMMENT '表备注'
+) ENGINE=InnoDB AUTO_INCREMENT=178 DEFAULT CHARSET=utf8;
+
+show variables like 'group_concat_max_len';
+
+-- SET GLOBAL group_concat_max_len = 2048;
+SET SESSION group_concat_max_len = 10240;
+
+--  NAME 表名  A 字段名  B 字段类型 C 字段注释  XXX 表备注
+SELECT
+concat_ws('',
+'create table if not exists ods_',NAME,'(',
+GROUP_CONCAT(
+concat_ws('',
+A,' ',
+CASE
+
+WHEN INSTR( B, 'int' ) THEN
+'bigint'
+WHEN INSTR( B, 'char' ) THEN
+'string'
+WHEN INSTR( B, 'time' ) THEN
+'string'
+WHEN INSTR( B, 'text' ) THEN
+'string'
+WHEN INSTR( B, 'text' ) THEN
+'string'
+WHEN INSTR( B, 'numeric' ) THEN
+'double'
+END ,
+' comment \'',C,'\''
+)
+) , ') \ncomment \'', XXX, '\' partitioned by(ds string comment \'时间分区\');'
+)
+FROM
+test1
+-- WHERE
+-- 	NAME = 'order_shipping_info' 
+GROUP BY
+NAME,XXX;
+
+
+
+
+	

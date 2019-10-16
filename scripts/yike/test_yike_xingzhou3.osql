@@ -1,0 +1,17 @@
+create table if not exists ods_stock_channel_hold_items(
+  id                    bigint comment 'ID',
+  channel_hold_id       bigint comment '渠道库存商品预占表id',
+  sku_code              string comment '商品sku',
+  qty_hold              bigint comment '预占数量',
+  app_id                string comment '应用ID',
+  org_code              string comment '销售组织编码',
+  remark                string comment '备注',
+  create_user_id        bigint comment '创建用户编码',
+  create_user_name      string comment '创建用户名（冗余）',
+  create_time           string comment '创建时间',
+  last_update_user_id   bigint comment '最后更新用户编码',
+  last_update_user_name string comment '最后更新用户名（冗余）',
+  last_update_time      string comment '最后更新时间',
+  deleted               string comment '软删除')
+comment '' partitioned by(
+  ds string comment '时间分区');
