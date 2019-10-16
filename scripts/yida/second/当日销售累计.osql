@@ -1,0 +1,82 @@
+--name:日销售排行
+--author:zhangjunda
+--create time:2019-10-13 23:26
+
+
+
+
+CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_clerk_15mm_2(
+  date_id STRING COMMENT '营业日期',
+  org_code STRING COMMENT '品牌编码',
+  channel_endpoint_code STRING COMMENT '门店编码,不能为空',
+  clerkstatus STRING COMMENT '店员状态',
+  clerk_no STRING COMMENT '店员编码',
+  clerk_name STRING COMMENT '店员名称',
+  target_no STRING COMMENT '销售目标编号,取',
+  target_month STRING COMMENT '目标月份,yyyy-mm',
+  role_code STRING COMMENT '角色编码',
+  target_amt DOUBLE COMMENT '目标金额',
+  real_sales_amt DOUBLE COMMENT '实际销售额',
+  biz_date STRING COMMENT '统计日期'
+) COMMENT '员工信息' PARTITIONED BY(ds STRING);
+
+
+
+
+INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_clerk_15mm_2 PARTITION(ds = '${bizdate}')
+  SELECT '${bizdate}' AS date_id
+  ,      t2.org_code
+  ,      t2.channel_endpoint_code
+  ,      t2.clerk_no
+  ,      t2.clerk_name AS cleck_name
+  ,      t2.STATUS AS STATUS
+  ,      t2.role_code AS role_code
+  ,      store_monthly_sales_analyze_no
+  ,      target_time
+  ,      target_amount
+  ,      realSales
+  ,'${bizdate}'
+  FROM (
+    SELECT '${bizdate}' AS date_id
+    ,      coalesce(a.shopping_guider_no, b.clerk_no) AS clerk_no
+    ,      coalesce(b.store_monthly_sales_analyze_no) AS store_monthly_sales_analyze_no
+    ,      coalesce(b.target_time) AS target_time
+    ,      coalesce(b.target_amount, 0) AS target_amount
+    ,      coalesce(a.realSales, 0) AS realSales
+    FROM (
+      SELECT so.org_code
+      ,      so.channel_endpoint_code
+      ,      so.shopping_guider_no
+      ,      coalesce(sum(so.amt_total), 0) - coalesce(sum(sop.amt_coupon_paid), 0) AS realSales
+      FROM (
+        SELECT *
+        FROM ods_sales_order
+        WHERE ds = '${bizdate}' AND order_status = 1 AND substr(REPLACE(paid_time, '-', ''), 1, 6) =
+        substr('${bizdate}', 1, 6)
+        --      AND order_type IN ('101', '104')
+      ) so
+        INNER JOIN (
+          SELECT *
+          FROM ods_sales_order_price
+          WHERE ds = '${bizdate}'
+        ) sop ON sop.sales_order_no = so.sales_order_no
+
+      GROUP BY so.org_code, so.channel_endpoint_code
+      , so.shopping_guider_no
+    ) a
+      full outer JOIN (
+        SELECT store_monthly_sales_analyze_no
+        ,      store_code
+        ,      concat(YEAR, '-', MONTH) AS target_time
+        ,      clerk_no
+        ,      target_amount
+        FROM ods_clerk_monthly_sales_analyze
+        WHERE ds = '${bizdate}' AND clerk_no IS NOT NULL AND YEAR = substr('${bizdate}', 1, 4) AND MONTH =
+        substr('${bizdate}', 6, 2)) b ON a.shopping_guider_no = b.clerk_no
+  ) t1
+    INNER JOIN (
+      SELECT *
+      FROM ods_clerk_info
+      WHERE ds = '${bizdate}'
+    ) t2 ON t1.clerk_no = t2.clerk_no;
+

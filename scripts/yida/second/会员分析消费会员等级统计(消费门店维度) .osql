@@ -2,25 +2,29 @@
 --author:zhangjunda
 --create time:2019-10-12 11:09
 
-CREATE TABLE IF NOT EXISTS ads_api_crm_ma_clerk_15mm_3(
+CREATE TABLE IF NOT EXISTS ads_api_crm_ma_clerk_member_grade_15mm(
   date_type                                     STRING COMMENT '统计周期类型',
   date_id                                       STRING COMMENT '统计周期',
   org_code                                      STRING COMMENT '品牌编号',
   channel_endpoint_code                         STRING COMMENT '门店编号',
   clerk_no                                      STRING COMMENT '店员编号',
+  member_grade_code                             STRING COMMENT '会员等级ID',
   member_count                                  STRING COMMENT '消费会员总数',
   biz_date                                      STRING COMMENT '统计日期'
-)COMMENT '会员分析消费会员同环比(消费门店维度) ' PARTITIONED BY(
+)COMMENT '会员分析消费会员等级统计(消费门店维度)' PARTITIONED BY(
   ds  STRING);
 
 
-INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm_3 PARTITION(ds='${bizdate}')
+
+
+INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_member_grade_15mm PARTITION(ds='${bizdate}')
 
   SELECT t.date_type
   ,      t.date_id
   ,      t.org_code
   ,      t.channel_endpoint_code
   ,      t.shopping_guider_no
+  ,      member_grade_code
   ,      COUNT(DISTINCT (CASE WHEN order_fact_amount > 0 THEN t.member_no ELSE NULL END)) AS member_actived_qty
   ,      '${bizdate}' AS biz_date
   FROM (
@@ -30,13 +34,14 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm_3 PARTITION(ds='${bizdate}')
     ,      member_no
     ,      channel_endpoint_code
     ,      shopping_guider_no
+    ,      member_grade_code
     ,      sum(price_amt_discount) AS order_fact_amount
     FROM ods_sales_order a1
-    JOIN (
-      SELECT ds1,date_type,date_id,time_id
-      FROM dim_time
-      WHERE ds = '${bizdate}'
-    ) time ON to_char(to_date(create_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd') = time.time_id -- 改为过账时间to_char(to_date(audit_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd')
+      JOIN (
+        SELECT ds1,date_type,date_id,time_id
+        FROM dim_time
+        WHERE ds = '${bizdate}'
+      ) time ON to_char(to_date(create_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd') = time.time_id -- 改为过账时间to_char(to_date(audit_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd')
     WHERE a1.ds = '${bizdate}' AND CAST(a1.member_no AS BIGINT) > 1
     GROUP BY date_type
     , date_id
@@ -44,6 +49,7 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm_3 PARTITION(ds='${bizdate}')
     , member_no
     , channel_endpoint_code
     , shopping_guider_no
+    , member_grade_code
   ) t
     JOIN (
       SELECT date_type
@@ -65,32 +71,8 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm_3 PARTITION(ds='${bizdate}')
   , t.date_id
   , t.org_code
   , t.channel_endpoint_code
-  , t.shopping_guider_no;
-
-
-
-
-
---SELECT t.brand_code
---,      t.store_code
---,      COUNT(t.member_no) AS member_qty
---FROM (
---  SELECT a.brand_code
---  ,      a.store_code
---  ,      a.member_no
---  FROM order_info a
---    JOIN member_info c ON c.brand_code = a.brand_code AND c.`status` NOT IN (- 2) AND c.member_no = a.member_no
---  WHERE a.member_no NOT IN ('-1', '1') AND a.order_create_time BETWEEN '2019-09-01 00:00:00' AND '2019-09-30 23:59:59'
---  GROUP BY a.brand_code
---  , a.store_code
---  , a.member_no
---  HAVING sum(a.order_fact_amount) > 0
---
---) t
---GROUP BY t.brand_code
---, t.store_code;
-
-
+  , t.shopping_guider_no
+  , t.member_grade_code;
 
 
 
