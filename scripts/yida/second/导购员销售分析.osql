@@ -5,23 +5,23 @@
 
 CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_clerk_15mm_1(
 
-  date_type                                         STRING COMMENT '统计周期类型',
-  date_id                                           STRING COMMENT '统计周期',
-  org_code                                          STRING COMMENT '品牌编号',
-  channel_endpoint_code                             STRING COMMENT '门店编号',
-  rank_no                                           BIGINT COMMENT '排名',
-  clerk_no                                          STRING COMMENT '工号',
-  clerkName                                         BIGINT COMMENT '姓名',
-  sale_amt                                          DOUBLE COMMENT '销售售出',
-  item_num                                          BIGINT COMMENT '销售数量',
-  order_num                                         BIGINT COMMENT '销售单数',
-  average_discount                                  DOUBLE COMMENT '平均折扣',
-  per_customer_transaction                          DOUBLE COMMENT '客单价',
+  date_type                                           STRING COMMENT '统计周期类型',
+  date_id                                             STRING COMMENT '统计周期',
+  org_code                                            STRING COMMENT '品牌编号',
+  channel_endpoint_code                               STRING COMMENT '门店编号',
+  rank_no                                             BIGINT COMMENT '排名',
+  clerk_no                                            STRING COMMENT '工号',
+  clerk_name                                          BIGINT COMMENT '姓名',
+  sale_amt                                            DOUBLE COMMENT '销售售出',
+  item_num                                            BIGINT COMMENT '销售数量',
+  order_num                                           BIGINT COMMENT '销售单数',
+  average_discount                                    DOUBLE COMMENT '平均折扣',
+  per_customer_transaction                            DOUBLE COMMENT '客单价',
   associated_purchase_rate                            DOUBLE COMMENT '连带率',
-  vip_sales_amount                                  DOUBLE COMMENT 'vip消费额',
-  vip_sales_rate                                    DOUBLE COMMENT 'vip消费占比',
-  cash_coupon                                       DOUBLE COMMENT '现金券',
-  biz_date                                          STRING COMMENT '统计日期'
+  vip_sales_amount                                    DOUBLE COMMENT 'vip消费额',
+  vip_sales_rate                                      DOUBLE COMMENT 'vip消费占比',
+  cash_coupon                                         DOUBLE COMMENT '现金券',
+  biz_date                                            STRING COMMENT '统计日期'
 )COMMENT '导购员销售分析 日销售排行 ' PARTITIONED BY(
   ds  STRING);
 
@@ -73,7 +73,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_clerk_15mm_1 PARTITION(ds = '${bizd
       SELECT *
       FROM ods_sales_order a1
         JOIN (
-          SELECT ds1,date_type,date_id,time_id
+          SELECT ds1, date_type, date_id, time_id
           FROM dim_time
           WHERE ds = '${bizdate}'
         ) time ON to_char(to_date(paid_time, 'yyyy-mm-dd'), 'yyyymmdd hh:mi:ss') = time.time_id

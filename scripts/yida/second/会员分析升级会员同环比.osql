@@ -51,10 +51,10 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm_2 PARTITION(ds = '${bizdate}')
       ,      after_grade_id  -- 会员升级后等级  可能会用上
       ,      create_time
       ,      a1.member_no
-      FROM ${td_ods}.ods_member_grade_log a1
+      FROM ods_member_grade_log a1
         JOIN (
           SELECT ds1,date_type,date_id,time_id
-          FROM td_ads_dev.dim_time
+          FROM td_ads_dev.dim_time       ---------------------
           WHERE ds = '${bizdate}'
         ) time ON substr(REPLACE(grade_change_time, '-', ''), 1, 8) = time.time_id
       WHERE a1.ds = '${bizdate}' AND a1.grade_change_time IS NOT NULL

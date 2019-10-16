@@ -3,7 +3,7 @@
 --create time:2019-10-14 18:38
 CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_clerk_d(
 
-  month_id                                            STRING COMMENT '统计周期类型',
+  biz_month                                           STRING COMMENT '统计月份',
   org_code                                            STRING COMMENT '品牌编号',
   channel_endpoint_code                               STRING COMMENT '门店编号',
   rank_no                                             BIGINT COMMENT '排名',
@@ -16,9 +16,9 @@ CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_clerk_d(
   associated_purchase_rate                            DOUBLE COMMENT '连带率',
   vip_sales_rate                                      DOUBLE COMMENT 'vip消费占比',
   cash_coupon                                         DOUBLE COMMENT '现金券',
-  targetMonth                                         DOUBLE COMMENT '当月销售目标',
+  target_month                                         DOUBLE COMMENT '当月销售目标',
   target                                              DOUBLE COMMENT '目标达成率',
-  targetNo                                            BIGINT COMMENT '目标达成率排名',
+  target_no                                            BIGINT COMMENT '目标达成率排名',
   biz_date                                            STRING COMMENT '统计日期'
 )COMMENT '月销售排行 ' PARTITIONED BY(
   ds  STRING);

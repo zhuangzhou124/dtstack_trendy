@@ -8,31 +8,31 @@
 
 --DROP TABLE dim_time_mapping;
 CREATE TABLE IF NOT EXISTS dim_time_mapping(
-  time_id                       STRING COMMENT '时间ID'
+  time_id                         STRING COMMENT '时间ID'
 ,
-  week_id                       STRING COMMENT '时间ID'
+  week_id                         STRING COMMENT '时间ID'
 ,
-  week_sale_id                  STRING COMMENT '时间ID'
+  week_sale_id                    STRING COMMENT '时间ID'
 ,
-  month_id                      STRING COMMENT '时间ID'
+  month_id                        STRING COMMENT '时间ID'
 ,
-  year_id                       STRING COMMENT '时间ID'
+  year_id                         STRING COMMENT '时间ID'
 ,
-  is_day                        BIGINT COMMENT '是否当天，是为1，否为0'
+  is_day                          BIGINT COMMENT '是否当天，是为1，否为0'
 ,
-  is_week                       BIGINT COMMENT '是否当周，是为1，否为0'
+  is_week                         BIGINT COMMENT '是否当周，是为1，否为0'
 ,
-  is_week_sale                  BIGINT COMMENT '是否当周，是为1，否为0'
+  is_week_sale                    BIGINT COMMENT '是否当周，是为1，否为0'
 ,
-  is_month                      BIGINT COMMENT '是否当月，是为1，否为0'
+  is_month                        BIGINT COMMENT '是否当月，是为1，否为0'
 ,
-  is_year                       BIGINT COMMENT '是否当年，是为1，否为0'
+  is_year                         BIGINT COMMENT '是否当年，是为1，否为0'
 ,
-  is_7d                         BIGINT COMMENT '是否最近7天，是为1，否为0'
+  is_7d                           BIGINT COMMENT '是否最近7天，是为1，否为0'
 ,
-  is_15d                        BIGINT COMMENT '是否最近15天，是为1，否为0'
+  is_15d                          BIGINT COMMENT '是否最近15天，是为1，否为0'
 ,
-  is_30d                        BIGINT COMMENT '是否最近30天，是为1，否为0'
+  is_30d                          BIGINT COMMENT '是否最近30天，是为1，否为0'
 
 )COMMENT '门店销售类目渠道指标汇总年表	' PARTITIONED BY(
   ds   STRING COMMENT '业务时间	'
@@ -62,12 +62,12 @@ INSERT OVERWRITE TABLE dim_time_mapping PARTITION(ds)
   ,                       a.day_id
   FROM (
     SELECT day_id, week_id, week_start_day, week_of_day
-    FROM dim_unit_day
+    FROM td_ods_dev.dim_unit_day
     WHERE id <= 1000
   ) a
     LEFT OUTER JOIN (
       SELECT day_id, week_id, week_of_day
-      FROM dim_unit_day) b ON a.day_id >= b.day_id AND (
+      FROM td_ods_dev.dim_unit_day) b ON a.day_id >= b.day_id AND (
     concat(to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), 0, 'yyyy'), 'yyyy'), '0101') <= b.day_id OR to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), - 30, 'dd'), 'yyyymmdd') <= b.day_id);
 
 
@@ -94,12 +94,12 @@ INSERT OVERWRITE TABLE dim_time_mapping PARTITION(ds)
   ,                       a.day_id
   FROM (
     SELECT day_id, week_id, week_start_day, week_of_day
-    FROM dim_unit_day
+    FROM td_ods_dev.dim_unit_day
     WHERE id > 1000 AND id <= 2000
   ) a
     LEFT OUTER JOIN (
       SELECT day_id, week_id, week_of_day
-      FROM dim_unit_day) b ON a.day_id >= b.day_id AND (
+      FROM td_ods_dev.dim_unit_day) b ON a.day_id >= b.day_id AND (
     concat(to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), 0, 'yyyy'), 'yyyy'), '0101') <= b.day_id OR to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), - 30, 'dd'), 'yyyymmdd') <= b.day_id);
 
 
@@ -126,12 +126,144 @@ INSERT OVERWRITE TABLE dim_time_mapping PARTITION(ds)
   ,                       a.day_id
   FROM (
     SELECT day_id, week_id, week_start_day, week_of_day
-    FROM dim_unit_day
+    FROM td_ods_dev.dim_unit_day
     WHERE id > 2000 AND id <= 3000
   ) a
     LEFT OUTER JOIN (
       SELECT day_id, week_id, week_of_day
-      FROM dim_unit_day) b ON a.day_id >= b.day_id AND (
+      FROM td_ods_dev.dim_unit_day) b ON a.day_id >= b.day_id AND (
     concat(to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), 0, 'yyyy'), 'yyyy'), '0101') <= b.day_id OR to_char(dateadd(to_date(a.day_id, 'yyyymmdd'), - 30, 'dd'), 'yyyymmdd') <= b.day_id);
 
 
+
+
+
+CREATE TABLE IF NOT EXISTS dim_time(
+  ds1                             STRING COMMENT '分区ID'
+,
+  time_id                         STRING COMMENT '日期ID'
+,
+  date_type                       STRING COMMENT '时间类型'
+,
+  date_id                         STRING COMMENT '时间ID'
+)COMMENT '门店销售类目渠道指标汇总年表	' PARTITIONED BY(
+  ds   STRING COMMENT '业务时间	'
+);
+
+
+
+WITH t1 AS(
+  SELECT *
+  FROM dim_time_mapping
+  WHERE ds >= '20140101' AND ds <= '20181231'
+),
+     time AS(
+  SELECT ds AS ds1, time_id, 'day' AS date_type, time_id AS date_id
+  FROM t1
+  WHERE is_day = 1
+  UNION ALL SELECT ds AS ds1, time_id, 'week' AS date_type, week_id AS date_id
+  FROM t1
+  WHERE is_week = 1
+  UNION ALL SELECT ds AS ds1, time_id, 'month' AS date_type, month_id AS date_id
+  FROM t1
+  WHERE is_month = 1
+  UNION ALL SELECT ds AS ds1, time_id, 'year' AS date_type, year_id AS date_id
+  FROM t1
+  WHERE is_year = 1
+  UNION ALL SELECT ds AS ds1, time_id, '7d' AS date_type, '7' AS date_id
+  FROM t1
+  WHERE is_7d = 1
+  UNION ALL SELECT ds AS ds1, time_id, '15d' AS date_type, '15' AS date_id
+  FROM t1
+  WHERE is_15d = 1
+  UNION ALL SELECT ds AS ds1, time_id, '30d' AS date_type, '30' AS date_id
+  FROM t1
+  WHERE is_30d = 1
+  UNION ALL SELECT ds AS ds1, time_id, 'week_sale' AS date_type, week_sale_id AS date_id
+  FROM t1
+  WHERE is_week_sale = 1
+     )
+INSERT OVERWRITE TABLE dim_time PARTITION(ds)
+  SELECT  ds1
+  ,       time_id
+  ,       date_type
+  ,       date_id
+  ,       ds1
+  FROM time
+;
+
+
+
+WITH t1 AS(
+  SELECT *
+  FROM dim_time_mapping
+  WHERE ds >= '20190101' AND ds <= '20231231'
+),
+     time AS(
+  SELECT ds AS ds1, time_id, 'day' AS date_type, time_id AS date_id
+  FROM t1
+  WHERE is_day = 1
+  UNION ALL SELECT ds AS ds1, time_id, 'week' AS date_type, week_id AS date_id
+  FROM t1
+  WHERE is_week = 1
+  UNION ALL SELECT ds AS ds1, time_id, 'month' AS date_type, month_id AS date_id
+  FROM t1
+  WHERE is_month = 1
+  UNION ALL SELECT ds AS ds1, time_id, 'year' AS date_type, year_id AS date_id
+  FROM t1
+  WHERE is_year = 1
+  UNION ALL SELECT ds AS ds1, time_id, '7d' AS date_type, '7' AS date_id
+  FROM t1
+  WHERE is_7d = 1
+  UNION ALL SELECT ds AS ds1, time_id, '15d' AS date_type, '15' AS date_id
+  FROM t1
+  WHERE is_15d = 1
+  UNION ALL SELECT ds AS ds1, time_id, '30d' AS date_type, '30' AS date_id
+  FROM t1
+  WHERE is_30d = 1
+  UNION ALL SELECT ds AS ds1, time_id, 'week_sale' AS date_type, week_sale_id AS date_id
+  FROM t1
+  WHERE is_week_sale = 1
+     )
+INSERT OVERWRITE TABLE dim_time PARTITION(ds)
+  SELECT  ds1
+  ,       time_id
+  ,       date_type
+  ,       date_id
+  ,       ds1
+  FROM time
+;
+
+
+
+
+
+--WITH t1 AS(
+--  SELECT *
+--  FROM dim_time_mapping
+--  WHERE ds = '${bizdate}'),
+--     time AS(
+--  SELECT ds, time_id, 'day' AS date_type, time_id AS date_id
+--  FROM t1
+--  WHERE is_day = 1
+--  UNION ALL SELECT ds, time_id, 'week' AS date_type, week_id AS date_id
+--  FROM t1
+--  WHERE is_week = 1
+--  UNION ALL SELECT ds, time_id, 'month' AS date_type, month_id AS date_id
+--  FROM t1
+--  WHERE is_month = 1
+--  UNION ALL SELECT ds, time_id, 'year' AS date_type, year_id AS date_id
+--  FROM t1
+--  WHERE is_year = 1
+--  UNION ALL SELECT ds, time_id, '7d' AS date_type, '7' AS date_id
+--  FROM t1
+--  WHERE is_7d = 1
+--  UNION ALL SELECT ds, time_id, '15d' AS date_type, '15' AS date_id
+--  FROM t1
+--  WHERE is_15d = 1
+--  UNION ALL SELECT ds, time_id, '30d' AS date_type, '30' AS date_id
+--  FROM t1
+--  WHERE is_30d = 1
+--  UNION ALL SELECT ds, time_id, 'week_sale' AS date_type, week_sale_id AS date_id
+--  FROM t1
+--  WHERE is_week_sale = 1)
