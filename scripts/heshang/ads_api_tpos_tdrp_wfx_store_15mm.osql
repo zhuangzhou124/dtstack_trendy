@@ -15,9 +15,7 @@ create  table  if not exists ads_api_tpos_tdrp_wfx_store_15mm(
   sale_amt_rank bigint comment '销售额排名',
   sales_target_rate_rank bigint comment '销售额达成率排名',
   biz_date string comment '插入日期'
-)partitioned by (ds string)
-;
-
+)partitioned by (ds string);
 
 insert overwrite table ads_api_tpos_tdrp_wfx_store_15mm partition(ds=${bizdate})
   select tmp.brand_code
