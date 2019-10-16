@@ -22,7 +22,7 @@ create table if not exists ads_api_TPOS_MA_storecoupon_15mm(
   inventoryTurnOverWeekNum      double comment '库存周转周数（店铺现时库存金额÷店铺近一周销售价金额（例：今天周四，看店铺的库存周转周数就是用今天的库存牌价额除以上周四-到这周三的销售牌价额））',
   orderMaxAmount                double comment '最大单金额	',
   orderSubCouponMaxAmount       double comment '最大单金额(扣券)'
-) comment '店品类销售占比' partitioned by (
+) comment '销售分析-雷达图' partitioned by (
   ds string
 );
 INSERT OVERWRITE TABLE ads_api_TPOS_MA_storecoupon_15mm PARTITION(ds)
