@@ -15,43 +15,80 @@
 
 
 CREATE TABLE IF NOT EXISTS ads_api_crm_emr_tcrm_member_type_1d(
-	biz_date                                           STRING COMMENT '统计日期',
-	company_name                                       STRING COMMENT '上级公司名              ',
-	region                                             STRING COMMENT '区域                 ',
-	city                                               STRING COMMENT '城市                 ',
-	org_code                                           STRING COMMENT '品牌         ',
-	store_code                                         STRING COMMENT '门店                 ',
-	operation_name                                     STRING COMMENT '门店经营方式                 ',
-	member_type                                        STRING COMMENT '会员类型               ',
-	sales_amt_1d_member_type                           DOUBLE COMMENT '销售金额               ',
-	retail_price_amt_1d_member_type                    DOUBLE COMMENT '吊牌金额         ',
-	sales_amt_ratio_1d_member_type                     DOUBLE COMMENT '销售金额占比             ',
-	sales_amt_ratio_total_1d_member_type               DOUBLE COMMENT '销售金额占比汇总           ',
-	sales_amt_1d_member_type_last_year                 DOUBLE COMMENT '去年同期销售金额           ',
-	sales_num_1d_member_type                           BIGINT COMMENT '销售件数               ',
-	discount_rate_1d_member_type                       DOUBLE COMMENT '折扣率（销售金额/吊牌金额）                 ',
-	sales_mbr_num_1d_member_type                       BIGINT COMMENT '消费会员人数               ',
-	past_12_month_remain_member_amount                 BIGINT COMMENT '上月存量               ',
-	second_trade_rate                                  DOUBLE COMMENT '回头率                ',
-	svip_num_1d_member_type_new                        BIGINT COMMENT '会员招募-(SVIP会员， 金卡会员)',
-	vip_num_1d_member_type_new                         BIGINT COMMENT '会员招募-(VIP会员， 银卡会员) ',
-	normal_num_1d_member_type_new                      BIGINT COMMENT '会员招募-普通会员          ',
-	upgraded_num_1d_member_type                        BIGINT COMMENT '会员升级               ',
-	store_num_1d_member_type                           BIGINT COMMENT '店铺数                ',
-	store_mbr_num_1d_member_type_avg                   DOUBLE COMMENT '店均消费会员数             ',
-	sales_mbr_amt_1d_member_type_avg                   DOUBLE COMMENT '人均销售金额             ',
-	sales_mbr_num_1d_member_type_avg                   DOUBLE COMMENT '人均销售件数             ',
-	su_mbr_num_1d_member_type_avg                      DOUBLE COMMENT '人均SU               ',
-	order_mbr_num_1d_member_type_avg                   DOUBLE COMMENT '人均次                ',
-	date_type                                          STRING COMMENT '日期类型',
-	date_id                                            STRING COMMENT '日期'
+	biz_date                                                 STRING COMMENT '统计日期',
+	company_name                                             STRING COMMENT '上级公司名              ',
+	region                                                   STRING COMMENT '区域                 ',
+	city                                                     STRING COMMENT '城市                 ',
+	org_code                                                 STRING COMMENT '品牌         ',
+	channel_endpoint                                         STRING COMMENT '门店                 ',
+	operation_name                                           STRING COMMENT '门店经营方式                 ',
+	member_type                                              STRING COMMENT '会员类型               ',
+	sales_amt_1d_member_type                                 DOUBLE COMMENT '销售金额               ',
+	retail_price_amt_1d_member_type                          DOUBLE COMMENT '吊牌金额         ',
+	sales_amt_ratio_1d_member_type                           DOUBLE COMMENT '销售金额占比             ',
+	sales_amt_ratio_total_1d_member_type                     DOUBLE COMMENT '销售金额占比汇总           ',
+	sales_amt_1d_member_type_last_year                       DOUBLE COMMENT '去年同期销售金额           ',
+	sales_num_1d_member_type                                 BIGINT COMMENT '销售件数               ',
+	discount_rate_1d_member_type                             DOUBLE COMMENT '折扣率（销售金额/吊牌金额）                 ',
+	sales_mbr_num_1d_member_type                             BIGINT COMMENT '消费会员人数               ',
+	past_12_month_remain_member_amount                       BIGINT COMMENT '上月存量               ',
+	second_trade_rate                                        DOUBLE COMMENT '回头率                ',
+	svip_num_1d_member_type_new                              BIGINT COMMENT '会员招募-(SVIP会员， 金卡会员)',
+	vip_num_1d_member_type_new                               BIGINT COMMENT '会员招募-(VIP会员， 银卡会员) ',
+	normal_num_1d_member_type_new                            BIGINT COMMENT '会员招募-普通会员          ',
+	upgraded_num_1d_member_type                              BIGINT COMMENT '会员升级               ',
+	store_num_1d_member_type                                 BIGINT COMMENT '店铺数                ',
+	store_mbr_num_1d_member_type_avg                         DOUBLE COMMENT '店均消费会员数             ',
+	sales_mbr_amt_1d_member_type_avg                         DOUBLE COMMENT '人均销售金额             ',
+	sales_mbr_num_1d_member_type_avg                         DOUBLE COMMENT '人均销售件数             ',
+	su_mbr_num_1d_member_type_avg                            DOUBLE COMMENT '人均SU               ',
+	order_mbr_num_1d_member_type_avg                         DOUBLE COMMENT '人均次                ',
+	date_type                                                STRING COMMENT '日期类型',
+	date_id                                                  STRING COMMENT '日期'
 )COMMENT '日期+会员类型粒度汇总表' PARTITIONED BY(
 	ds STRING COMMENT '时间分区')
 LIFECYCLE 30;
 
 
-
-
+INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_type_1d PARTITION(ds = '${bizdate}')
+	SELECT *
+	FROM (
+		SELECT org_code,
+					 sales_order_no,
+					 channel_endpoint_code,
+					 member_grade_code,
+					 price_amt_retail,
+					 member_no,
+					 substr(regexp_replace(paid_time, '-', '', 0), 1, 8)
+		FROM ods_sales_order
+		WHERE ds = '${bizdate}' AND order_type = 1) AS t1
+		JOIN (
+			SELECT sales_order_no,
+						 price_sales,
+						 qty_product
+			FROM ods_sales_order_item
+			WHERE ds = '${bizdate}') AS t5
+			ON t1.sales_order_no = t5.sales_order_no
+		LEFT JOIN (
+			SELECT store_code,
+						 company_code,
+						 region_name,
+						 city_name
+			FROM ods_real_store
+			WHERE ds = '${bizdate}') AS t2
+			ON t1.channel_endpoint_code = t2.store_code
+		LEFT JOIN (
+			SELECT channel_endpoint_code,
+						 operation_name
+			FROM ods_api_channel_endpoint
+			WHERE ds = '20190920') AS t3
+			ON t1.channel_endpoint_code = t3.channel_endpoint_code
+		LEFT JOIN (
+			SELECT company_code,
+						 company_name
+			FROM ods_company
+			WHERE ds = '${bizdate}') AS t4
+			ON t2.company_code = t4.company_code
 
 
 

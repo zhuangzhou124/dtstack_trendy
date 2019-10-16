@@ -150,17 +150,13 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 	,
 				 so.price_print_type           --入机类型
 	,
-				 CASE
-				 WHEN sop.pay_way = 'COUPON' THEN so.amt_total - sop.amt_pay
-				 END AS sales_amt_deduct_coupon                            --销售金额(扣券)
+				 (soi.price_sales * soi.qty_product) - osoip.amt_cash_coupon_contribution AS sales_amt_deduct_coupon                            --销售金额(扣券)
 	,
-				 so.amt_total AS sales_amt_with_coupon              --销售金额(未扣券)
+				 soi.price_sales * soi.qty_product AS sales_amt_with_coupon              --销售金额(未扣券)
 	,
-				 CASE
-				 WHEN sop.pay_way = 'COUPON' THEN so.amt_total - sop.amt_pay
-				 END AS actual_amt_deduct_coupon                             --实际成交额(扣券)
+				 (soi.price_sales * soi.qty_product) - osoip.amt_cash_coupon_contribution AS actual_amt_deduct_coupon                             --实际成交额(扣券)
 	,
-				 so.amt_total AS actual_amt_with_coupon              --实际成交额(未扣券)
+				 soi.price_sales * soi.qty_product AS actual_amt_with_coupon              --实际成交额(未扣券)
 	,
 				 so.paid_time                         --原单营业日期
 	,
@@ -273,12 +269,12 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 			ON so.member_no = ua.member_no AND ua.ds = '${bizdate}' AND ua.auth_type = 20
 		LEFT JOIN ${td_ods}.ods_sales_order_item soi
 			ON so.sales_order_no = soi.sales_order_no AND soi.ds = '${bizdate}'
+	  INNER JOIN ${td_ods}.ods_sales_order_item_price osoip
+		ON osoip.sales_order_item_no = soi.sales_order_item_no and osoip.ds = '${bizdate}'
 		LEFT JOIN ${td_ods}.ods_real_store rs
 			ON so.channel_endpoint_code = rs.store_code AND rs.ds = '${bizdate}'
 		LEFT JOIN ${td_ods}.ods_api_item_sku ais
 			ON soi.sku_code = ais.sku_code and ais.ds = '${bizdate}'
-		LEFT JOIN ${td_ods}.ods_sales_order_item_price osoip
-			ON soi.sku_code = osoip.sku_code AND osoip.ds = '${bizdate}'
 	WHERE so.ds = '${bizdate}';
 
 
