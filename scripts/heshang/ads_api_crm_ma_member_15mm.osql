@@ -30,9 +30,6 @@ CREATE TABLE ads_api_crm_ma_member_15mm(
 )PARTITIONED BY(
   ds STRING);
 
-
-
-
 INSERT OVERWRITE TABLE ads_api_crm_ma_member_15mm PARTITION(ds = ${bizdate})
   SELECT card.member_card_no
   ,      card.member_no
