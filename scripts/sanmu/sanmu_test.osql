@@ -5,9 +5,8 @@
 
 
 
-select count(*) from ods_stock_logic_order_in_items where
-ds = '${bizdate}'
-AND business_order_business_type IN ('20102') AND business_order_type = '201' ;
+select count(*) from ods_sales_delivery_order where
+ds = '${bizdate}';
 
 
 

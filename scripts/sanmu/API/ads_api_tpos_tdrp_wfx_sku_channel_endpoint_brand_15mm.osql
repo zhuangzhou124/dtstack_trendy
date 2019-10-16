@@ -252,34 +252,34 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 				 so.audit_time                --营业时间
 	,
 				 substr(so.audit_time, 1, 10)   --营业日期
-	FROM ods_sales_order so
-		LEFT JOIN ods_product_brand pb
-			ON so.org_code = pb.org_code AND pb.ds = '20190920'
-		left join ods_sales_delivery_order sdo
-			on so.sales_order_no = sdo.sales_order_no and sdo.ds = '20190920'
-		LEFT JOIN ods_sales_order_coupon soc
-			ON so.sales_order_no = soc.sales_order_no AND soc.ds = '20190920'
-		LEFT JOIN ods_member_info mi
-			ON so.member_no = mi.member_no AND mi.ds = '20190920'
-		LEFT JOIN ods_sales_order_payment sop
-			ON so.sales_order_no = sop.sales_order_no AND sop.ds = '20190920'
-		LEFT JOIN ods_sales_order_item_promotion soip
-			ON so.sales_order_no = soip.sales_order_no AND soip.ds = '20190920'
-		left join ods_promotion_info pi
-			on soip.promotion_code = pi.promotion_no and pi.ds = '20190920'
-		LEFT JOIN ods_api_channel_endpoint ace
-			ON so.channel_endpoint_code = ace.channel_endpoint_code AND ace.ds = '20190920'
-		LEFT JOIN ods_user_auth ua
-			ON so.member_no = ua.member_no AND ua.ds = '20190920' AND ua.auth_type = 20
-		LEFT JOIN ods_sales_order_item soi
-			ON so.sales_order_no = soi.sales_order_no AND soi.ds = '20190920'
-		LEFT JOIN ods_real_store rs
-			ON so.channel_endpoint_code = rs.store_code AND rs.ds = '20190920'
-		LEFT JOIN ods_api_item_sku ais
-			ON soi.sku_code = ais.sku_code and ais.ds = '20190920'
-		LEFT JOIN ods_sales_order_item_price osoip
-			ON soi.sku_code = osoip.sku_code AND osoip.ds = '20190920'
-	WHERE so.ds = '20190920';
+	FROM ${td_ods}.ods_sales_order so
+		LEFT JOIN ${td_ods}.ods_product_brand pb
+			ON so.org_code = pb.org_code AND pb.ds = '${bizdate}'
+		left join ${td_ods}.ods_sales_delivery_order sdo
+			on so.sales_order_no = sdo.sales_order_no and sdo.ds = '${bizdate}'
+		LEFT JOIN ${td_ods}.ods_sales_order_coupon soc
+			ON so.sales_order_no = soc.sales_order_no AND soc.ds = '${bizdate}'
+		LEFT JOIN ${td_ods}.ods_member_info mi
+			ON so.member_no = mi.member_no AND mi.ds = '${bizdate}'
+		LEFT JOIN ${td_ods}.ods_sales_order_payment sop
+			ON so.sales_order_no = sop.sales_order_no AND sop.ds = '${bizdate}'
+		LEFT JOIN ${td_ods}.ods_sales_order_item_promotion soip
+			ON so.sales_order_no = soip.sales_order_no AND soip.ds = '${bizdate}'
+		left join ${td_ods}.ods_promotion_info pi
+			on soip.promotion_code = pi.promotion_no and pi.ds = '${bizdate}'
+		LEFT JOIN ${td_ods}.ods_api_channel_endpoint ace
+			ON so.channel_endpoint_code = ace.channel_endpoint_code AND ace.ds = '${bizdate}'
+		LEFT JOIN ${td_ods}.ods_user_auth ua
+			ON so.member_no = ua.member_no AND ua.ds = '${bizdate}' AND ua.auth_type = 20
+		LEFT JOIN ${td_ods}.ods_sales_order_item soi
+			ON so.sales_order_no = soi.sales_order_no AND soi.ds = '${bizdate}'
+		LEFT JOIN ${td_ods}.ods_real_store rs
+			ON so.channel_endpoint_code = rs.store_code AND rs.ds = '${bizdate}'
+		LEFT JOIN ${td_ods}.ods_api_item_sku ais
+			ON soi.sku_code = ais.sku_code and ais.ds = '${bizdate}'
+		LEFT JOIN ${td_ods}.ods_sales_order_item_price osoip
+			ON soi.sku_code = osoip.sku_code AND osoip.ds = '${bizdate}'
+	WHERE so.ds = '${bizdate}';
 
 
 

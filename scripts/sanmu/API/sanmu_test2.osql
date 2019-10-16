@@ -3,15 +3,61 @@
 --create time:2019-10-15 10:29
 --drop table sanmu_test2
 
+
+
+--imp_ods_stock_physical_order_out_notify_items(根据create_time时间字段增量同步)
+--imp_ods_stock_physical_order_out_items(根据create_time时间字段增量同步)
+--imp_ods_stock_physical_order_inventory_items(根据create_time时间字段增量同步,但是目前看create_time字段都是15号的) 1d
+--imp_ods_stock_physical_order_in_notify_items(根据create_time时间字段增量同步,但是目前看create_time字段都是15号的)
+--imp_ods_stock_physical_order_in_items (根据create_time时间字段增量同步)
+--imp_ods_stock_logic_order_in_notify(根据哪个时间字段增量同步 make_order_time还是create_time)
+--imp_ods_stock_logic_order_out(根据哪个时间字段增量同步 make_order_time还是create_time)
+--imp_ods_stock_logic_order_in(根据哪个时间字段增量同步 make_order_time还是create_time)
+
+--ods_stock_physical_order_out_notify_items(根据create_time时间字段增量同步)
+--ods_stock_physical_order_out_items(根据create_time时间字段增量同步)
+--ods_stock_physical_order_inventory_items(根据create_time时间字段增量同步,但是目前看create_tiem字段都是15号的) 1d
+--ods_stock_physical_order_in_notify_items(根据create_time时间字段增量同步,但是目前看create_tiem字段都是15号的)
+--ods_stock_physical_order_in_items (根据create_time时间字段增量同步)
+
+--ods_stock_logic_order_in_notify(根据哪个时间字段增量同步 make_order_time还是create_time) 15mm
+--ods_stock_logic_order_out(根据哪个时间字段增量同步 make_order_time还是create_time) 15mm
+--ods_stock_logic_order_in(根据哪个时间字段增量同步 make_order_time还是create_time) 15mm
+
+
+
+--15mm
+ods_stock_logic_items(根据create_time时间字段增量同步,但是目前看create_tiem字段都是15号的)
+
+ods_stock_logic_order_out(根据时间字段增量同步 make_order_time)
+ods_stock_logic_order_out_items(根据create_time时间字段增量同步)
+
+ods_stock_logic_order_in(根据时间字段增量同步 make_order_time)
+ods_stock_logic_order_in_items(根据create_time时间字段增量同步,但是目前看create_tiem字段都是15号的)
+ods_stock_logic_order_in_notify(根据时间字段增量同步 make_order_time)
+ods_stock_logic_order_in_notify_items(根据create_time时间字段增量同步,但是目前看create_tiem字段都是15号的)
+
+
+ods_stock_logic_order_difference(根据时间字段增量同步 make_order_time)
+ods_stock_logic_order_difference_items(根据create_time时间字段增量同步,但是目前看create_tiem字段都是15号的)
+
+
+
+
 --毅达
-ds=${bizdate}
+desc ods_stock_logic_order_difference;
+
+
+
+select distinct create_time from ods_stock_logic_order_difference_items where ds = '20191014';
 
 DROP TABLE IF EXISTS ods_stock_logic_order_reserve;
 
 
 CREATE TABLE   ods_stock_logic_order_reserve(
 	id                    BIGINT COMMENT 'ID',
-	stock_logic_id        BIGINT COMMENT '逻辑库存id',
+	stock_logic_id        BIGINT COMMENT
+	'逻辑库存id',
 	order_no              STRING COMMENT '单据编码',
 	order_status          BIGINT COMMENT '单据状态',
 	order_business_status BIGINT COMMENT '单据业务状态',
@@ -646,4 +692,32 @@ CREATE TABLE   ods_promotion_info(
 ALTER TABLE ods_promotion_info SET LIFECYCLE 365;
 
 
+DROP TABLE IF EXISTS ods_stock_logic_order_difference;
 
+
+CREATE TABLE IF NOT EXISTS ods_stock_logic_order_difference(
+	id                             BIGINT COMMENT 'ID',
+	logic_order_allocate_id        BIGINT COMMENT '调配单id',
+	stock_logic_in_id              BIGINT COMMENT '调入逻辑库存id',
+	stock_logic_out_id             BIGINT COMMENT '调出逻辑库存id',
+	stock_logic_responsibility_id  BIGINT COMMENT '差异承担逻辑库存id',
+	order_no                       STRING COMMENT '单据编码',
+	made_order_time                STRING COMMENT '制单时间',
+	order_status                   BIGINT COMMENT '单据状态',
+	app_id                         STRING COMMENT '应用ID',
+	org_code                       STRING COMMENT '品牌编码',
+	remark                         STRING COMMENT '备注',
+	create_user_id                 BIGINT COMMENT '创建用户编码',
+	create_user_name               STRING COMMENT '创建用户名（冗余）',
+	create_time                    STRING COMMENT '创建时间',
+	last_update_user_id            BIGINT COMMENT '最后更新用户编码',
+	last_update_user_name          STRING COMMENT '最后更新用户名（冗余）',
+	last_update_time               STRING COMMENT '最后更新时间',
+	deleted                        STRING COMMENT '软删除',
+	external_order_no              STRING COMMENT '外部单据编码',
+	inventory_control              BIGINT COMMENT '负库存控制')
+COMMENT '' PARTITIONED BY(
+	ds STRING COMMENT '时间分区');
+
+
+ALTER TABLE ods_stock_logic_order_difference SET LIFECYCLE 365;

@@ -220,21 +220,21 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 				 substr(so.audit_time, 1, 10)   --营业日期
 	FROM ${td_ods}.ods_sales_order so
 		LEFT JOIN ${td_ods}.ods_sales_order_coupon soc
-			ON so.sales_order_no = soc.sales_order_no AND soc.ds = '20190920'
+			ON so.sales_order_no = soc.sales_order_no AND soc.ds = '${bizdate}'
 		LEFT JOIN ${td_ods}.ods_member_info mi
-			ON so.member_no = mi.member_no AND mi.ds = '20190920'
+			ON so.member_no = mi.member_no AND mi.ds = '${bizdate}'
 		LEFT JOIN ${td_ods}.ods_member_card mc
-			ON so.org_code = mc.org_code AND so.member_no = mc.member_no AND mc.ds = '20190920'
+			ON so.org_code = mc.org_code AND so.member_no = mc.member_no AND mc.ds = '${bizdate}'
 		LEFT JOIN ${td_ods}.ods_sales_order_payment sop
-			ON so.sales_order_no = sop.sales_order_no AND sop.ds = '20190920'
+			ON so.sales_order_no = sop.sales_order_no AND sop.ds = '${bizdate}'
 		LEFT JOIN ${td_ods}.ods_sales_order_item_promotion soip
-			ON so.sales_order_no = soip.sales_order_no AND soip.ds = '20190920'
+			ON so.sales_order_no = soip.sales_order_no AND soip.ds = '${bizdate}'
 		LEFT JOIN ${td_ods}.ods_api_channel_endpoint ace
-			ON so.channel_endpoint_code = ace.channel_endpoint_code AND ace.ds = '20190920'
+			ON so.channel_endpoint_code = ace.channel_endpoint_code AND ace.ds = '${bizdate}'
 		LEFT JOIN ${td_ods}.ods_user_auth ua
-			ON so.member_no = ua.member_no AND ua.ds = '20190920' AND ua.auth_type = 20
+			ON so.member_no = ua.member_no AND ua.ds = '${bizdate}' AND ua.auth_type = 20
 	left join ${td_ods}.ods_promotion_info pi
-	on soip.promotion_code = pi.promotion_no and pi.ds = '20190920'
+	on soip.promotion_code = pi.promotion_no and pi.ds = '${bizdate}'
 	left join ${td_ods}.ods_sales_delivery_order sdo
-	on so.sales_order_no = sdo.sales_order_no and sdo.ds = '20190920'
-	WHERE so.ds = '20190920';
+	on so.sales_order_no = sdo.sales_order_no and sdo.ds = '${bizdate}'
+	WHERE so.ds = '${bizdate}';
