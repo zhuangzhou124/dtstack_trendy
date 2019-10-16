@@ -55,22 +55,22 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_member_15mm PARTITION(ds = ${bizdate})
   ,      to_char(gs.last_upgrade_time, 'yyyymmdd'）
          , ${bizdate} AS biz_date
 
-  FROM ods_member_card card
-    LEFT JOIN ods_member_info info
-      ON card.member_no = info.member_no
-    AND info.ds = '20190920'
-    LEFT JOIN ods_member_grade_state gs
-      ON gs.member_card_id = card.member_info_id
-    AND gs.ds = '20190920'
-    LEFT JOIN ods_member_score_state ss
-      ON ss.member_card_id = card.member_info_id
-    AND ss.ds = '20190920'
-    LEFT JOIN ods_user_auth ua
-      ON card.id = ua.member_card_id
-    AND ua.ds= '20190920'
-    LEFT OUTER JOIN ods_feedback_member_asset asset
-      ON card.member_no=asset.user_id
-    AND asset.ds='20190920'
+  FROM ${td_ods}.ods_member_card card
+  LEFT JOIN ${td_ods}.ods_member_info info
+    ON card.member_no = info.member_no
+  AND info.ds = '20190920'
+  LEFT JOIN ${td_ods}.ods_member_grade_state gs
+    ON gs.member_card_id = card.member_info_id
+  AND gs.ds = '20190920'
+  LEFT JOIN ${td_ods}.ods_member_score_state ss
+    ON ss.member_card_id = card.member_info_id
+  AND ss.ds = '20190920'
+  LEFT JOIN ${td_ods}.ods_user_auth ua
+    ON card.id = ua.member_card_id
+  AND ua.ds= '20190920'
+  LEFT OUTER JOIN ${td_ods}.ods_feedback_member_asset asset
+    ON card.member_no=asset.user_id
+  AND asset.ds='20190920'
   WHERE card.ds = '20190920'
   AND gs.last_upgrade_time IS NOT NULL
 ;
