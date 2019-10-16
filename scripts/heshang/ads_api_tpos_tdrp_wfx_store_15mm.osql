@@ -1,39 +1,53 @@
 --name:TEST
 --author:xuzhengzhi
 --create time:2019-10-14 19:01
+
 create  table  if not exists ads_api_tpos_tdrp_wfx_store_15mm(
   brand_code string comment '品牌code',
   store_code string comment '门店code',
+  store_name string comment '门店名称',
+  region_name string comment '区域名称',
   date_type string comment '日期类型',
   date_id string comment '日期ID',
+  sales_amt double comment '实际销售额',
+  sales_target_amt double comment '目标销售额',
+  sales_target_rate double comment '达成率',
   sale_amt_rank bigint comment '销售额排名',
-  sale_amt_rate_rank bigint comment '销售额达成率排名',
+  sales_target_rate_rank bigint comment '销售额达成率排名',
   biz_date string comment '插入日期'
-)partitioned by (ds string)
-;
+)partitioned by (ds string);
 
-insert  overwrite  table  ads_api_tpos_tdrp_wfx_store_15mm partition(ds=${bizdate})
+insert overwrite table ads_api_tpos_tdrp_wfx_store_15mm partition(ds=${bizdate})
   select tmp.brand_code
   ,tmp.store_code
+  ,null as store_name
+  ,null as region_name
   ,tmp.date_type
   ,tmp.date_id
+  ,daily_reality_money_all
+  ,daily_init_target_money_all
+  ,rate
   ,tmp.sale_amt_rank
   ,tmp.sale_amt_rate_rank
-  ,'${cyctime}'as biz_date
+  ,'${cyctime}' as biz_date
 
   from(
 SELECT brand_code
 ,      store_code
 ,      'day' AS date_type
 ,      sales_date AS date_id
-,      row_number()OVER (PARTITION BY brand_code ORDER BY daily_reality_money_all DESC) AS sale_amt_rank
-,      row_number()OVER (PARTITION BY brand_code ORDER BY rate DESC) AS sale_amt_rate_rank
+  ,      daily_reality_money_all
+  ,      daily_init_target_money_all
+  ,      rate
+,      row_number()OVER (PARTITION BY brand_code,sales_date ORDER BY daily_reality_money_all DESC) AS sale_amt_rank
+,      row_number()OVER (PARTITION BY brand_code,sales_date ORDER BY rate DESC) AS sale_amt_rate_rank
 
 FROM (
   SELECT brand_code
   ,      store_code
   ,      sales_date
   ,      daily_reality_money_all
+  ,      daily_init_target_money_all
   ,      CASE WHEN daily_init_target_money_all > 0 THEN daily_reality_money_all / daily_init_target_money_all END AS
          rate
   FROM (
@@ -43,7 +57,7 @@ FROM (
     ,      sum(coalesce(daily_init_target_money, 0)) AS daily_init_target_money_all
     ,      sum(coalesce(daily_reality_money, 0)) AS daily_reality_money_all
     FROM ${td_ods}.ods_store_daily_sales_analyze
-    WHERE ds = 20190920
+    WHERE ds = '${bizdate}'
     GROUP BY brand_code, store_code, REPLACE(sales_date, '-', '')
   ) tmp
 ) tmp
@@ -53,14 +67,18 @@ FROM (
   ,      store_code
   ,      'week' AS date_type
   ,      week_id AS date_id
-  ,      row_number()OVER (PARTITION BY brand_code ORDER BY daily_reality_money_all DESC) AS sale_amt_rank
-  ,      row_number()OVER (PARTITION BY brand_code ORDER BY rate DESC) AS sale_amt_rate_rank
+  ,      daily_reality_money_all
+  ,      daily_init_target_money_all
+  ,      rate
+  ,      row_number()OVER (PARTITION BY brand_code,week_id ORDER BY daily_reality_money_all DESC) AS sale_amt_rank
+  ,      row_number()OVER (PARTITION BY brand_code,week_id ORDER BY rate DESC) AS sale_amt_rate_rank
 
   FROM (
     SELECT brand_code
     ,      store_code
     ,      week_id
     ,      daily_reality_money_all
+    ,      daily_init_target_money_all
     ,      CASE WHEN daily_init_target_money_all > 0 THEN daily_reality_money_all / daily_init_target_money_all END AS
            rate
     FROM (
@@ -70,9 +88,9 @@ FROM (
     ,      sum(coalesce(daily_init_target_money, 0)) AS daily_init_target_money_all
     ,      sum(coalesce(daily_reality_money, 0)) AS daily_reality_money_all
     FROM ${td_ods}.ods_store_daily_sales_analyze tmp1
-    left outer join ${td_ods}.dim_unit_day tmp2
+    left outer join ${td_ods}. dim_unit_day tmp2
       on tmp1.sales_date=tmp2.day_short_desc
-  WHERE tmp1.ds = 20190920
+  WHERE tmp1.ds = '${bizdate}'
   GROUP BY brand_code, store_code,tmp2.week_id
   ) tmp
   ) tmp
@@ -83,14 +101,18 @@ FROM (
   ,      store_code
   ,      'month' AS date_type
   ,      sales_date AS date_id
-  ,      row_number()OVER (PARTITION BY brand_code ORDER BY daily_reality_money_all DESC) AS sale_amt_rank
-  ,      row_number()OVER (PARTITION BY brand_code ORDER BY rate DESC) AS sale_amt_rate_rank
+  ,      daily_reality_money_all
+  ,      daily_init_target_money_all
+  ,      rate
+  ,      row_number()OVER (PARTITION BY brand_code,sales_date ORDER BY daily_reality_money_all DESC) AS sale_amt_rank
+  ,      row_number()OVER (PARTITION BY brand_code,sales_date ORDER BY rate DESC) AS sale_amt_rate_rank
 
   FROM (
     SELECT brand_code
     ,      store_code
     ,      sales_date
     ,      daily_reality_money_all
+    ,      daily_init_target_money_all
     ,      CASE WHEN daily_init_target_money_all > 0 THEN daily_reality_money_all / daily_init_target_money_all END AS
            rate
     FROM (
@@ -100,7 +122,7 @@ FROM (
     ,      sum(coalesce(daily_init_target_money, 0)) AS daily_init_target_money_all
     ,      sum(coalesce(daily_reality_money, 0)) AS daily_reality_money_all
     FROM ${td_ods}.ods_store_daily_sales_analyze
-  WHERE ds = 20190920
+  WHERE ds = '${bizdate}'
   GROUP BY brand_code, store_code, SUBSTR(REPLACE(sales_date, '-', ''),1,6)
   ) tmp
   ) tmp
@@ -111,14 +133,18 @@ FROM (
   ,      store_code
   ,      'year' AS date_type
   ,      sales_date AS date_id
-  ,      row_number()OVER (PARTITION BY brand_code ORDER BY daily_reality_money_all DESC) AS sale_amt_rank
-  ,      row_number()OVER (PARTITION BY brand_code ORDER BY rate DESC) AS sale_amt_rate_rank
+  ,      daily_reality_money_all
+  ,      daily_init_target_money_all
+  ,      rate
+  ,      row_number()OVER (PARTITION BY brand_code,sales_date ORDER BY daily_reality_money_all DESC) AS sale_amt_rank
+  ,      row_number()OVER (PARTITION BY brand_code,sales_date ORDER BY rate DESC) AS sale_amt_rate_rank
 
   FROM (
     SELECT brand_code
     ,      store_code
     ,      sales_date
     ,      daily_reality_money_all
+    ,      daily_init_target_money_all
     ,      CASE WHEN daily_init_target_money_all > 0 THEN daily_reality_money_all / daily_init_target_money_all END AS
            rate
     FROM (
@@ -128,7 +154,7 @@ FROM (
     ,      sum(coalesce(daily_init_target_money, 0)) AS daily_init_target_money_all
     ,      sum(coalesce(daily_reality_money, 0)) AS daily_reality_money_all
     FROM ${td_ods}.ods_store_daily_sales_analyze
-  WHERE ds = 20190920
+  WHERE ds = '${bizdate}'
   GROUP BY brand_code, store_code, SUBSTR(REPLACE(sales_date, '-', ''),1,4)
   ) tmp
   ) tmp
@@ -138,12 +164,16 @@ FROM (
   ,      store_code
   ,      '7d' AS date_type
   ,      '7' AS date_id
+  ,      daily_reality_money_all
+  ,      daily_init_target_money_all
+  ,      rate
   ,      row_number()OVER (PARTITION BY brand_code ORDER BY daily_reality_money_all DESC) AS sale_amt_rank
   ,      row_number()OVER (PARTITION BY brand_code ORDER BY rate DESC) AS sale_amt_rate_rank
   FROM (
     SELECT brand_code
     ,      store_code
     ,      daily_reality_money_all
+    ,      daily_init_target_money_all
     ,      CASE WHEN daily_init_target_money_all > 0 THEN daily_reality_money_all / daily_init_target_money_all END AS
            rate
     FROM (
@@ -152,11 +182,11 @@ FROM (
     ,      sum(coalesce(daily_init_target_money, 0)) AS daily_init_target_money_all
     ,      sum(coalesce(daily_reality_money, 0)) AS daily_reality_money_all
     FROM ${td_ods}.ods_store_daily_sales_analyze
-  WHERE ds = 20190920
+  WHERE ds = '${bizdate}'
   and REPLACE(sales_date, '-', '')>to_char(dateadd(to_date(${bizdate},'yyyymmdd'),-7,'dd'),'yyyymmdd')
   and REPLACE(sales_date, '-', '')<=${bizdate}
   GROUP BY brand_code, store_code
-) tmp
+  ) tmp
   ) tmp
   --最近15天
   UNION ALL
@@ -164,12 +194,16 @@ FROM (
   ,      store_code
   ,      '15d' AS date_type
   ,      '15' AS date_id
+  ,      daily_reality_money_all
+  ,      daily_init_target_money_all
+  ,      rate
   ,      row_number()OVER (PARTITION BY brand_code ORDER BY daily_reality_money_all DESC) AS sale_amt_rank
   ,      row_number()OVER (PARTITION BY brand_code ORDER BY rate DESC) AS sale_amt_rate_rank
   FROM (
     SELECT brand_code
     ,      store_code
     ,      daily_reality_money_all
+    ,      daily_init_target_money_all
     ,      CASE WHEN daily_init_target_money_all > 0 THEN daily_reality_money_all / daily_init_target_money_all END AS
            rate
     FROM (
@@ -178,7 +212,7 @@ FROM (
     ,      sum(coalesce(daily_init_target_money, 0)) AS daily_init_target_money_all
     ,      sum(coalesce(daily_reality_money, 0)) AS daily_reality_money_all
     FROM ${td_ods}.ods_store_daily_sales_analyze
-  WHERE ds = 20190920
+  WHERE ds = '${bizdate}'
   and REPLACE(sales_date, '-', '')>to_char(dateadd(to_date(${bizdate},'yyyymmdd'),-15,'dd'),'yyyymmdd')
   and REPLACE(sales_date, '-', '')<=${bizdate}
   GROUP BY brand_code, store_code
@@ -191,12 +225,16 @@ FROM (
   ,      store_code
   ,      '30d' AS date_type
   ,      '30' AS date_id
+  ,      daily_reality_money_all
+  ,      daily_init_target_money_all
+  ,      rate
   ,      row_number()OVER (PARTITION BY brand_code ORDER BY daily_reality_money_all DESC) AS sale_amt_rank
   ,      row_number()OVER (PARTITION BY brand_code ORDER BY rate DESC) AS sale_amt_rate_rank
   FROM (
     SELECT brand_code
     ,      store_code
     ,      daily_reality_money_all
+    ,      daily_init_target_money_all
     ,      CASE WHEN daily_init_target_money_all > 0 THEN daily_reality_money_all / daily_init_target_money_all END AS
            rate
     FROM (
@@ -205,12 +243,12 @@ FROM (
     ,      sum(coalesce(daily_init_target_money, 0)) AS daily_init_target_money_all
     ,      sum(coalesce(daily_reality_money, 0)) AS daily_reality_money_all
     FROM ${td_ods}.ods_store_daily_sales_analyze
-  WHERE ds = 20190920
+  WHERE ds = '${bizdate}'
   and REPLACE(sales_date, '-', '')>to_char(dateadd(to_date(${bizdate},'yyyymmdd'),-7,'dd'),'yyyymmdd')
   and REPLACE(sales_date, '-', '')<=${bizdate}
   GROUP BY brand_code, store_code
 ) tmp
   ) tmp
   )tmp
-;
 
+;

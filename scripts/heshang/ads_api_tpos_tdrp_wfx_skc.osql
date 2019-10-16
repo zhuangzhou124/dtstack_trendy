@@ -27,23 +27,23 @@ INSERT OVERWRITE  TABLE ads_api_tpos_tdrp_wfx_skc PARTITION(ds=${bizdate})
   FROM (
     SELECT  a.org_code,sku.skc_code,
             sum( ( b.price_sales - b.amt_freight_contribution ) - d.amt_cash_coupon_contribution ) AS sub_coupon_amount
-    FROM   ods_sales_order a
-      LEFT OUTER JOIN   ods_sales_order_item b
-        ON  b.sales_order_no = a.sales_order_no
-      AND b.ds=20190920
-      LEFT OUTER JOIN ods_item_sku sku
-        ON b.sku_code=sku.sku_code
-      AND sku.ds=20190920
-      LEFT OUTER JOIN ods_sales_order_item_price d
-        ON b.sales_order_no = d.sales_order_no
-      AND d.ds=20190920
-      LEFT OUTER JOIN   ods_member_card c
-        ON    c.org_code = a.org_code
-      AND c.ds=20190920
-      AND   c.STATUS IN (1,0)
-      AND   c.member_no = a.member_no
-    WHERE  a.ds=20190920
-    AND to_char(a.create_time,'yyyymmdd')>to_char(dateadd(to_date(${bizdate},'yyyymmdd'),-7,'dd'),'yyyymmdd')
+    FROM   ${td_ods}.ods_sales_order a
+    LEFT OUTER JOIN   ${td_ods}.ods_sales_order_item b
+      ON  b.sales_order_no = a.sales_order_no
+    AND b.ds=20190920
+    LEFT OUTER JOIN ${td_ods}.ods_item_sku sku
+      ON b.sku_code=sku.sku_code
+    AND sku.ds=20190920
+    LEFT OUTER JOIN ${td_ods}.ods_sales_order_item_price d
+      ON b.sales_order_no = d.sales_order_no
+    AND d.ds=20190920
+    LEFT OUTER JOIN   ${td_ods}.ods_member_card c
+      ON    c.org_code = a.org_code
+    AND c.ds=20190920
+    AND   c.STATUS IN (1,0)
+    AND   c.member_no = a.member_no
+  WHERE  a.ds=20190920
+  AND to_char(a.create_time,'yyyymmdd')>to_char(dateadd(to_date(${bizdate},'yyyymmdd'),-7,'dd'),'yyyymmdd')
   AND   a.member_no NOT IN ( '-1', '1' )
   GROUP BY a.org_code,sku.skc_code
   )tmp;

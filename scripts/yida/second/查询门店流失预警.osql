@@ -4,71 +4,66 @@
 
 
 
+CREATE TABLE IF NOT EXISTS ads_api_crm_ma_clerk_d(
+  org_code                                STRING COMMENT '品牌编号',
+  channel_endpoint_code                   STRING COMMENT '门店编号',
+  clerk_no                                STRING COMMENT '店员编号',
+  member_count                            STRING COMMENT '会员总数',
+  active_member_count                     STRING COMMENT '活跃会员数量',
+  silence_member_count                    STRING COMMENT '沉默会员数量',
+  sleep_member_count                      STRING COMMENT '沉睡会员数量',
+  loss_member_count                       STRING COMMENT '预流失会员数量',
+  biz_date                                STRING COMMENT '统计日期'
+)COMMENT '查询门店流失预警' PARTITIONED BY(
+  ds  STRING);
 
 
+--${td_ods}.ods_
 
-SELECT b.org_code
-,      b.member_manage_channel_endpoint_code
-,      b.member_manage_clerk
-,      COUNT(DISTINCT t.member_no) AS member_qty
-,
-       COUNT(DISTINCT CASE WHEN datediff(to_date('${bdp.system.bizdate}', 'yyyymmdd'), to_date(last_order_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 0 AND 90 THEN t.member_no END)
-       AS member_qty1
-,
-       COUNT(DISTINCT CASE WHEN datediff(to_date('${bdp.system.bizdate}', 'yyyymmdd'), to_date(last_order_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 91 AND 180 THEN t.member_no END)
-       AS member_qty2
-,
-       COUNT(DISTINCT CASE WHEN datediff(to_date('${bdp.system.bizdate}', 'yyyymmdd'), to_date(last_order_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 181 AND 270 THEN t.member_no END)
-       AS member_qty3
-,
-       COUNT(DISTINCT CASE WHEN datediff(to_date('${bdp.system.bizdate}', 'yyyymmdd'), to_date(last_order_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 271 AND 365 THEN t.member_no END)
-       AS member_qty4
-,'${bizdate}'  as  biz_date
+INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_d PARTITION(ds = '${bizdate}')
 
-FROM (
-  SELECT '${bdp.system.bizdate}' AS report_date
-  ,      org_code
-  ,      member_no
-  ,      max(create_time) AS last_order_time
-  FROM ods_sales_order
-  WHERE ds = '${bdp.system.bizdate}' AND price_amt_discount > 0 AND amt_total > 0 AND CAST(member_no AS BIGINT) > 1 AND
-  datediff(to_date('${bdp.system.bizdate}', 'yyyymmdd'), to_date(create_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 0
-  AND 365
-  GROUP BY org_code
-  , member_no
-) t
-  LEFT JOIN (
-    SELECT org_code
+  SELECT b.org_code
+  ,      b.member_manage_channel_endpoint_code
+  ,      b.member_manage_clerk
+  ,      COUNT(DISTINCT t.member_no) AS member_qty
+  ,
+         COUNT(DISTINCT CASE WHEN datediff(to_date('${bizdate}', 'yyyymmdd'), to_date(last_order_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 0 AND 90 THEN t.member_no END)
+         AS member_qty1
+  ,
+         COUNT(DISTINCT CASE WHEN datediff(to_date('${bizdate}', 'yyyymmdd'), to_date(last_order_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 91 AND 180 THEN t.member_no END)
+         AS member_qty2
+  ,
+         COUNT(DISTINCT CASE WHEN datediff(to_date('${bizdate}', 'yyyymmdd'), to_date(last_order_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 181 AND 270 THEN t.member_no END)
+         AS member_qty3
+  ,
+         COUNT(DISTINCT CASE WHEN datediff(to_date('${bizdate}', 'yyyymmdd'), to_date(last_order_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 271 AND 365 THEN t.member_no END)
+         AS member_qty4
+  ,      '${bizdate}' AS biz_date
+
+  FROM (
+    SELECT '${bizdate}' AS report_date
+    ,      org_code
     ,      member_no
-    ,      member_manage_channel_endpoint_code
-    ,      member_manage_clerk
-    FROM ods_member_card
-    WHERE ds = '${bdp.system.bizdate}' and STATUS > 0
-  ) b ON b.org_code = t.org_code AND b.member_no = t.member_no
-where b.org_code is not null
-GROUP BY b.org_code, b.member_manage_channel_endpoint_code, b.member_manage_clerk;
+    ,      max(create_time) AS last_order_time
+    FROM ods_sales_order
+    WHERE ds = '${bizdate}' AND price_amt_discount > 0 AND amt_total > 0 AND CAST(member_no AS BIGINT) > 1 AND
+    datediff(to_date('${bizdate}', 'yyyymmdd'), to_date(create_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 0 AND 365
+    GROUP BY org_code
+    , member_no
+  ) t
+    LEFT JOIN (
+      SELECT org_code
+      ,      member_no
+      ,      member_manage_channel_endpoint_code
+      ,      member_manage_clerk
+      FROM ods_member_card
+      WHERE ds = '${bizdate}' AND STATUS > 0
+    ) b ON b.org_code = t.org_code AND b.member_no = t.member_no
+  WHERE b.org_code IS NOT NULL
+  GROUP BY b.org_code, b.member_manage_channel_endpoint_code, b.member_manage_clerk;
 
 
 
 
 
 
---SELECT datediff(to_date('20190920', 'yyyymmdd'), to_date('20190920', 'yyyymmdd'), 'dd') BETWEEN 0 AND 365,
---       datediff(to_date('20190920', 'yyyymmdd'), to_date('20190920', 'yyyymmdd'), 'dd')
---UNION ALL SELECT datediff(to_date('20190920', 'yyyymmdd'), to_date('20190921', 'yyyymmdd'), 'dd') BETWEEN 0 AND 365,
---                 datediff(to_date('20190920', 'yyyymmdd'), to_date('20190921', 'yyyymmdd'), 'dd')
---UNION ALL SELECT datediff(to_date('20190920', 'yyyymmdd'), to_date('20190919', 'yyyymmdd'), 'dd') BETWEEN 0 AND 365,
---                 datediff(to_date('20190920', 'yyyymmdd'), to_date('20190919', 'yyyymmdd'), 'dd')
---UNION ALL SELECT datediff(to_date('20190920', 'yyyymmdd'), to_date('20180920', 'yyyymmdd'), 'dd') BETWEEN 0 AND 365,
---                 datediff(to_date('20190920', 'yyyymmdd'), to_date('20180920', 'yyyymmdd'), 'dd')
---UNION ALL SELECT datediff(to_date('20190920', 'yyyymmdd'), to_date('20180921', 'yyyymmdd'), 'dd') BETWEEN 0 AND 365,
---                 datediff(to_date('20190920', 'yyyymmdd'), to_date('20180921', 'yyyymmdd'), 'dd')
---UNION ALL SELECT datediff(to_date('20190920', 'yyyymmdd'), to_date('20180919', 'yyyymmdd'), 'dd') BETWEEN 0 AND 365,
---                 datediff(to_date('20190920', 'yyyymmdd'), to_date('20180919', 'yyyymmdd'), 'dd');
-
---true	0
---false	-1
---true	1
---true	365
---true	364
---false	366

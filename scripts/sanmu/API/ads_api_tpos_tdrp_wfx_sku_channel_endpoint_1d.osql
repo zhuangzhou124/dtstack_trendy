@@ -70,7 +70,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 	SELECT '${cyctime}' AS biz_date,
 				 t3.org_code,
 				 t5.brand_code,
-				 t3.channel_endpint_code,
+				 t3.channel_endpoint_code,
 				 t6.store_name AS channel_endpoint_name,
 				 t3.sku_code,
 				 t4.spu_code AS product_code,
@@ -148,7 +148,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 				 '${bizdate}' AS date_id
 	FROM (
 		SELECT t2.org_code,
-					 t2.channel_endpint_code,
+					 t2.channel_endpoint_code,
 					 t2.manager_channel_code,
 					 t1.sku_code
 		FROM (
@@ -159,7 +159,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 			FROM ${td_ods}.ods_stock_logic_items
 			WHERE ds = '${bizdate}') t1
 			LEFT JOIN (
-				SELECT channel_endpint_code,
+				SELECT channel_endpoint_code,
 							 org_code,
 							 manager_channel_code,
 							 id
@@ -199,7 +199,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 						 store_name
 			FROM ${td_ods}.ods_real_store
 			WHERE ds = '${bizdate}') AS t6
-			ON t3.channel_endpint_code = t6.store_code
+			ON t3.channel_endpoint_code = t6.store_code
 		LEFT OUTER JOIN (
 			SELECT sku_code,
 						 cn_name
@@ -235,7 +235,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 				UNION ALL
 				--入库单，库存反减回去
 				SELECT sl.org_code,
-							 ii.channel_code AS owner_channel_code,
+							 ii.owner_channel_code,
 							 ii.sku_code,
 							 - 1 * ii.qty_received AS qty
 				FROM ${td_ods}.ods_stock_logic_order_in AS i
@@ -344,7 +344,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 		LEFT JOIN (
 		--跨渠道横调入数量
 			SELECT i.org_code,
-						 b.channel_code AS owner_channel_code,
+						 b.owner_channel_code,
 						 b.sku_code,
 						 b.qty_received AS qty
 			FROM ${td_ods}.ods_stock_logic_order_in AS a
@@ -566,7 +566,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 		WHERE ds = '${bizdate}') AS t1
 		LEFT JOIN (
 			SELECT t00.org_code,
-						 t00.channel_endpint_code,
+						 t00.channel_endpoint_code,
 						 t00.manager_channel_code,
 						 t0.sku_code
 			FROM (
@@ -577,13 +577,13 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 				FROM ${td_ods}.ods_stock_logic_items
 				WHERE ds = '${bizdate}') t0
 				LEFT JOIN (
-					SELECT channel_endpint_code,
+					SELECT channel_endpoint_code,
 								 org_code,
 								 manager_channel_code,
 								 id
 					FROM ${td_ods}.ods_stock_logic
 					WHERE ds = '${bizdate}') AS t00 ON t0.stock_logic_id = t00.id) as t2
-					ON t1.org_code = t2.org_code AND t1.sku_code = t2.sku_code AND t1.channel_endpoint = t2.channel_endpint_code
+					ON t1.org_code = t2.org_code AND t1.sku_code = t2.sku_code AND t1.channel_endpoint = t2.channel_endpoint_code
 				LEFT JOIN (--配货出数量、配退出数量、调退出数量
 					SELECT o.org_code,
 								 b.owner_channel_code,
@@ -603,7 +603,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 				LEFT JOIN (
 				--配货入数量、配退入数量、调拨入数量
 					SELECT o.org_code,
-								 b.channel_code AS owner_channel_code,
+								 b.owner_channel_code,
 								 b.sku_code,
 								 a.business_order_business_type,
 								 a.business_order_type,

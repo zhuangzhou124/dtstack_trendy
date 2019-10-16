@@ -5,11 +5,10 @@
 
 
 
-select count(*) from ods_stock_logic_order_in_items where
-ds = '${bizdate}'
-AND business_order_business_type IN ('20102') AND business_order_type = '201' ;
+select distinct member_grade_code from ods_sales_order where
+ds = '${bizdate}';
 
-
+select distinct grade_code,grade_name from ods_member_grade_info where ds = '20191014';
 
 INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PARTITION(ds)
 select * from td_ods_dev.ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm where ds = '20190920';
@@ -30,7 +29,173 @@ FROM ods_stock_logic_order_in AS a
 	INNER JOIN ods_stock_logic AS o
 		ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
 WHERE  a.ds = '${bizdate}'
-and substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = '${bizdate}' ;
+and substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) = '${bizdate}' ;
+
+--销售金额
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 sum(soi.price_sales * soi.qty_product)
+FROM ods_sales_order so
+	INNER JOIN ods_sales_order_item soi
+		ON soi.sales_order_no = so.sales_order_no
+WHERE so.order_status = 1 AND substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) = '${bizdate}'
+GROUP BY so.org_code, so.channel_endpoint_code;
+
+
+
+--吊牌价总额
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 sum(so.price_amt_retail)
+FROM ods_sales_order so
+WHERE so.order_status = 1 AND so.paid_time BETWEEN ? AND ?
+GROUP BY so.org_code, so.channel_endpoint_code;
+
+
+--退货件数
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 sum(so.qty_return_item)
+FROM ods_sales_order so
+WHERE so.order_status = 1 AND so.paid_time BETWEEN ? AND ?
+AND so.order_type = '103'
+GROUP BY so.org_code, so.channel_endpoint_code;
+
+
+
+--退货金额
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8),
+			 sum(so.qty_return_item),
+			 sum(so.amt_return_item)
+FROM ods_sales_order so
+WHERE so.order_status = 1 AND so.ds = '${bizdate}'
+AND so.order_type = '103'
+GROUP BY so.org_code, so.channel_endpoint_code,substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8);
+
+--销售件数、净销售量
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) as order_time,
+			 sum(soi.qty_product) as sales_num_1d_brand_store
+FROM ods_sales_order so
+	INNER JOIN ods_sales_order_item soi
+		ON soi.sales_order_no = so.sales_order_no AND soi.ds = '${bizdate}'
+WHERE so.order_status = 1 AND so.ds = '${bizdate}'
+AND (soi.price_discount <> 0 OR soi.qty_product <> 0)
+GROUP BY so.org_code, so.channel_endpoint_code,substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8);
+
+
+--退换笔数
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8),
+			 COUNT(1)
+FROM ods_sales_order so
+WHERE so.order_status = 1 AND so.ds = '${bizdate}'
+AND so.order_type IN ('103', '104')
+GROUP BY so.org_code, so.channel_endpoint_code;
+
+
+--vip销售件数
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 sum(soi.qty_product)
+FROM ods_sales_order so
+	LEFT JOIN ods_member_grade_info mgi
+		ON so.member_grade_code = mgi.grade_code
+	INNER JOIN ods_sales_order_item soi
+		ON soi.sales_order_no = so.sales_order_no
+WHERE so.order_status = 1 AND mgi.is_vip = TRUE AND so.paid_time BETWEEN ? AND ?
+AND (soi.price_discount <> 0 OR soi.qty_product <> 0)
+GROUP BY so.org_code, so.channel_endpoint_code;
+
+
+
+--成交笔数
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) as order_time,
+			 sum(CASE
+			 WHEN so.order_type = '101' THEN 1
+			 WHEN so.order_type IN ('102', '103') THEN - 1
+			 WHEN so.order_type = '104' AND so.amt_total > 0 THEN 1
+			 WHEN so.order_type = '104' AND so.amt_total = 0 THEN 0
+			 END)
+FROM ods_sales_order so
+WHERE so.order_status = 1 AND so.ds = '${bizdate}'
+GROUP BY so.org_code, so.channel_endpoint_code,substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8);
+
+
+--vip销售金额
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) as order_time,
+			 sum(soi.price_sales * soi.qty_product)
+FROM ods_sales_order so
+	INNER JOIN ods_sales_order_item soi
+		ON soi.sales_order_no = so.sales_order_no
+	LEFT JOIN ods_member_grade_info mgi
+		ON so.member_grade_code = mgi.grade_code
+WHERE so.order_status = 1 AND mgi.is_vip = 1 AND so.ds = '${bizdate}'
+GROUP BY so.org_code, so.channel_endpoint_code,substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8);
+
+
+SELECT so.org_code,
+			 so.sales_order_no,
+			 so.order_type,
+			 so.member_no,
+			 so.member_grade_code,
+			 channel_endpoint_code,
+			 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) AS order_time,
+			 sum(soi.price_sales * soi.qty_product) AS sales_amt_1d_brand_channel_endpoint,
+			 sum(case when (soi.price_discount <> 0 OR soi.qty_product <> 0) then 1 end) as sales_num_1d_brand_channel_endpoint
+FROM ods_sales_order so
+	INNER JOIN ods_sales_order_item soi
+		ON soi.sales_order_no = so.sales_order_no AND soi.ds = '${bizdate}'
+WHERE so.order_status = 1 AND so.ds = '${bizdate}'
+GROUP BY so.org_code, so.sales_order_no,
+so.order_type,
+so.member_no,
+so.member_grade_code, so.channel_endpoint_code, substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8);
+
+--------销售件数
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) as order_time,
+			 sum(soi.qty_product) as sales_num_1d_brand_store
+FROM ods_sales_order so
+	INNER JOIN ods_sales_order_item soi
+		ON soi.sales_order_no = so.sales_order_no AND soi.ds = '${bizdate}'
+WHERE so.order_status = 1 AND so.ds = '${bizdate}'
+AND (soi.price_discount <> 0 OR soi.qty_product <> 0)
+GROUP BY so.org_code, so.channel_endpoint_code,substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8);
+
+
+
+
+
+
+
+--门店级:
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 sum(soi.price_sales * soi.qty_product) - sum(soip.amt_cash_coupon_contribution)
+FROM ods_sales_order so
+	INNER JOIN ods_sales_order_item soi
+		ON soi.sales_order_no = so.sales_order_no
+	INNER JOIN ods_sales_order_item_price soip
+		ON soip.sales_order_item_no = soi.sales_order_item_no
+WHERE so.order_status = 1 AND so.paid_time BETWEEN ? AND ?
+GROUP BY so.org_code, so.channel_endpoint_code;
+
+-- 如果算到导购级 , 追加so.shopping_guider_no, 和group by so.shopping_guider_no
+-- 如果算到商品级 , 追加soi.sku_code, 和group by soi.sku_code
+
+
+
+
 
 
 --期初在库数
