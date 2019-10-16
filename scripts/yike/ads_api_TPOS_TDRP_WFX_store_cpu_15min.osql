@@ -1,7 +1,7 @@
 --name:ads_api_TPOS_TDRP_WFX_store_15min
 --author:yike
 --create time:2019-10-16 15:17
-create table if not exists ads_api_TPOS_TDRP_WFX_store_15min(
+create table if not exists ads_api_TPOS_TDRP_WFX_store_cpu_15min(
   brand_code                    string comment '品牌编号',
   audit_time                    string comment '营业时间',
   store_code                    string comment '门店编码',
@@ -14,7 +14,7 @@ create table if not exists ads_api_TPOS_TDRP_WFX_store_15min(
 ) comment '商品销售金额排行TOP10' partitioned by (
   ds string
 );
-INSERT OVERWRITE TABLE ads_api_TPOS_TDRP_WFX_store_15min PARTITION(ds)
+INSERT OVERWRITE TABLE ads_api_TPOS_TDRP_WFX_store_cpu_15min PARTITION(ds)
 select
   a.org_code,
   a.audit_time,
