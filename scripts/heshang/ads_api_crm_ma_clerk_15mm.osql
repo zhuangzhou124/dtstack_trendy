@@ -10,6 +10,7 @@ create  table  if  not  EXISTS  ads_api_crm_ma_clerk_15mm(
   biz_date  string  comment  '插入日期'
 )partitioned  by  (ds  string);
 
+
 insert  overwrite  table  ads_api_crm_ma_clerk_15mm  partition(ds='${bizdate}')
   select  coalesce(tmp1.brand_code,tmp2.brand_code)
   ,coalesce(tmp1.store_no,tmp2.store_no)
