@@ -2,9 +2,6 @@
 --author:xuzhengzhi
 --create time:2019-10-14 14:48
 
-
-
-
 CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_skc(
   brand_code             STRING COMMENT '品牌编号',
   brand_name             STRING COMMENT '品牌名称',

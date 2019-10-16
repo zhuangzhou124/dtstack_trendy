@@ -1,4 +1,4 @@
-create  table  if  not  EXISTS  ads_api_crm_ma_clerk_15mm(
+create  table  if  not  EXISTS  ads_api_crm_ma_clerk_grade_15mm(
   brand_code  string  comment  '品牌编号',
   store_code  string  comment  '门店编号',
   clerk_no  string  comment  '店员编号',
@@ -11,7 +11,7 @@ create  table  if  not  EXISTS  ads_api_crm_ma_clerk_15mm(
 )partitioned  by  (ds  string);
 
 
-insert  overwrite  table  ads_api_crm_ma_clerk_15mm  partition(ds='${bizdate}')
+insert  overwrite  table  ads_api_crm_ma_clerk_grade_15mm  partition(ds='${bizdate}')
   select  coalesce(tmp1.brand_code,tmp2.brand_code)
   ,coalesce(tmp1.store_no,tmp2.store_no)
   ,coalesce(tmp1.clerk_no,tmp2.clerk_no)
