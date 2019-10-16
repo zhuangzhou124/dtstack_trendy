@@ -20,7 +20,7 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm_3 PARTITION(ds='${bizdate}')
   ,      t.date_id
   ,      t.org_code
   ,      t.channel_endpoint_code
-  ,      t.shopping_guider_no
+  ,      t.shopping_guider_no as clerk_no
   ,      COUNT(DISTINCT (CASE WHEN order_fact_amount > 0 THEN t.member_no ELSE NULL END)) AS member_actived_qty
   ,      '${bizdate}' AS biz_date
   FROM (

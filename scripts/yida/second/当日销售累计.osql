@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_clerk_15mm_2(
   target_amt DOUBLE COMMENT '目标金额',
   real_sales_amt DOUBLE COMMENT '实际销售额',
   biz_date STRING COMMENT '统计日期'
-) COMMENT '员工信息' PARTITIONED BY(ds STRING);
+) COMMENT '当日销售累计' PARTITIONED BY(ds STRING);
 
 
 
@@ -72,11 +72,13 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_clerk_15mm_2 PARTITION(ds = '${bizd
         ,      target_amount
         FROM ods_clerk_monthly_sales_analyze
         WHERE ds = '${bizdate}' AND clerk_no IS NOT NULL AND YEAR = substr('${bizdate}', 1, 4) AND MONTH =
-        substr('${bizdate}', 6, 2)) b ON a.shopping_guider_no = b.clerk_no
+        substr('${bizdate}', 5, 2)) b ON a.shopping_guider_no = b.clerk_no
   ) t1
     INNER JOIN (
       SELECT *
       FROM ods_clerk_info
       WHERE ds = '${bizdate}'
     ) t2 ON t1.clerk_no = t2.clerk_no;
+
+
 

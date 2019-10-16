@@ -41,7 +41,7 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm_1 PARTITION(ds='${bizdate}')
     FROM ods_member_card a1
       JOIN (
         SELECT ds1,date_type,date_id,time_id
-        FROM dim_time
+        FROM td_ads_dev.dim_time
         WHERE ds = '${bizdate}'
       ) time ON to_char(to_date(member_register_time, 'yyyy-mm-dd'), 'yyyymmdd') = time.time_id
     WHERE a1.ds = '${bizdate}' AND a1.STATUS > 0 AND CAST(a1.member_no AS BIGINT) > 1 AND a1.
@@ -56,10 +56,10 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm_1 PARTITION(ds='${bizdate}')
       FROM ods_sales_order a1
         JOIN (
       SELECT ds1,date_type,date_id,time_id
-      FROM dim_time
+      FROM td_ads_dev.dim_time
       WHERE ds = '${bizdate}'
-      ) time ON to_char(to_date(create_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd') = time.time_id
-      -- 改为过账时间to_char(to_date(audit_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd')
+      ) time ON to_char(to_date(paid_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd') = time.time_id
+      -- 改为过账时间to_char(to_date(paid_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd')
       WHERE a1.ds = '${bizdate}' AND CAST(a1.member_no AS BIGINT) > 1
 
       GROUP BY date_type

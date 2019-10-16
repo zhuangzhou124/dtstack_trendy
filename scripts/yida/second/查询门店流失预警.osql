@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS ads_api_crm_ma_clerk_d(
   silence_member_count                    STRING COMMENT '沉默会员数量',
   sleep_member_count                      STRING COMMENT '沉睡会员数量',
   loss_member_count                       STRING COMMENT '预流失会员数量',
-  biz_date STRING COMMENT '统计日期'
+  biz_date                                STRING COMMENT '统计日期'
 )COMMENT '查询门店流失预警' PARTITIONED BY(
   ds  STRING);
 

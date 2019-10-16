@@ -25,7 +25,7 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm_2 PARTITION(ds = '${bizdate}')
   SELECT date_type
   ,      date_id
   ,      org_code
-  ,      store_no
+  ,      store_no as channel_endpoint_code
   ,      clerk_no
   ,      COUNT(DISTINCT member_no) AS member_cnt
   ,      '${bizdate}' AS biz_date
@@ -44,9 +44,9 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm_2 PARTITION(ds = '${bizdate}')
     FROM (
       SELECT date_type
       ,      date_id
-      ,      a1.org_code
-      ,      a1.store_no
-      ,      a1.clerk_no
+      ,      trim(a1.org_code) as org_code
+      ,      trim(a1.store_no) as store_no
+      ,      trim(a1.clerk_no) as clerk_no
       ,      substr(REPLACE(a1.grade_change_time, '-', ''), 1, 8) AS grade_change_time
       ,      after_grade_id  -- 会员升级后等级  可能会用上
       ,      create_time
