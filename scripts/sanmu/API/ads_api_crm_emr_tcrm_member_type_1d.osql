@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS ads_api_crm_emr_tcrm_member_type_1d(
 LIFECYCLE 30;
 
 
+
 INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_type_1d PARTITION(ds = '${bizdate}')
 	SELECT '${cyctime}' AS biz_date,
 				 t4.company_name,

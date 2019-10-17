@@ -66,7 +66,7 @@ INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_1d PARTITION(ds = '${bizdate}
 				 END AS order_fact_amt_with_coupon,
 				 t1.amt_total AS totla_amt_order,
 				 t1.channel_endpoint_code,
-				 t6.region_name,
+				 t6.consumer_region_name,
 				 t7.before_grade_id,
 				 t7.after_grade_id,
 				 t7.grade_change_time,
@@ -118,7 +118,7 @@ INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_1d PARTITION(ds = '${bizdate}
 			ON t3.member_manage_channel_endpoint_code = t5.store_code
 		LEFT OUTER JOIN (
 			SELECT store_code,
-						 region_name
+						 region_name as consumer_region_name
 			FROM ${td_ods}.ods_real_store
 			WHERE ds = '${bizdate}') AS t6
 			ON t1.channel_endpoint_code = t6.store_code

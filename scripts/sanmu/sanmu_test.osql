@@ -3,6 +3,8 @@
 --create time:2019-09-26 14:45
 --drop table sanmu_test
 
+--ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm
+--ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d
 
 --2019-10-12 15:30:01
 select  min(create_time) from ods_sales_order where
@@ -65,7 +67,7 @@ WHERE grade_change_time = '${bizdate}' and ds = '${bizdate}'
 AND before_grade_id < after_grade_id AND STATUS > 0;
 
 
-
+drop table ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm;
 --店铺数
 SELECT org_code
 ,

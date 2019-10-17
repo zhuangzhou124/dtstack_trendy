@@ -158,7 +158,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 	,
 				 soi.price_sales * soi.qty_product AS actual_amt_with_coupon              --实际成交额(未扣券)
 	,
-				 so.paid_time                         --原单营业日期
+				 so.paid_time    as original_audit_date                     --原单营业日期
 	,
 				 mi.crm_info_id                      --会员id
 	,
