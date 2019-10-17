@@ -6,6 +6,17 @@
 --ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm
 --ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d
 
+
+
+--ods_stock_logic_order_out_items
+--ods_stock_logic_order_in_items
+--ods_stock_logic_order_in_notify_items
+
+
+
+
+
+
 --2019-10-12 15:30:01
 select  min(create_time) from ods_sales_order where
 ds = '${bizdate}' and create_time <= '2019-09-30 23:59:59';

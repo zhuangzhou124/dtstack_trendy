@@ -2,13 +2,81 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ccb34a09-2509-4140-9103-1a564ca8795d" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/scripts/sanmu/API/ads_api_crm_emr_tcrm_member_1d.osql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/sanmu/API/ads_api_crm_emr_tcrm_member_1d.osql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/sanmu/API/ads_api_crm_emr_tcrm_member_type_1d.osql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/sanmu/API/ads_api_crm_emr_tcrm_member_type_1d.osql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/sanmu/API/ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm.osql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/sanmu/API/ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm.osql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/sanmu/API/ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm.osql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/sanmu/API/ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm.osql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_alibaba_fastjson_1_2_28_odps.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_common_local_0_28_4_public.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_lot_proto_0_28_4_public.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_mapred_bridge_0_28_4_public.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_mapred_local_0_28_4_public.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_sdk_commons_0_28_4_public.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_sdk_core_0_28_4_public.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_sdk_lot_0_28_4_public.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_sdk_mapred_0_28_4_public.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_sdk_udf_0_28_4_public.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_udf_example_0_28_4_public.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_aliyun_odps_odps_udf_local_0_28_4_public.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_code_gson_gson_2_2_4.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_google_protobuf_protobuf_java_2_4_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__commons_cli_commons_cli_1_3_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__commons_codec_commons_codec_1_9.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__commons_collections_commons_collections_3_2_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__commons_io_commons_io_2_4.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__commons_lang_commons_lang_2_6.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__commons_logging_commons_logging_1_1_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__javax_activation_activation_1_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__javax_mail_mail_1_4_7.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__junit_junit_4_12.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__net_sourceforge_javacsv_javacsv_2_0.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_commons_commons_compress_1_4.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_velocity_velocity_1_7.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_aspectj_aspectjrt_1_8_2.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_codehaus_jackson_jackson_core_asl_1_9_13.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_codehaus_jackson_jackson_mapper_asl_1_9_13.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_hamcrest_hamcrest_core_1_3.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_slf4j_slf4j_api_1_7_5.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_tukaani_xz_1_0.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_xerial_snappy_snappy_java_1_1_1_6.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/java/JavaMoudle.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scripts/sanmu/sanmu_odps2mysql_ddl.osql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/TestUtil.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/mr/Resource$TokenizerMapper.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/mr/Resource.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/mr/WordCount$SumCombiner.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/mr/WordCount$SumReducer.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/mr/WordCount$TokenizerMapper.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/mr/WordCount.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/mr/test/WordCountTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/udf/UDAFExample.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/udf/UDAFResource.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/udf/UDFExample.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/udf/UDFResource.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/udf/UDTFExample.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/udf/UDTFResource.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/udf/test/UDAFTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/udf/test/UDFTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/udf/test/UDTFTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/unstructured/SpeechSentenceSnrExtractor.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/unstructured/SpeechStorageHandler.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/unstructured/TextExtractor$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/unstructured/TextExtractor.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/unstructured/TextOutputer.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/unstructured/TextStorageHandler.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/unstructured/UtteranceLabel.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/unstructured/test/ExtractorTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/com/aliyun/odps/examples/unstructured/test/OutputerTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/data/ambulance_csv/1.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/data/ambulance_csv/2.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/data/speech_wav/tsh148_seg_2_3013_3_6_48_80bd359827e24dd7_0.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/data/speech_wav/tsh148_seg_3013_1_31_11_9d7c87aef9f3e559_0.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/target/test-classes/data/speech_wav/tsh148_seg_3013_2_29_49_f4cb0990a6b4060c_0.wav" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/scripts/sanmu/sanmu_test.osql" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/sanmu/sanmu_test.osql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trendy_api.iml" beforeDir="false" afterPath="$PROJECT_DIR$/trendy_api.iml" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
+    <ignored path="$PROJECT_DIR$/java/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,12 +101,14 @@
     <session id="970997928">
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="osql" value="27" />
+          <entry key="java" value="16" />
+          <entry key="osql" value="65" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="OdpsQL" value="27" />
+          <entry key="JAVA" value="16" />
+          <entry key="OdpsQL" value="65" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -46,13 +116,21 @@
           <entry key="20191017025941158g8v525pr2" value="1" />
           <entry key="20191017030515366g11405pr2" value="1" />
           <entry key="20191017030818233gffyk4pr2" value="1" />
-          <entry key="osql" value="8" />
+          <entry key="csv" value="1" />
+          <entry key="iml" value="2" />
+          <entry key="java" value="6" />
+          <entry key="osql" value="23" />
+          <entry key="xml" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="OdpsQL" value="8" />
+          <entry key="CSV" value="1" />
+          <entry key="IDEA_MODULE" value="2" />
+          <entry key="JAVA" value="6" />
+          <entry key="OdpsQL" value="23" />
           <entry key="UNKNOWN" value="3" />
+          <entry key="XML" value="1" />
         </counts>
       </usages-collector>
     </session>
@@ -63,20 +141,25 @@
         <entry file="file://$PROJECT_DIR$/scripts/sanmu/sanmu_test.osql">
           <provider editor-type-id="OdpsQlGraph" />
           <provider selected="true" editor-type-id="OdpsQlEditor">
-            <state relative-caret-position="102">
-              <caret line="6" column="47" selection-start-line="6" selection-start-column="47" selection-end-line="6" selection-end-column="47" />
+            <state relative-caret-position="238">
+              <caret line="14" selection-start-line="14" selection-end-line="14" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scripts/sanmu/sanmu_odps2mysql_ddl.osql">
+          <provider editor-type-id="OdpsQlGraph" />
+          <provider selected="true" editor-type-id="OdpsQlEditor">
+            <state relative-caret-position="68">
+              <caret line="4" selection-start-line="4" selection-end-line="4" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/scripts/sanmu/API/ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm.osql">
-          <provider editor-type-id="OdpsQlGraph" />
-          <provider selected="true" editor-type-id="OdpsQlEditor">
-            <state relative-caret-position="272">
-              <caret line="16" column="80" selection-start-line="16" selection-start-column="27" selection-end-line="16" selection-end-column="80" />
-            </state>
-          </provider>
+        <entry file="file://$PROJECT_DIR$/java/pom.xml">
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
     </leaf>
@@ -85,12 +168,16 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="MaxCompute Sql Script" />
+        <option value="Class" />
+        <option value="MaxCompute UDF" />
       </list>
     </option>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
       <find>ods_sales_order</find>
+      <find>ii</find>
+      <find>b</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -120,8 +207,14 @@
         <option value="$PROJECT_DIR$/scripts/sanmu/API/ads_api_crm_emr_tcrm_member_type_1d.osql" />
         <option value="$PROJECT_DIR$/scripts/sanmu/API/ads_api_crm_emr_tcrm_member_1d.osql" />
         <option value="$PROJECT_DIR$/scripts/sanmu/API/ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm.osql" />
-        <option value="$PROJECT_DIR$/scripts/sanmu/sanmu_test.osql" />
         <option value="$PROJECT_DIR$/scripts/sanmu/API/ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm.osql" />
+        <option value="$PROJECT_DIR$/scripts/sanmu/sanmu_test.osql" />
+        <option value="$PROJECT_DIR$/java/examples/com/aliyun/odps/examples/udf/GetTableDdlForMysql.java" />
+        <option value="$PROJECT_DIR$/java/src/GetTableDdlForMysql.java" />
+        <option value="$PROJECT_DIR$/scripts/sanmu/sanmu_test1.osql" />
+        <option value="$PROJECT_DIR$/scripts/sanmu/GetTableDdlForMysql.java" />
+        <option value="$PROJECT_DIR$/scripts/sanmu/sanmu_odps2mysql_ddl.osql" />
+        <option value="$PROJECT_DIR$/java/GetTableDdlForMysql.java" />
       </list>
     </option>
   </component>
@@ -594,6 +687,17 @@
             <path>
               <item name="dtstack_trendy" type="b2602c69:ProjectViewProjectNode" />
               <item name="dtstack_trendy" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="dtstack_trendy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="dtstack_trendy" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="examples" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="dtstack_trendy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="dtstack_trendy" type="462c0819:PsiDirectoryNode" />
               <item name="scripts" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -646,7 +750,9 @@
     <property name="SearchEverywhereHistoryKey" value="ods_item_sku&#9;null&#9;null" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1571294804878" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="OdpsQL&#10;GenericSQL" />
+    <property name="jdk.selected.PYTHON_MODULE" value="Python 3.7" />
     <property name="last_opened_file_path" value="/usr/local/bin/git" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="project.structure.last.edited" value="Modules" />
@@ -797,11 +903,19 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="MaxCompute SQL.sanmu_test.osql">
+  <component name="RunManager" selected="Application.GetTableDdlForMysql">
     <configuration default="true" type="Applet" factoryName="Applet">
       <option name="HEIGHT" value="0" />
       <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
       <option name="WIDTH" value="0" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="GetTableDdlForMysql" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="GetTableDdlForMysql" />
+      <module name="JavaMoudle" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -967,9 +1081,11 @@
       <item itemvalue="MaxCompute Java.Resource" />
       <item itemvalue="MaxCompute SQL.ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm.osql" />
       <item itemvalue="MaxCompute SQL.sanmu_test.osql" />
+      <item itemvalue="Application.GetTableDdlForMysql" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.GetTableDdlForMysql" />
         <item itemvalue="MaxCompute Java.Resource" />
       </list>
     </recent_temporary>
@@ -1002,7 +1118,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="74685000" />
+    <option name="totallyTimeSpent" value="79874000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1440" height="900" extended-state="0" />
@@ -1137,13 +1253,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/java/examples/com/aliyun/odps/examples/udf/UDAFExample.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="16" column="13" selection-start-line="16" selection-start-column="13" selection-end-line="16" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/java/examples/com/aliyun/odps/examples/TestUtil.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="588">
@@ -1176,18 +1285,80 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/java/examples/data/ambulance_csv/1.csv">
+      <provider selected="true" editor-type-id="csv-text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/java/JavaMoudle.iml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/java/examples/com/aliyun/odps/examples/udf/UDAFExample.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="272">
+          <caret line="16" column="13" selection-start-line="16" selection-start-column="13" selection-end-line="16" selection-end-column="13" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/java/examples/com/aliyun/odps/examples/udf/GetTableDdlForMysql.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="272">
+          <caret line="19" column="3" lean-forward="true" selection-start-line="19" selection-start-column="3" selection-end-line="19" selection-end-column="3" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/java/src/GetTableDdlForMysql.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="18" lean-forward="true" selection-start-line="18" selection-end-line="18" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/sanmu/sanmu_test.osql">
+      <provider editor-type-id="OdpsQlGraph" />
+      <provider selected="true" editor-type-id="OdpsQlEditor">
+        <state relative-caret-position="238">
+          <caret line="14" selection-start-line="14" selection-end-line="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/sanmu/sanmu_test1.osql">
+      <provider editor-type-id="OdpsQlGraph" />
+      <provider selected="true" editor-type-id="OdpsQlEditor">
+        <state relative-caret-position="645">
+          <caret line="49" column="2" lean-forward="true" selection-start-line="49" selection-start-column="2" selection-end-line="49" selection-end-column="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/sanmu/GetTableDdlForMysql.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2125">
+          <caret line="128" column="1" selection-start-line="128" selection-start-column="1" selection-end-line="128" selection-end-column="1" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/sanmu/API/ads_api_crm_emr_tcrm_member_type_1d.osql">
       <provider editor-type-id="OdpsQlGraph" />
       <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="491">
-          <caret line="52" selection-start-line="52" selection-end-line="52" />
+        <state relative-caret-position="560">
+          <caret line="53" column="58" selection-start-line="53" selection-start-column="23" selection-end-line="53" selection-end-column="58" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/scripts/sanmu/API/ads_api_crm_emr_tcrm_member_1d.osql">
       <provider editor-type-id="OdpsQlGraph" />
       <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="-800">
+        <state relative-caret-position="17">
           <caret line="48" column="53" selection-start-line="48" selection-start-column="23" selection-end-line="48" selection-end-column="53" />
         </state>
       </provider>
@@ -1195,7 +1366,7 @@
     <entry file="file://$PROJECT_DIR$/scripts/sanmu/API/ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm.osql">
       <provider editor-type-id="OdpsQlGraph" />
       <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="179">
+        <state relative-caret-position="272">
           <caret line="16" column="74" selection-start-line="16" selection-start-column="27" selection-end-line="16" selection-end-column="74" />
         </state>
       </provider>
@@ -1219,7 +1390,7 @@
     <entry file="file://$PROJECT_DIR$/scripts/sanmu/API/ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d.osql">
       <provider editor-type-id="OdpsQlGraph" />
       <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="-666">
+        <state relative-caret-position="272">
           <caret line="16" column="80" selection-start-line="16" selection-start-column="27" selection-end-line="16" selection-end-column="80" />
         </state>
       </provider>
@@ -1240,14 +1411,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/sanmu/sanmu_test.osql">
-      <provider editor-type-id="OdpsQlGraph" />
-      <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="102">
-          <caret line="6" column="47" selection-start-line="6" selection-start-column="47" selection-end-line="6" selection-end-column="47" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/sanmu/API/ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm.osql">
       <provider editor-type-id="OdpsQlGraph" />
       <provider selected="true" editor-type-id="OdpsQlEditor">
@@ -1255,6 +1418,37 @@
           <caret line="16" column="80" selection-start-line="16" selection-start-column="27" selection-end-line="16" selection-end-column="80" />
         </state>
       </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/java/java.iml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="jar://$USER_HOME$/work/m2/repository/com/aliyun/odps/odps-sdk-commons/0.28.4-public/odps-sdk-commons-0.28.4-public-sources.jar!/com/aliyun/odps/type/TypeInfo.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="10" column="9" selection-start-line="10" selection-start-column="9" selection-end-line="10" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/java/GetTableDdlForMysql.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="562">
+          <caret line="165" lean-forward="true" selection-start-line="165" selection-end-line="165" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/sanmu/sanmu_odps2mysql_ddl.osql">
+      <provider editor-type-id="OdpsQlGraph" />
+      <provider selected="true" editor-type-id="OdpsQlEditor">
+        <state relative-caret-position="68">
+          <caret line="4" selection-start-line="4" selection-end-line="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/java/pom.xml">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
   </component>
   <component name="masterDetails">
@@ -1296,7 +1490,7 @@
       </state>
       <state key="GlobalLibrariesConfigurable.UI">
         <settings>
-          <last-edited>Python 3.4.4 (C:\myprograms\python3.4\python.exe) interpreter library</last-edited>
+          <last-edited>Python 3.7 (sanmu_py) interpreter library</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
@@ -1320,11 +1514,12 @@
       </state>
       <state key="ModuleStructureConfigurable.UI">
         <settings>
-          <last-edited>trendy_api</last-edited>
+          <last-edited>java</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
                 <option value="0.2" />
+                <option value="0.6" />
               </list>
             </option>
           </splitter-proportions>
