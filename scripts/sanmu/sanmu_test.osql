@@ -4,9 +4,9 @@
 --drop table sanmu_test
 
 
-
-select distinct member_grade_code from ods_sales_order where
-ds = '${bizdate}';
+--2019-10-12 15:30:01
+select  min(create_time) from ods_sales_order where
+ds = '${bizdate}' and create_time <= '2019-09-30 23:59:59';
 
 select distinct grade_code,grade_name from ods_member_grade_info where ds = '20191014';
 
@@ -16,30 +16,115 @@ select * from td_ods_dev.ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm w
 select count(*) from td_ods_dev.ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm where ds = '20190920';
 
 
-SELECT o.org_code,
-			 b.channel_code AS owner_channel_code,
-			 b.sku_code,
-			 a.business_order_business_type,
-			 a.business_order_type,
-			 a.app_id,
-			 b.qty_received AS qty
-FROM ods_stock_logic_order_in AS a
-	INNER JOIN ods_stock_logic_order_in_items AS b
-		ON a.id = b.logic_order_in_id AND b.ds = '${bizdate}'
-	INNER JOIN ods_stock_logic AS o
-		ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
-WHERE  a.ds = '${bizdate}'
-and substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) = '${bizdate}' ;
 
---销售金额
+--新会员
+SELECT bb.org_code,
+			 bb.channel_endpoint_code,
+			 bb.sales_order_no,
+			 bb.member_grade_code,
+			 bb.order_time,
+			 bb.price_amt_retail,
+			 bb.amt_total,
+			 bb.order_type,
+			 bb.member_no
+FROM ods_member_info aa
+	JOIN ods_member_card cc
+		ON cc.member_no = aa.member_no and cc.ds = '${bizdate}'
+	RIGHT JOIN (
+		SELECT a.org_code,
+					 a.member_no,
+					 a.sales_order_no,
+					 a.member_grade_code,
+					 a.price_amt_retail,
+					 a.order_type,
+					 a.amt_total,
+					 substr(regexp_replace(a.paid_time, '-', '', 0), 1, 8) AS order_time,
+					 a.channel_endpoint_code,
+					 min(a.create_time)OVER (PARTITION BY a.org_code, a.member_no) AS first_order_time
+		FROM ods_sales_order a
+		WHERE substr(regexp_replace(a.audit_time, '-', '', 0), 1, 8) <= '${bizdate}' AND a.amt_total > 0
+		AND a.order_status = 1 AND a.price_amt_discount > 0
+		AND (a.member_grade_code IS NOT NULL OR a.member_grade_code NOT LIKE '%ANONYMOUS%')
+		and a.ds = '${bizdate}'
+		AND a.member_no NOT IN ('-1', '1')
+	) bb
+		ON bb.org_code = cc.org_code AND bb.member_no = cc.member_no
+WHERE substr(regexp_replace(cc.member_register_time, '-', '', 0), 1, 8) <= '${bizdate}' AND aa.STATUS > 0
+AND cc.member_no NOT IN ('-1', '1') and aa.ds = '${bizdate}'
+--AND substr(regexp_replace(bb.first_order_time, '-', '', 0), 1, 8) = '${bizdate}';
+AND substr(regexp_replace(bb.first_order_time, '-', '', 0), 1, 8) = '20191012';
+
+
+
+--substr(regexp_replace(a.audit_time, '-', '', 0), 1, 8)
+
+--会员升级
+SELECT member_no,'1' as grade_change
+FROM ods_member_grade_log
+WHERE grade_change_time = '${bizdate}' and ds = '${bizdate}'
+AND before_grade_id < after_grade_id AND STATUS > 0;
+
+
+
+--店铺数
+SELECT org_code
+,
+			 COUNT(DISTINCT channel_endpoint_code) AS store_qty
+FROM ods_sales_order
+WHERE 1 = 1 AND create_time BETWEEN '2019-09-01 00:00:00' AND '2019-09-30 23:59:59' AND org_code = 'TRE'
+AND channel_endpoint_code IN ('1101', '1102', '1104')
+GROUP BY org_code
+HAVING sum(price_amt_discount) > 0
+ORDER BY org_code
+LIMIT 1000;
+
+
+
+--普通会员
+SELECT t.org_code,
+			 t.channel_endpoint_code,
+			 t.grade_code,
+			 t.grade_name
+,
+			 member_qty
+FROM (
+	SELECT a.org_code,
+				 a.channel_endpoint_code
+	,
+				 b.grade_code
+	,
+				 b.grade_name
+	,
+				 COUNT(DISTINCT a.member_no) AS member_qty
+	,
+				 a.member_no
+	,
+				 min(a.create_time) AS first_order_time
+	,
+				 sum(a.price_amt_discount) AS order_fact_amount
+	FROM ods_sales_order a
+		LEFT JOIN ods_member_grade_state c
+			ON a.member_no = c.member_no and c.ds = '20191014'
+		LEFT JOIN ods_member_grade_info b
+			ON b.org_code = c.org_code AND b.grade_code = a.member_grade_code and b.ds = '20191014'
+	WHERE a.create_time <= '2019-10-15 23:59:59' AND a.member_no != - 1 and a.ds = '20191014'
+	GROUP BY a.org_code, a.channel_endpoint_code, a.member_grade_code, b.grade_code, b.grade_name, a.member_no
+	HAVING min(a.create_time) BETWEEN '2019-10-12 00:00:00' AND '2019-10-12 23:59:59'
+) t
+WHERE t.order_fact_amount > 0;
+
+
+
+--门店总销售金额
 SELECT so.org_code,
 			 so.channel_endpoint_code,
-			 sum(soi.price_sales * soi.qty_product)
+			 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) as order_time,
+			 sum(soi.price_sales * soi.qty_product) as total_amt
 FROM ods_sales_order so
 	INNER JOIN ods_sales_order_item soi
 		ON soi.sales_order_no = so.sales_order_no
-WHERE so.order_status = 1 AND substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) = '${bizdate}'
-GROUP BY so.org_code, so.channel_endpoint_code;
+WHERE so.order_status = 1 AND so.ds = '${bizdate}'
+GROUP BY so.org_code, so.channel_endpoint_code,substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8);
 
 
 
