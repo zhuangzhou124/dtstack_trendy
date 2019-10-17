@@ -8,20 +8,15 @@
 
 
 
---ods_stock_logic_order_out_items
---ods_stock_logic_order_in_items
---ods_stock_logic_order_in_notify_items
-
-
 
 
 
 
 --2019-10-12 15:30:01
-select  min(create_time) from ods_sales_order where
-ds = '${bizdate}' and create_time <= '2019-09-30 23:59:59';
+select * from ads_api_crm_emr_tcrm_member_type_1d where ds = '${bizdate}' and store_num_1d_member_type is not null
+and channel_endpoint = '34R05J' and date_id = '20190821';
 
-select distinct grade_code,grade_name from ods_member_grade_info where ds = '20191014';
+select * from ods_sales_order where ds = '20191014' and channel_endpoint_code IN ('1101', '1102', '1104');
 
 INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PARTITION(ds)
 select * from td_ods_dev.ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm where ds = '20190920';

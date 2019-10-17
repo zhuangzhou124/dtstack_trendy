@@ -1,0 +1,142 @@
+--name:sanmu_test3
+--author:sanmu
+--create time:2019-10-17 17:00
+--drop table sanmu_test3
+
+
+
+
+
+
+
+SELECT '${cyctime}' AS biz_date,
+			 t4.company_name,
+			 t2.region_name,
+			 t2.city_name,
+			 t1.org_code,
+			 t1.channel_endpoint_code,
+			 t3.operation_name,
+			 CASE
+			 WHEN t1.member_grade_code LIKE '%GENERAL%' THEN '普通会员'
+			 WHEN t1.member_grade_code LIKE '%SILVER%' OR t1.member_grade_code = 'FIV_VIP' THEN 'VIP会员'
+			 WHEN t1.member_grade_code LIKE '%GOLD%' OR t1.member_grade_code = 'FIV_SVIP' THEN 'SVIP会员'
+			 ELSE '不是会员'
+			 END AS member_type,
+			 sum(t5.price_sales * t5.qty_product) AS sales_amt_1d_member_type,
+			 t1.price_amt_retail AS retail_price_amt_1d_member_type,
+			 sum(CASE
+			 WHEN (t5.price_discount <> 0 OR t5.qty_product <> 0) THEN t5.qty_product
+			 END) AS sales_num_1d_member_type,
+			 COUNT(DISTINCT CASE
+			 WHEN t6.is_vip = '1' THEN t1.member_no
+			 END) AS sales_mbr_num_1d_member_type,
+			 COUNT(DISTINCT CASE
+			 WHEN t7.grade_change = '1' THEN t1.member_no
+			 END) AS upgraded_num_1d_member_type,
+			 sum(CASE
+			 WHEN t1.channel_endpoint_code IN ('1101', '1102', '1104') THEN 1
+			 END) AS store_num_1d_member_type,
+			 sum(CASE
+			 WHEN t1.order_type = '101' THEN 1
+			 WHEN t1.order_type IN ('102', '103') THEN - 1
+			 WHEN t1.order_type = '104' AND t1.amt_total > 0 THEN 1
+			 WHEN t1.order_type = '104' AND t1.amt_total = 0 THEN 0
+			 END) AS su_mbr_num_1d_member_type_avg,      --(订单数)
+			 'day' as date_type,
+			 t1.order_time as date_id
+FROM (
+	SELECT org_code,
+				 sales_order_no,
+				 channel_endpoint_code,
+				 member_grade_code,
+				 price_amt_retail,
+				 order_type,
+				 amt_total,
+				 member_no,
+				 substr(regexp_replace(paid_time, '-', '', 0), 1, 8) AS order_time
+	FROM ods_sales_order
+	WHERE ds = '${bizdate}' AND order_status = 1 AND price_amt_discount > 0 AND member_no != - 1
+	AND (member_grade_code IS NOT NULL OR member_grade_code NOT LIKE '%ANONYMOUS%')
+and channel_endpoint_code = '34R05J'
+and substr(regexp_replace(paid_time, '-', '', 0), 1, 8) = '20190821') AS t1
+	JOIN (
+		SELECT sales_order_no,
+					 price_sales,
+					 price_discount,
+					 qty_product
+		FROM ods_sales_order_item
+		WHERE ds = '${bizdate}') AS t5
+		ON t1.sales_order_no = t5.sales_order_no
+	LEFT JOIN (
+		SELECT store_code,
+					 company_code,
+					 region_name,
+					 city_name
+		FROM ods_real_store
+		WHERE ds = '${bizdate}') AS t2
+		ON t1.channel_endpoint_code = t2.store_code
+	LEFT JOIN (
+		SELECT channel_endpoint_code,
+					 operation_name
+		FROM ods_api_channel_endpoint
+		WHERE ds = '${bizdate}') AS t3
+		ON t1.channel_endpoint_code = t3.channel_endpoint_code
+	LEFT JOIN (
+		SELECT company_code,
+					 company_name
+		FROM ods_company
+		WHERE ds = '${bizdate}') AS t4
+		ON t2.company_code = t4.company_code
+	LEFT JOIN (
+		SELECT grade_code,
+					 is_vip
+		FROM ods_member_grade_info
+		WHERE ds = '${bizdate}') AS t6
+		ON t1.member_grade_code = t6.grade_code
+	LEFT JOIN (
+		SELECT member_no,
+					 '1' AS grade_change
+		FROM ods_member_grade_log
+		WHERE grade_change_time = '${bizdate}' AND ds = '${bizdate}' AND before_grade_id < after_grade_id AND STATUS > 0)
+	AS t7
+		ON t1.member_no = t7.member_no
+GROUP BY t4.company_name,
+t2.region_name,
+t2.city_name,
+t1.org_code,
+t1.channel_endpoint_code,
+t3.operation_name, t1.member_grade_code, t1.price_amt_retail, t1.order_time;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 so.price_amt_retail,
+			 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) as order_time,
+			 sum(soi.price_sales * soi.qty_product) as total_amt
+FROM ods_sales_order so
+	INNER JOIN ods_sales_order_item soi
+		ON soi.sales_order_no = so.sales_order_no and soi.ds = '${bizdate}'
+WHERE so.order_status = 1 AND so.ds = '${bizdate}'
+and substr(regexp_replace(so.audit_time, '-', '', 0), 1, 8) <= '${bizdate}' AND so.amt_total > 0
+AND so.order_status = 1 AND so.price_amt_discount > 0
+AND (so.member_grade_code IS NOT NULL OR so.member_grade_code NOT LIKE '%ANONYMOUS%')
+AND so.member_no NOT IN ('-1', '1') and substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) = '20190821'
+and channel_endpoint_code = '34R05J'
+GROUP BY so.org_code, so.channel_endpoint_code,so.price_amt_retail,substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8);
+
