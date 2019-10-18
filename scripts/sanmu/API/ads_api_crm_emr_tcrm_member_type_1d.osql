@@ -13,7 +13,6 @@
 --***********************************
 
 
-
 CREATE TABLE IF NOT EXISTS ads_api_crm_emr_tcrm_member_type_1d(
 	biz_date                                                 STRING COMMENT '统计日期',
 	company_name                                             STRING COMMENT '上级公司名              ',
