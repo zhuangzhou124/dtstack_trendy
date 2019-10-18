@@ -17,7 +17,7 @@
 CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm(
 	biz_date                                                       STRING COMMENT '统计日期',
 	org_code                                                       STRING COMMENT '品牌         ',
-	brand_code                                                     STRING COMMENT '子品牌         ',
+	brand_name                                                     STRING COMMENT '子品牌         ',
 	channel_endpoint                                               STRING COMMENT '门店code',
 	channel_endpoint_type                                          STRING COMMENT '门店类别',
 	region_name                                               STRING COMMENT '门店区域',
@@ -100,7 +100,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 	SELECT '${cyctime}' AS biz_date,
 				 so.org_code                         --品牌编码
 	,
-				 pb.brand_code                     --子品牌编码
+				 pb.brand_name                     --子品牌编码
 	,
 				 so.channel_endpoint_code AS channel_endpoint         --门店编码
 	,
