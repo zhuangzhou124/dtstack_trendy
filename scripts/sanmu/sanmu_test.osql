@@ -11,9 +11,8 @@
 
 
 
-
 --2019-10-12 15:30:01
-INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_1d PARTITION(ds)
+INSERT OVERWRITE TABLE ods_stock_logic PARTITION(ds)
 select distinct * from ads_api_crm_emr_tcrm_member_1d where ds = '${bizdate}' and member_no not in ('-1','1');
 
 select * from ads_api_crm_emr_tcrm_member_1d where ds = '${bizdate}' and store_num_1d_member_type is not null
