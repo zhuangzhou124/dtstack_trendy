@@ -13,7 +13,10 @@
 
 
 --2019-10-12 15:30:01
-select * from ads_api_crm_emr_tcrm_member_type_1d where ds = '${bizdate}' and store_num_1d_member_type is not null
+INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_1d PARTITION(ds)
+select distinct * from ads_api_crm_emr_tcrm_member_1d where ds = '${bizdate}' and member_no not in ('-1','1');
+
+select * from ads_api_crm_emr_tcrm_member_1d where ds = '${bizdate}' and store_num_1d_member_type is not null
 and channel_endpoint = '34R05J' and date_id = '20190821';
 
 select * from ods_sales_order where ds = '20191014' and channel_endpoint_code IN ('1101', '1102', '1104');

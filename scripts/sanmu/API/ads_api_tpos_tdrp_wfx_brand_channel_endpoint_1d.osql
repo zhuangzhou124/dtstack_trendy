@@ -37,7 +37,9 @@ CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d(
 	avg_discount_1d_brand_channel_endpoint                      DOUBLE COMMENT '平均折扣(销售金额/吊牌金额)         ',
 	sales_per_1d_brand_channel_endpoint                         DOUBLE COMMENT '客单价:实际销售金额(销售金额-现金券金额)/销售单数 (成交笔数)        ',
 	joint_rate_1d_brand_channel_endpoint                        DOUBLE COMMENT '连带率:销售件数/销售单数(成交笔数)         ',
-	sales_ratio_1d_brand_store_vip                              DOUBLE COMMENT 'vip销售占比：vip销售金额/销售金额      '
+	sales_ratio_1d_brand_store_vip                              DOUBLE COMMENT 'vip销售占比：vip销售金额/销售金额      ',
+	date_type                                                   STRING COMMENT '日期类型',
+	date_id                                                     STRING COMMENT '日期'
 
 )COMMENT '日期+品牌+门店粒度汇总表' PARTITIONED BY(
 	ds STRING COMMENT '时间分区')
@@ -92,7 +94,9 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION
 				 CASE
 				 WHEN t1.sales_amt_1d_brand_store IS  NULL OR t1.sales_amt_1d_brand_store = 0 or t11.sales_amt_1d_brand_store_vip <= 0 THEN 0.0
 				 ELSE (t11.sales_amt_1d_brand_store_vip / t1.sales_amt_1d_brand_store)
-				 END AS sales_ratio_1d_brand_store_vip
+				 END AS sales_ratio_1d_brand_store_vip,
+				 'day' as date_type,
+				 t1.order_time as date_id
 	FROM (
 
 	----------吊牌金额、销售金额

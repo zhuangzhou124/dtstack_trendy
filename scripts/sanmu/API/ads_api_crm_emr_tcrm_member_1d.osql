@@ -47,11 +47,12 @@ LIFECYCLE 30;
 
 
 INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_1d PARTITION(ds = '${bizdate}')
-	SELECT '${cyctime}' AS biz_date,
+	SELECT distinct '${cyctime}' AS biz_date,
 				 t1.org_code,
 				 t1.member_no,
 				 t1.member_mobile,
-				 '' AS gmt_member_first_order,
+--				 min(t1.paid_time) over (partition by t1.org_code,t1.member_no) AS gmt_member_first_order,
+				 '' as gmt_member_first_order,
 				 t3.member_register_channel_endpoint_code,
 				 t3.member_manage_channel_endpoint_code,
 				 t4.operation_name,
@@ -87,7 +88,7 @@ INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_1d PARTITION(ds = '${bizdate}
 					 paid_time,
 					 create_time
 		FROM ${td_ods}.ods_sales_order
-		WHERE ds = '${bizdate}' and member_no is not null) AS t1
+		WHERE ds = '${bizdate}' and member_no not in ('-1','1')) AS t1
 		LEFT OUTER JOIN (
 			SELECT sales_order_no,
 						 pay_way,
