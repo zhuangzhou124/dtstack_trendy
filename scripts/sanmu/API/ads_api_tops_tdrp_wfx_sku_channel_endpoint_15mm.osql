@@ -38,12 +38,10 @@ CREATE TABLE IF NOT EXISTS ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm(
 	sku_color_name                                                        STRING COMMENT '商品颜色名称         ',
 	sku_size_code                                                         STRING COMMENT '商品尺码编码         ',
 	sku_size_name                                                         STRING COMMENT '商品尺码名称   ',
-	sku_type_1d_zckc                                                      STRING COMMENT
-	'商品在仓库存数类型("变更后数量类型:POSITIVE-正数,NEGATIVE-负数,ZERO-零,NONZERO-非零)         ',
+	sku_type_1d_zckc                                                      STRING COMMENT '商品在仓库存数类型("变更后数量类型:POSITIVE-正数,NEGATIVE-负数,ZERO-零,NONZERO-非零)         ',
 	sku_num_1d_zckc                                                       BIGINT COMMENT '商品在仓库存数         ',
 	sku_amt_1d_zckc_retail                                                DOUBLE COMMENT '商品在仓库存吊牌总金额   ',
-	sku_type_1d_ztkc                                                      STRING COMMENT
-	'商品在途库存数类型("变更后数量类型:POSITIVE-正数,NEGATIVE-负数,ZERO-零,NONZERO-非零)         ',
+	sku_type_1d_ztkc                                                      STRING COMMENT '商品在途库存数类型("变更后数量类型:POSITIVE-正数,NEGATIVE-负数,ZERO-零,NONZERO-非零)         ',
 	sku_num_1d_ztkc                                                       BIGINT COMMENT '商品在途库存数         ',
 	sku_amt_1d_ztkc_retail                                                DOUBLE COMMENT '商品在途库存吊牌总金额   ',
 	gmt_sku_effective                                                     STRING COMMENT '库存有效时间       '
