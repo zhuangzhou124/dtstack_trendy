@@ -11,6 +11,7 @@ create table if not exists ads_api_TPOS_MA_store_15mm(
   orgCode                       string comment '品牌编码',
   salesAmount                   double comment '销售总额',
   salesSubCouponAmount          double comment '扣卷销售总额-真实金额',
+  rank                          bigint comment '销售金额排名',
   orderMaxAmount                double comment '最大单金额',
   itemQuantity                  bigint comment '商品数量',
   orderQuantity                 bigint comment '订单数量',
@@ -47,6 +48,7 @@ INSERT OVERWRITE TABLE ads_api_TPOS_MA_store_15mm PARTITION(ds)
   a.org_code as orgCode,
   sale_amt as salesAmount,--销售金额
   sale_amt - coalesce(amt_pay,0) AS salesSubCouponAmount, --销售金额（扣券）
+  rank() over (partition by a.org_code,a.store_code order by sale_amt desc) as rank,
   c.orderMaxAmount,
   a.itemQuantity,
   a.orderQuantity,
@@ -252,11 +254,11 @@ INSERT OVERWRITE TABLE ads_api_TPOS_MA_store_15mm PARTITION(ds)
             osi.sku_code,
             replace(ops.list_date,'-',''),--通过渠道库存id关联拿到商品SKU再拿到波段和上市日期
             ops.band,--波段
-            dense_rank() over (partition by osr.channel_endpint_code order by replace(ops.list_date,'-','') desc) as ranking
+            dense_rank() over (partition by osr.channel_endpoint_code order by replace(ops.list_date,'-','') desc) as ranking
             from ods_stock_channel_terminal_rel osr
               left join ods_stock_channel_items osi on osr.stock_channel_id = osi.stock_channel_id
               left join ods_api_item_sku ops on osi.sku_code = ops.sku_code
-              join ods_real_store rs_r on osr.channel_endpint_code = rs_r.store_code and rs_r.ds = '20190920'
+              join ods_real_store rs_r on osr.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
             where osr.ds = '20190920' and osi.ds = '20190905' and ops.ds = '20190920'
           )T0
         )T where sku_code is not null

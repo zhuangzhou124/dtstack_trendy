@@ -10,6 +10,8 @@ create table if not exists ads_api_TPOS_MA_storecate2_15mm(
   orgCode                       string comment '品牌编码',
   salesAmount                   double comment '销售总额',
   salesSubCouponAmount          double comment '扣券销售总额',
+  salesAmountRate               double comment '销售总额占比',
+  salesSubCouponAmountRate      double comment '销售总额占比(扣券)',
   subCate                       string comment '二级品类',
   salesQuantity                 bigint comment '销售件数'
 ) comment '店品类销售占比' partitioned by (
@@ -17,6 +19,21 @@ create table if not exists ads_api_TPOS_MA_storecate2_15mm(
 );
 INSERT OVERWRITE TABLE ads_api_TPOS_MA_storecate2_15mm PARTITION(ds)
 select
+  date_type,
+  date_id,
+  storeCode,
+  orderType,
+  status,
+  orgCode,
+  salesAmount,
+  salesSubCouponAmount,
+  case when salesAmountRate is not null and salesAmountRate <> 0 then salesAmount/salesAmountRate end as salesAmountRate,
+  case when salesSubCouponAmountRate is not null and salesSubCouponAmountRate <> 0 then salesSubCouponAmount/salesSubCouponAmountRate end as salesSubCouponAmountRate,
+  subCate,
+  pro_cnt,
+  ds
+from (
+  select
   'day' as date_type,
   '20190920' as date_id,
   a.real_store_code as storeCode,
@@ -25,70 +42,73 @@ select
   a.org_code as orgCode,
   a.salesAmount,
   (coalesce(a.salesAmount,0) - coalesce(b.amt_pay,0)) as salesSubCouponAmount,
+  sum(a.salesAmount) over (partition by a.org_code,a.real_store_code) as salesAmountRate,--销售总额剔除二级品类
+  sum(coalesce(a.salesAmount,0) - coalesce(b.amt_pay,0)) over (partition by a.org_code,a.real_store_code) as salesSubCouponAmountRate,--销售总额扣券剔除二级品类
   a.level2_cate_code as subCate,
   a.pro_cnt,
   a.ds
-from (
-  select rs_r.store_code as real_store_code
-  ,      soi.level2_cate_code
-  ,      sum(soi.qty_product) as pro_cnt--销售件数
-  ,      sum(so.amt_total) as salesAmount--销售金额
-  ,      so.org_code
-  ,      soi.ds
   from (
-    select channel_endpoint_code, sales_order_no, org_code, amt_total
-    from ods_sales_order
-    where ds = '20190920' and replace(substr(create_time,1,10),'-','') = '20190920'
-  ) so
-    left join (
+    select rs_r.store_code as real_store_code
+    ,      soi.level2_cate_code
+    ,      sum(soi.qty_product) as pro_cnt--销售件数
+    ,      sum(so.amt_total) as salesAmount--销售金额
+    ,      so.org_code
+    ,      soi.ds
+    from (
+      select channel_endpoint_code, sales_order_no, org_code, amt_total
+      from ods_sales_order
+      where ds = '20190920' and replace(substr(create_time,1,10),'-','') = '20190920'
+    ) so
+      left join (
+        select qty_product, sales_order_no, price_discount,os.level2_cate_code,oi.ds,oi.org_code
+        from ods_sales_order_item oi left join ods_api_item_sku os on oi.sku_code = os.sku_code
+        where oi.ds = '20190920' and os.ds = '20190920'
+      ) soi on soi.sales_order_no = so.sales_order_no and soi.org_code = so.org_code
+      join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
+    where soi.price_discount > 0 and soi.qty_product > 0
+    group by
+    rs_r.store_code,
+    soi.level2_cate_code,
+    so.org_code,
+    soi.ds
+  )a left join (
+    SELECT
+    rs_r.store_code,
+    sop.org_code,
+    soi.level2_cate_code,
+    sum( sop.amt_pay ) AS amt_pay,
+    sop.ds
+    FROM
+    (
+        SELECT
+               amt_pay,
+               sales_order_no,
+               pay_way,
+               org_code,
+               ds
+        FROM ods_sales_order_payment
+        WHERE ds = '20190920' AND REPLACE ( substr( create_time, 1, 10 ), '-', '' ) = '20190920'
+        and pay_way = 'COUPON'
+    ) sop LEFT JOIN (
+      SELECT
+             org_code,
+             channel_endpoint_code,
+             sales_order_no
+      FROM ods_sales_order
+      WHERE ds = '20190920'
+    ) so ON sop.sales_order_no = so.sales_order_no and sop.org_code = so.org_code
+      left join (
       select qty_product, sales_order_no, price_discount,os.level2_cate_code,oi.ds,oi.org_code
       from ods_sales_order_item oi left join ods_api_item_sku os on oi.sku_code = os.sku_code
       where oi.ds = '20190920' and os.ds = '20190920'
-    ) soi on soi.sales_order_no = so.sales_order_no and soi.org_code = so.org_code
-    join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
-  where soi.price_discount > 0 and soi.qty_product > 0
-  group by
-  rs_r.store_code,
-  soi.level2_cate_code,
-  so.org_code,
-  soi.ds
-)a left join (
-  SELECT
-  rs_r.store_code,
-  sop.org_code,
-  soi.level2_cate_code,
-  sum( sop.amt_pay ) AS amt_pay,
-  sop.ds
-  FROM
-  (
-    SELECT
-    amt_pay,
-    sales_order_no,
-    pay_way,
-    org_code,
-    ds
-    FROM ods_sales_order_payment
-    WHERE ds = '20190920' AND REPLACE ( substr( create_time, 1, 10 ), '-', '' ) = '20190920'
-    and pay_way = 'COUPON'
-  ) sop LEFT JOIN (
-    SELECT
-           org_code,
-           channel_endpoint_code,
-           sales_order_no
-    FROM ods_sales_order
-    WHERE ds = '20190920'
-  ) so ON sop.sales_order_no = so.sales_order_no and sop.org_code = so.org_code
-    left join (
-    select qty_product, sales_order_no, price_discount,os.level2_cate_code,oi.ds,oi.org_code
-    from ods_sales_order_item oi left join ods_api_item_sku os on oi.sku_code = os.sku_code
-    where oi.ds = '20190920' and os.ds = '20190920'
-    ) soi on soi.sales_order_no = so.sales_order_no and soi.org_code = so.org_code
-    join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
-  GROUP BY
-  rs_r.store_code,
-  sop.org_code,
-  soi.level2_cate_code,
-  sop.ds
+      ) soi on soi.sales_order_no = so.sales_order_no and soi.org_code = so.org_code
+      join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
+    GROUP BY
+    rs_r.store_code,
+    sop.org_code,
+    soi.level2_cate_code,
+    sop.ds
   )b on a.org_code = b.org_code and a.level2_cate_code = b.level2_cate_code and a.real_store_code = b.store_code
+) t
 ;
 
