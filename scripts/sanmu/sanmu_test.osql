@@ -6,14 +6,64 @@
 --ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm
 --ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d
 
+desc ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d;
+SELECT  '' as salesAmountRankNo,
+				'' as quantityRankNo,
+				skc,
+			 thumbnail_img_url as thumbnailImgUrl,
+			 year,
+			 product_code as projects,
+			 spu_name as spuName,
+			 color,
+			 price,
+			 discount_rate as discountRate,
+			 sales_amt_rate as SalesAmountRate,
+			 sales_amt AS salesAmount,
+			 sales_num AS quantity
+FROM ads_api_tpos_tdrp_wfx_clerkno_skc_15min
+WHERE org_code = ${org_code}
+AND clerk_no = ${clerkNo}
+AND year = ${year}
+AND product_code IN (${projects})
+AND spu IN (${spu})
+AND skc IN (${skc})
+AND color IN (${color})
+AND date_type = ${date_type}
+AND date_id = ${date_id};
 
+
+SELECT '' as salesAmountRankNo,
+			 '' as quantityRankNo,
+			 sku,
+			 thumbnail_img_url as thumbnailImgUrl,
+			 year,
+			 product_code as projects,
+			 spu_name as spuName,
+			 price,
+			 discount_rate as discountRate,
+			 sales_amt_rate as SalesAmountRate,
+			 sales_amt AS salesAmount,
+			 null as stockNum,
+			 sales_num AS quantity
+FROM ads_api_tpos_tdrp_wfx_clerkno_sku_15min
+WHERE org_code = ${org_code}
+AND clerk_no = ${clerkNo}
+AND year = ${year}
+AND product_code IN (${projects})
+AND spu IN (${spu})
+AND skc IN (${skc})
+AND sku IN (${sku})
+AND color IN (${color})
+AND date_type = ${date_type}
+AND date_id = ${date_id};
 
 
 
 
 
 --2019-10-12 15:30:01
-INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_1d PARTITION(ds)
+INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_payway_15min
+PARTITION(ds)
 select distinct * from ads_api_crm_emr_tcrm_member_1d where ds = '${bizdate}' and member_no not in ('-1','1');
 
 select * from ads_api_crm_emr_tcrm_member_1d where ds = '${bizdate}' and store_num_1d_member_type is not null
