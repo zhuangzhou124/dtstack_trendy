@@ -15,7 +15,7 @@
 
 CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_channel_endpoint_1d(
 	biz_date                                              STRING COMMENT '统计日期',
-	channel_endpoint                                            STRING COMMENT '门店编码',
+	channel_endpoint                                      STRING COMMENT '门店编码',
 	new_card_num_1d_store_vip                             BIGINT COMMENT 'VIP新开卡数',
 	total_card_num_td_store_vip                           BIGINT COMMENT 'VIP累计开卡数',
 	date_type                                             STRING COMMENT '日期类型',
