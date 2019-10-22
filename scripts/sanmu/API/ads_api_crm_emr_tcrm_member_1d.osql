@@ -133,9 +133,10 @@ INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_1d PARTITION(ds = '${bizdate}
 			ON t1.sales_order_no = t7.trigger_order_no;
 
 
-
-
-
+INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_1d PARTITION(ds)
+	SELECT *
+	FROM ads_api_crm_emr_tcrm_member_1d
+	WHERE ds = '${bizdate}' AND gmt_grade_change IS NOT NULL;
 
 
 

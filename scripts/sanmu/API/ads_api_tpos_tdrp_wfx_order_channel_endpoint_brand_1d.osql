@@ -98,3 +98,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d PAR
 
 
 
+INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d PARTITION(ds)
+	SELECT *
+	FROM ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d
+	WHERE ds = '${bizdate}' AND product_code IS NOT NULL;

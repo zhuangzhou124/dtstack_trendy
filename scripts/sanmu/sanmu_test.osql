@@ -7,13 +7,14 @@
 --ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d
 
 
-select * from td_ods.ods_sales_order where ds = '20191020' and member_no not in ('-1','1') and external_order_no = 'FP190630009SJ'
+select * from ods_channel_endpoint where ds = '20191021' and channel_endpoint_code = '13251'
+and member_no not in ('-1','1') and external_order_no = 'FP190630009SJ'
 and paid_time = '2019-06-30 22:43:42';
 
 
 --FP190630009SJ
 
-
+desc ods_api_channel_endpoint;
 
 desc ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d;
 SELECT  '' as salesAmountRankNo,
