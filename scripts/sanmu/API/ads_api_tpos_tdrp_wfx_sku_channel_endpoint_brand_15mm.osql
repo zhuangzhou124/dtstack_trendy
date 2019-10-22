@@ -17,9 +17,11 @@
 CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm(
 	biz_date                                                       STRING COMMENT '统计日期',
 	org_code                                                       STRING COMMENT '品牌         ',
-	brand_code                                                     STRING COMMENT '子品牌         ',
+	brand_name                                                     STRING COMMENT '子品牌         ',
 	channel_endpoint                                               STRING COMMENT '门店code',
 	channel_endpoint_type                                          STRING COMMENT '门店类别',
+	region_name                                                    STRING COMMENT '门店区域',
+	city_name                                                      STRING COMMENT '门店城市',
 	endpoint_code                                                  STRING COMMENT '终端代码       ',
 	endpoint_name                                                  STRING COMMENT '终端名称       ',
 	clerk_no                                                       STRING COMMENT '导购员代码      ',
@@ -98,7 +100,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 	SELECT '${cyctime}' AS biz_date,
 				 so.org_code                         --品牌编码
 	,
-				 pb.brand_code                     --子品牌编码
+				 pb.brand_name                     --子品牌编码
 	,
 				 so.channel_endpoint_code AS channel_endpoint         --门店编码
 	,
@@ -106,7 +108,9 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 	,
 				 ace.endpoint_code AS endpoint_code                 --终端代码
 	,
-				 ace.endpoint_name AS endpoint_name                --终端名称
+				 ace.endpoint_name AS endpoint_name ,               --终端名称
+				 rs.region_name,
+				 rs.city_name
 	,
 				 so.shopping_guider_no AS clerk_no      --导购员代码
 	,
@@ -158,7 +162,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 	,
 				 soi.price_sales * soi.qty_product AS actual_amt_with_coupon              --实际成交额(未扣券)
 	,
-				 so.paid_time                         --原单营业日期
+				 so.paid_time    as original_audit_date                     --原单营业日期
 	,
 				 mi.crm_info_id                      --会员id
 	,

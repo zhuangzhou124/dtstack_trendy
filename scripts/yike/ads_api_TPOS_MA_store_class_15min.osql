@@ -1,0 +1,62 @@
+--name:ads_api_TPOS_MA_store_cate_15min
+--author:yike
+--create time:2019-10-18 10:33
+create table if not exists ads_api_tpos_ma_store_class_15min(
+  biz_date                      string comment '统计日期',
+  date_type                     string comment '日期类型',
+  date_id                       string comment '日期id',
+  store_code                    string comment '门店列表编码',
+  order_type                    string comment '订单类型-写死1，2，3',
+  brand_code                    string comment '品牌编码',
+  cate_amount                   double comment '销售TOP3品类销售金额',
+  cate_amount_rate              double comment '销售TOP3品类销售金额占比'
+) comment '店品类销售占比' partitioned by (
+  ds string
+);
+INSERT OVERWRITE TABLE ads_api_tpos_ma_store_class_15min PARTITION(ds)
+select
+  '${cyctime}',
+  'day' as date_type,
+  '20191014' as date_id,
+  real_store_code,
+  '1,2,3',
+  brand_code,
+  rank_sale,
+  case when sales_amt_all is not null and sales_amt_all <> 0 then rank_sale/sales_amt_all end,
+  ds
+from (
+  select
+  real_store_code,
+  brand_code,
+  sum(case when ranking <= 3 then salesamount end) as rank_sale,
+  sum(salesAmount) over (partition by real_store_code,brand_code) as sales_amt_all,
+  ds
+  from (
+
+    select rs_r.store_code as real_store_code
+    ,      soi.brand_code
+    ,      soi.class_id
+    ,      sum(so.amt_total) as salesAmount--销售金额，各个品类下的销售金额
+    ,      rank() over (partition by rs_r.store_code,soi.brand_code order by sum(so.amt_total) desc) as ranking
+    ,      soi.ds
+    from (
+      select channel_endpoint_code, sales_order_no, org_code, amt_total
+      from ods_sales_order
+      where ds = '20191014'
+    ) so
+      left join (
+        select qty_product, sales_order_no, price_discount,os.class_id,oi.ds,oi.org_code,os.brand_code
+        from ods_sales_order_item oi left join ods_api_item_sku os on oi.sku_code = os.sku_code
+        where oi.ds = '20191014' and os.ds = '20191014'
+      ) soi on soi.sales_order_no = so.sales_order_no and soi.org_code = so.org_code
+      join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20191014'
+    where soi.price_discount > 0 and soi.qty_product > 0
+    group by
+    rs_r.store_code,
+    soi.class_id,
+    soi.brand_code,
+    soi.ds
+  )a group by real_store_code,brand_code,salesAmount,ds
+  having sum(case when ranking <= 3 then salesamount end) is not null
+)T
+;

@@ -27,19 +27,19 @@
 
 
 --15mm
-ods_stock_logic_items(根据create_time时间字段增量同步,但是目前看create_tiem字段都是15号的)
-
-ods_stock_logic_order_out(根据时间字段增量同步 make_order_time)
-ods_stock_logic_order_out_items(根据create_time时间字段增量同步)
-
-ods_stock_logic_order_in(根据时间字段增量同步 make_order_time)
-ods_stock_logic_order_in_items(根据create_time时间字段增量同步,但是目前看create_tiem字段都是15号的)
-ods_stock_logic_order_in_notify(根据时间字段增量同步 make_order_time)
-ods_stock_logic_order_in_notify_items(根据create_time时间字段增量同步,但是目前看create_tiem字段都是15号的)
-
-
-ods_stock_logic_order_difference(根据时间字段增量同步 make_order_time)
-ods_stock_logic_order_difference_items(根据create_time时间字段增量同步,但是目前看create_tiem字段都是15号的)
+--ods_stock_logic_items(根据create_time时间字段增量同步,但是目前看create_tiem字段都是15号的)
+--
+--ods_stock_logic_order_out(根据时间字段增量同步 make_order_time)
+--ods_stock_logic_order_out_items(根据create_time时间字段增量同步)
+--
+--ods_stock_logic_order_in(根据时间字段增量同步 make_order_time)
+--ods_stock_logic_order_in_items(根据create_time时间字段增量同步,但是目前看create_tiem字段都是15号的)
+--ods_stock_logic_order_in_notify(根据时间字段增量同步 make_order_time)
+--ods_stock_logic_order_in_notify_items(根据create_time时间字段增量同步,但是目前看create_tiem字段都是15号的)
+--
+--
+--ods_stock_logic_order_difference(根据时间字段增量同步 make_order_time)
+--ods_stock_logic_order_difference_items(根据create_time时间字段增量同步,但是目前看create_tiem字段都是15号的)
 
 
 
