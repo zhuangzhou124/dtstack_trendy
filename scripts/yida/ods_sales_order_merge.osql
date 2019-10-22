@@ -3,7 +3,7 @@
 --create time:2019-09-26 20:20
 
 
-CREATE TABLE IF NOT EXISTS ods_sales_order_merge(
+CREATE TABLE IF NOT EXISTS ods_sales_order_delty(
   id                       BIGINT COMMENT '销售订单Id',
   sales_order_no           STRING COMMENT '主单编码（XS-销售单号、TH-退货单号、TK-退款单号、HH-换货单号）',
   app_id                   STRING COMMENT '应用ID',
@@ -75,11 +75,11 @@ CREATE TABLE IF NOT EXISTS ods_sales_order_merge(
 
 
 --修改生命周期
-ALTER TABLE ods_sales_order_merge SET LIFECYCLE 365;
+--ALTER TABLE ods_sales_order_delty SET LIFECYCLE 365;
 
 
 
-INSERT OVERWRITE TABLE ods_sales_order_merge PARTITION(ds = '${bizdate}')
+INSERT OVERWRITE TABLE ods_sales_order PARTITION(ds = '${bizdate}')
 
   SELECT DISTINCT coalesce(t2.id, t1.id) AS id
   ,               coalesce(t2.sales_order_no, t1.sales_order_no) AS sales_order_no
@@ -214,7 +214,7 @@ INSERT OVERWRITE TABLE ods_sales_order_merge PARTITION(ds = '${bizdate}')
     ,      amt_discount
     ,      buyer_nick_name
     ,      made_order_time
-    FROM ods_sales_order_merge
+    FROM ods_sales_order
     WHERE ds = to_char(dateadd(to_date('${bizdate}', 'yyyymmdd'), - 1, 'dd'), 'yyyymmdd')) t1
     LEFT OUTER JOIN (
       SELECT id
@@ -283,7 +283,7 @@ INSERT OVERWRITE TABLE ods_sales_order_merge PARTITION(ds = '${bizdate}')
       ,      amt_discount
       ,      buyer_nick_name
       ,      made_order_time
-      FROM ods_sales_order
+      FROM ods_sales_order_delty
       WHERE ds = '${bizdate}' AND sales_order_no IS NOT NULL
     ) t2 ON t1.sales_order_no = t2.sales_order_no;
 

@@ -155,7 +155,7 @@ CREATE TABLE IF NOT EXISTS dim_time(
 WITH t1 AS(
   SELECT *
   FROM dim_time_mapping
-  WHERE ds >= '20140101' AND ds <= '20181231'
+  WHERE ds >= '20140101' AND ds <= '20281231'
 ),
      time AS(
   SELECT ds AS ds1, time_id, 'day' AS date_type, time_id AS date_id
@@ -170,13 +170,13 @@ WITH t1 AS(
   UNION ALL SELECT ds AS ds1, time_id, 'year' AS date_type, year_id AS date_id
   FROM t1
   WHERE is_year = 1
-  UNION ALL SELECT ds AS ds1, time_id, '7d' AS date_type, '7' AS date_id
+  UNION ALL SELECT ds AS ds1, time_id, '7d' AS date_type, ds AS date_id
   FROM t1
   WHERE is_7d = 1
-  UNION ALL SELECT ds AS ds1, time_id, '15d' AS date_type, '15' AS date_id
+  UNION ALL SELECT ds AS ds1, time_id, '15d' AS date_type, ds AS date_id
   FROM t1
   WHERE is_15d = 1
-  UNION ALL SELECT ds AS ds1, time_id, '30d' AS date_type, '30' AS date_id
+  UNION ALL SELECT ds AS ds1, time_id, '30d' AS date_type, ds AS date_id
   FROM t1
   WHERE is_30d = 1
   UNION ALL SELECT ds AS ds1, time_id, 'week_sale' AS date_type, week_sale_id AS date_id
@@ -212,13 +212,13 @@ WITH t1 AS(
   UNION ALL SELECT ds AS ds1, time_id, 'year' AS date_type, year_id AS date_id
   FROM t1
   WHERE is_year = 1
-  UNION ALL SELECT ds AS ds1, time_id, '7d' AS date_type, '7' AS date_id
+  UNION ALL SELECT ds AS ds1, time_id, '7d' AS date_type, ds AS date_id
   FROM t1
   WHERE is_7d = 1
-  UNION ALL SELECT ds AS ds1, time_id, '15d' AS date_type, '15' AS date_id
+  UNION ALL SELECT ds AS ds1, time_id, '15d' AS date_type, ds AS date_id
   FROM t1
   WHERE is_15d = 1
-  UNION ALL SELECT ds AS ds1, time_id, '30d' AS date_type, '30' AS date_id
+  UNION ALL SELECT ds AS ds1, time_id, '30d' AS date_type, ds AS date_id
   FROM t1
   WHERE is_30d = 1
   UNION ALL SELECT ds AS ds1, time_id, 'week_sale' AS date_type, week_sale_id AS date_id
@@ -235,7 +235,7 @@ INSERT OVERWRITE TABLE dim_time PARTITION(ds)
 ;
 
 
-
+select * from td_ads_dev.dim_time;
 
 
 --WITH t1 AS(

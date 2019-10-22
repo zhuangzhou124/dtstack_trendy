@@ -34,10 +34,10 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_clerk_15mm_1 PARTITION(ds = '${bizd
   SELECT date_type
   ,      date_id
   ,      org_code
-  ,      channel_endpoint_code
+  ,      coalesce(channel_endpoint_code , '-110')
   ,      row_number()OVER (PARTITION BY date_type, date_id, org_code, channel_endpoint_code ORDER BY salesAmount DESC)
          AS rank_no
-  ,      shopping_guider_no
+  ,      coalesce(shopping_guider_no , '-110')
   ,      NULL AS name
   ,      salesAmount
   ,      itemQuantity
@@ -52,7 +52,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_clerk_15mm_1 PARTITION(ds = '${bizd
   ,      CASE WHEN vipSalesAmount != 0 OR salesAmount != 0 THEN round(vipSalesAmount / salesAmount, 4) ELSE 0 END AS
          vipSalesRate
   ,      cashCoupon
-  ,      '${bizdate}'
+  ,      '${cyctime}'
   FROM (
     SELECT date_type
     ,      date_id
@@ -74,9 +74,9 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_clerk_15mm_1 PARTITION(ds = '${bizd
       FROM ods_sales_order a1
         JOIN (
           SELECT ds1, date_type, date_id, time_id
-          FROM dim_time
+          FROM td_ads_dev.dim_time
           WHERE ds = '${bizdate}'
-        ) time ON to_char(to_date(paid_time, 'yyyy-mm-dd'), 'yyyymmdd hh:mi:ss') = time.time_id
+        ) time ON to_char(to_date(paid_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd') = time.time_id
       WHERE a1.ds = '${bizdate}' AND order_status = 1 AND shopping_guider_no IS NOT NULL
       --AND paid_time = substr('${bizdate}', 1, 6)
     ) so

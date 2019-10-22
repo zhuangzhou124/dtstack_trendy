@@ -27,10 +27,10 @@ CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_clerk_d(
 
 INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_clerk_d PARTITION(ds = '${bizdate}')
   SELECT substr('${bizdate}', 1, 6) AS date_id
-  ,      t2.org_code
-  ,      t2.channel_endpoint_code
-  ,      row_number()OVER (PARTITION BY date_id, org_code, channel_endpoint_code ORDER BY salesAmount DESC) AS rank_no
-  ,      t2.clerk_no
+  ,      t1.org_code
+  ,      coalesce(t1.channel_endpoint_code, '-110')
+  ,      row_number()OVER (PARTITION BY date_id, t1.org_code, t1.channel_endpoint_code ORDER BY salesAmount DESC) AS rank_no
+  ,      coalesce(t1.clerk_no, '-110')
   ,      t2.clerk_name AS cleck_name
   ,      salesAmount
   ,      orderQuantity
@@ -40,16 +40,19 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_clerk_d PARTITION(ds = '${bizdate}'
   ,      vipSalesRate
   ,      cashCoupon
   ,      target_amount
-  ,      CASE WHEN salesAmount != 0 OR target_amount != 0 THEN round(salesAmount / target_amount, 4) ELSE 0 END AS
-         vipSalesRate
-  ,      row_number()OVER (PARTITION BY date_id, org_code, channel_endpoint_code
-  ORDER BY CASE WHEN salesAmount != 0 OR target_amount != 0 THEN round(salesAmount / target_amount, 4) ELSE 0 END DESC)
-         AS rank_no
-  ,      '${bizdate}'
+  ,      CASE WHEN salesAmount != 0 and target_amount != 0 THEN round(salesAmount / target_amount, 4) ELSE 0 END AS
+         target
+  ,      row_number()OVER (PARTITION BY date_id, t1.org_code, t1.channel_endpoint_code
+  ORDER BY CASE WHEN salesAmount != 0 and target_amount != 0 THEN round(salesAmount / target_amount, 4) ELSE 0 END DESC)
+         AS target_no
+  ,      '${cyctime}'
   FROM (
-    SELECT coalesce(a.shopping_guider_no, b.clerk_no) AS clerk_no
+    SELECT org_code
+    ,      channel_endpoint_code
+    ,      coalesce(a.shopping_guider_no, b.clerk_no) AS clerk_no
     ,      coalesce(b.store_monthly_sales_analyze_no) AS store_monthly_sales_analyze_no
     ,      b.target_time AS target_time
+    ,      date_id
     ,      coalesce(b.target_amount, 0) AS target_amount
     ,      coalesce(a.salesAmount, 0) AS salesAmount
     ,      coalesce(a.orderQuantity, 0) AS orderQuantity
@@ -68,16 +71,15 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_clerk_d PARTITION(ds = '${bizdate}'
       ,      salesAmount
       ,      orderQuantity
       ,
-             CASE WHEN salesAmount != 0 OR price_amt_retail != 0 THEN round(salesAmount / price_amt_retail, 4) ELSE 0 END
+             CASE WHEN salesAmount != 0 and price_amt_retail != 0 THEN round(salesAmount / price_amt_retail, 4) ELSE 0 END
              AS averageDiscount
-      ,      CASE WHEN salesAmount != 0 OR orderQuantity != 0 THEN round(salesAmount / orderQuantity, 4) ELSE 0 END AS
+      ,      CASE WHEN salesAmount != 0 and orderQuantity != 0 THEN round(salesAmount / orderQuantity, 4) ELSE 0 END AS
              perCustomerTransaction
-      ,      CASE WHEN itemQuantity != 0 OR orderQuantity != 0 THEN round(itemQuantity / orderQuantity, 4) ELSE 0 END AS
+      ,      CASE WHEN itemQuantity != 0 and orderQuantity != 0 THEN round(itemQuantity / orderQuantity, 4) ELSE 0 END AS
              associatedPurchaseRate
-      ,      CASE WHEN vipSalesAmount != 0 OR salesAmount != 0 THEN round(vipSalesAmount / salesAmount, 4) ELSE 0 END AS
+      ,      CASE WHEN vipSalesAmount != 0 and salesAmount != 0 THEN round(vipSalesAmount / salesAmount, 4) ELSE 0 END AS
              vipSalesRate
       ,      cashCoupon
-      ,      '${bizdate}'
       FROM (
         SELECT date_type
         ,      date_id
@@ -99,9 +101,9 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_clerk_d PARTITION(ds = '${bizdate}'
           FROM ods_sales_order a1
             JOIN (
               SELECT ds1, date_type, date_id, time_id
-              FROM dim_time
-              WHERE ds = '${bizdate}' AND date_type = 'month'
-            ) time ON to_char(to_date(paid_time, 'yyyy-mm-dd'), 'yyyymmdd hh:mi:ss') = time.time_id
+              FROM td_ads_dev.dim_time
+              WHERE ds = '20190831' AND date_type = 'month'
+            ) time ON to_char(to_date(paid_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd') = time.time_id
           WHERE a1.ds = '${bizdate}' AND order_status = 1 AND shopping_guider_no IS NOT NULL
           --AND paid_time = substr('${bizdate}', 1, 6)
         ) so
@@ -127,7 +129,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_clerk_d PARTITION(ds = '${bizdate}'
         , so.shopping_guider_no
       ) a
     ) a
-      FULL OUTER JOIN (
+      left OUTER JOIN (
         SELECT store_monthly_sales_analyze_no
         ,      store_code
         ,      concat(YEAR, '-', MONTH) AS target_time
@@ -136,13 +138,15 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_clerk_d PARTITION(ds = '${bizdate}'
         FROM ods_clerk_monthly_sales_analyze
         WHERE ds = '${bizdate}' AND clerk_no IS NOT NULL AND YEAR = substr('${bizdate}', 1, 4) AND MONTH =
         substr('${bizdate}', 5, 2)
-      ) b ON a.shopping_guider_no = b.clerk_no
+      ) b ON a.shopping_guider_no = b.clerk_no and a.channel_endpoint_code=b.store_code
   ) t1
-    INNER JOIN (
+    left outer JOIN (
       SELECT *
       FROM ods_clerk_info
       WHERE ds = '${bizdate}'
-    ) t2 ON t1.clerk_no = t2.clerk_no;
+    ) t2 ON t1.clerk_no = t2.clerk_no and t1.channel_endpoint_code=t2.channel_endpoint_code;
+
+
 
 
 
