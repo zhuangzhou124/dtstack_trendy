@@ -1,8 +1,29 @@
 {
   "data": [
     {
-      "itemQuantity": 6,
-      "salesAmount": 1194
+      "salesDateStr": "20190825",
+      "salesItemQuantity": 44,
+      "returnItemAmount": null,
+      "retailPriceAmount": 1515,
+      "dealQuantity": 20,
+      "perCustomerTransaction": 0,
+      "customerQuantity": null,
+      "closeRate": 0,
+      "netSalesItemQuantity": 44,
+      "associatedPurchaseRate": 2.2,
+      "vipSalesRatio": 5.2158,
+      "terminalName": null,
+      "cashCoupon": null,
+      "salesItemAmount": 1515,
+      "itemAmountOfVipSalesOrder": 7902,
+      "netSalesItemAmount": 1515,
+      "returnItemQuantity": null,
+      "rmaQuantity": null,
+      "averageDiscount": 1,
+      "itemQuantityOfVipSalesOrder": 13,
+      "org_code": "TRE",
+      "netSalesItemAmountWithoutCoupon": null,
+      "storeCode": "1201"
     }
   ],
   "success": true,
@@ -14,13 +35,13 @@
     "User-Agent": "Apache-HttpClient/4.5.2 (Java/1.8.0_144)",
     "Host": "10.4.4.5:8086",
     "Accept-Encoding": "gzip,deflate",
-    "Content-Length": "4053",
+    "Content-Length": "4265",
     "Content-Type": "application/json"
   },
   "page": {
-    "totalPage": 1,
+    "totalPage": 2,
     "pageSize": 1,
-    "totalCount": 1,
+    "totalCount": 2,
     "currentPage": 1
   },
   "space": 0

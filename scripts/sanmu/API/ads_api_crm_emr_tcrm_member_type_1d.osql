@@ -50,7 +50,7 @@ LIFECYCLE 30;
 
 
 INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_type_1d PARTITION(ds = '${bizdate}')
-	SELECT '${cyctime}' AS biz_date,
+	SELECT '${bizdate}' AS biz_date,
 				 t4.company_name,
 				 t2.region_name,
 				 t2.city_name,
@@ -164,7 +164,7 @@ INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_type_1d PARTITION(ds = '${biz
 				 ELSE '不是会员'
 				 END, t1.order_time
 
-	UNION ALL SELECT '${cyctime}' AS biz_date,
+	UNION ALL SELECT '${bizdate}' AS biz_date,
 									 t4.company_name,
 									 t2.region_name,
 									 t2.city_name,

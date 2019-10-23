@@ -46,13 +46,13 @@ CREATE TABLE IF NOT EXISTS ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm(
 	sku_amt_1d_ztkc_retail                                                DOUBLE COMMENT '商品在途库存吊牌总金额   ',
 	gmt_sku_effective                                                     STRING COMMENT '库存有效时间       '
 
-)COMMENT '日期+善品+门店粒度明细表' PARTITIONED BY(
+)COMMENT '日期+商品+门店粒度明细表' PARTITIONED BY(
 	ds STRING COMMENT '时间分区')
 LIFECYCLE 30;
 
 
 INSERT OVERWRITE TABLE ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm PARTITION(ds = '${bizdate}')
-	SELECT '${cyctime}' AS biz_date,
+	SELECT '${bizdate}' AS biz_date,
 				 t3.org_code,
 				 t6.region_code,
 				 t5.endpoint_code,

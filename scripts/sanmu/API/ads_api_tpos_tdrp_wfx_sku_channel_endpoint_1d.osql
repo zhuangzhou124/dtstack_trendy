@@ -145,7 +145,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 				 NULL AS sku_num_1d_qmzts,
 				 NULL AS sku_num_1d_qmkcs,
 				 'day' AS date_type,
-				 '${bizdate}' AS date_id
+				 '${cyctime}' AS date_id
 	FROM (
 		SELECT t2.org_code,
 					 t2.channel_endpoint_code,
