@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm
 	member_id                                                      STRING COMMENT '会员id       ',
 	member_phone                                                   STRING COMMENT '会员手机号      ',
 	member_grade_code                                              STRING COMMENT '会员等级       ',
+	member_type                                                    STRING COMMENT '会员类型       ',
 	member_no                                                      STRING COMMENT '会员编号       ',
 	sku_code                                                       STRING COMMENT '商品编号       ',
 	sku_name                                                       STRING COMMENT '商品名称       ',
@@ -172,6 +173,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 	,
 				 so.member_grade_code          --会员等级
 	,
+				 so.external_member_type,      --会员类型
 				 so.member_no                  --会员编号
 	,
 				 soi.sku_code                           --商品编号
