@@ -11,7 +11,7 @@ select * from ods_channel_endpoint where ds = '20191021' and channel_endpoint_co
 and member_no not in ('-1','1') and external_order_no = 'FP190630009SJ'
 and paid_time = '2019-06-30 22:43:42';
 
-
+--联营
 --FP190630009SJ
 
 desc ods_api_channel_endpoint;

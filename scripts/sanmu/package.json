@@ -1,0 +1,27 @@
+{
+  "data": [
+    {
+      "itemQuantity": 6,
+      "salesAmount": 1194
+    }
+  ],
+  "success": true,
+  "errorCode": 1,
+  "errorInfo": "成功",
+  "header": {
+    "Content-Encoding": "UTF-8",
+    "Connection": "Keep-Alive",
+    "User-Agent": "Apache-HttpClient/4.5.2 (Java/1.8.0_144)",
+    "Host": "10.4.4.5:8086",
+    "Accept-Encoding": "gzip,deflate",
+    "Content-Length": "4053",
+    "Content-Type": "application/json"
+  },
+  "page": {
+    "totalPage": 1,
+    "pageSize": 1,
+    "totalCount": 1,
+    "currentPage": 1
+  },
+  "space": 0
+}

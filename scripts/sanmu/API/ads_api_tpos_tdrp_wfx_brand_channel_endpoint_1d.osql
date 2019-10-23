@@ -291,10 +291,10 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION
 			ON t1.channel_endpoint_code = t5.channel_endpoint_code AND t1.org_code = t5.org_code;
 
 
-
-
-
-
+INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION(ds)
+	SELECT *
+	FROM ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d
+	WHERE ds = '${bizdate}' AND org_code IS NOT NULL AND channel_endpoint IS NOT NULL AND date_id IS NOT NULL;
 
 
 
