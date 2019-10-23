@@ -89,7 +89,9 @@ CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm
 	order_create_time                                              STRING COMMENT '订单建立时间(年月日时分秒)     ',
 	order_create_date                                              STRING COMMENT '订单建立日期（年月日）     ',
 	audit_time                                                     STRING COMMENT '营业时间       ',
-	audit_date                                                     STRING COMMENT '营业日期       '
+	audit_date                                                     STRING COMMENT '营业日期       ',
+	date_type                                                      STRING COMMENT '日期类型',
+	date_id                                                        STRING COMMENT '日期'
 
 )COMMENT '日期+门店+品牌粒度明细表' PARTITIONED BY(
 	ds STRING COMMENT '时间分区')
@@ -252,6 +254,8 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 				 so.audit_time                --营业时间
 	,
 				 substr(so.audit_time, 1, 10)   --营业日期
+	,      'day' as date_type
+	,      '${bizdate}' as date_id
 	FROM ${td_ods}.ods_sales_order so
 		LEFT JOIN ${td_ods}.ods_product_brand pb
 			ON so.org_code = pb.org_code AND pb.ds = '${bizdate}'

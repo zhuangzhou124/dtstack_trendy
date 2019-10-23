@@ -44,7 +44,9 @@ CREATE TABLE IF NOT EXISTS ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm(
 	sku_type_1d_ztkc                                                      STRING COMMENT '商品在途库存数类型("变更后数量类型:POSITIVE-正数,NEGATIVE-负数,ZERO-零,NONZERO-非零)         ',
 	sku_num_1d_ztkc                                                       BIGINT COMMENT '商品在途库存数         ',
 	sku_amt_1d_ztkc_retail                                                DOUBLE COMMENT '商品在途库存吊牌总金额   ',
-	gmt_sku_effective                                                     STRING COMMENT '库存有效时间       '
+	gmt_sku_effective                                                     STRING COMMENT '库存有效时间       ',
+	date_type                                                             STRING COMMENT '日期类型',
+	date_id                                                               STRING COMMENT '日期'
 
 )COMMENT '日期+商品+门店粒度明细表' PARTITIONED BY(
 	ds STRING COMMENT '时间分区')
@@ -81,7 +83,9 @@ INSERT OVERWRITE TABLE ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm PARTITION
 				 '' AS sku_type_1d_ztkc,
 				 t8.qty AS sku_num_1d_ztkc,
 				 t4.cny_price * t8.qty AS sku_amt_1d_ztkc_retail,
-				 '${bizdate}' AS gmt_sku_effective
+				 '${bizdate}' AS gmt_sku_effective,
+         'day' as date_type,
+         '${bizdate}' as date_id
 	FROM (
 		SELECT t2.org_code,
 					 t2.channel_endpoint_code,

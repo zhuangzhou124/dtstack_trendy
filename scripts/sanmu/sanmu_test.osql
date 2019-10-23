@@ -43,7 +43,7 @@ and paid_time = '2019-06-30 22:43:42';
 --联营
 --FP190630009SJ
 
-desc ods_stock_logic_items;
+desc ods_channel_endpoint;
 
 desc ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d;
 SELECT  '' as salesAmountRankNo,

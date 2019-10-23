@@ -1,48 +1,10 @@
 {
-  "data": [
-    {
-      "salesDateStr": "20190825",
-      "salesItemQuantity": 44,
-      "returnItemAmount": null,
-      "retailPriceAmount": 1515,
-      "dealQuantity": 20,
-      "perCustomerTransaction": 0,
-      "customerQuantity": null,
-      "closeRate": 0,
-      "netSalesItemQuantity": 44,
-      "associatedPurchaseRate": 2.2,
-      "vipSalesRatio": 5.2158,
-      "terminalName": null,
-      "cashCoupon": null,
-      "salesItemAmount": 1515,
-      "itemAmountOfVipSalesOrder": 7902,
-      "netSalesItemAmount": 1515,
-      "returnItemQuantity": null,
-      "rmaQuantity": null,
-      "averageDiscount": 1,
-      "itemQuantityOfVipSalesOrder": 13,
-      "org_code": "TRE",
-      "netSalesItemAmountWithoutCoupon": null,
-      "storeCode": "1201"
-    }
-  ],
-  "success": true,
-  "errorCode": 1,
-  "errorInfo": "成功",
-  "header": {
-    "Content-Encoding": "UTF-8",
-    "Connection": "Keep-Alive",
-    "User-Agent": "Apache-HttpClient/4.5.2 (Java/1.8.0_144)",
-    "Host": "10.4.4.5:8086",
-    "Accept-Encoding": "gzip,deflate",
-    "Content-Length": "4265",
-    "Content-Type": "application/json"
-  },
-  "page": {
-    "totalPage": 2,
-    "pageSize": 1,
-    "totalCount": 2,
-    "currentPage": 1
-  },
-  "space": 0
+  "pageNo": 1,
+  "pageSize": null,
+  "inFields": {
+    "date_type": "day",
+    "date_id": "20191022",
+    "org_code": "TRE",
+    "storeCode": "1001"
+  }
 }
