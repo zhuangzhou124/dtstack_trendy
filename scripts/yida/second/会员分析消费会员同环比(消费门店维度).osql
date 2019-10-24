@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS ads_api_crm_ma_clerk_15mm_3(
   org_code                                      STRING COMMENT '品牌编号',
   channel_endpoint_code                         STRING COMMENT '门店编号',
   clerk_no                                      STRING COMMENT '店员编号',
-  member_count                                  STRING COMMENT '消费会员总数',
+  member_count                                  bigint COMMENT '消费会员总数',
   biz_date                                      STRING COMMENT '统计日期'
 )COMMENT '会员分析消费会员同环比(消费门店维度) ' PARTITIONED BY(
   ds  STRING);
@@ -22,7 +22,7 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm_3 PARTITION(ds='${bizdate}')
   ,      t.channel_endpoint_code
   ,      t.shopping_guider_no as clerk_no
   ,      COUNT(DISTINCT (CASE WHEN order_fact_amount > 0 THEN t.member_no ELSE NULL END)) AS member_actived_qty
-  ,      '${bizdate}' AS biz_date
+  ,      '${cyctime}' AS biz_date
   FROM (
     SELECT date_type
     ,      date_id
@@ -34,7 +34,7 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm_3 PARTITION(ds='${bizdate}')
     FROM ods_sales_order a1
     JOIN (
       SELECT ds1,date_type,date_id,time_id
-      FROM dim_time
+      FROM td_ads_dev.dim_time
       WHERE ds = '${bizdate}'
     ) time ON to_char(to_date(create_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd') = time.time_id -- 改为过账时间to_char(to_date(audit_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd')
     WHERE a1.ds = '${bizdate}' AND CAST(a1.member_no AS BIGINT) > 1
@@ -54,10 +54,10 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm_3 PARTITION(ds='${bizdate}')
       FROM ods_member_card a1
         JOIN (
       SELECT ds1,date_type,date_id,time_id
-      FROM dim_time
+      FROM td_ads_dev.dim_time
       WHERE ds = '${bizdate}'
       ) time ON to_char(to_date(member_register_time, 'yyyy-mm-dd'), 'yyyymmdd') = time.time_id
-      WHERE a1.ds = '${bizdate}' AND a1.STATUS NOT IN (- 2) AND CAST(a1.member_no AS BIGINT) > 1 AND a1.
+      WHERE a1.ds = '${bizdate}' AND a1.STATUS >0 AND CAST(a1.member_no AS BIGINT) > 1 AND a1.
       member_register_time IS NOT NULL
     ) b ON b.org_code = t.org_code AND b.member_no = t.member_no AND b.date_type = t.date_type AND b.date_id = t.date_id
   WHERE t.org_code IS NOT NULL AND t.shopping_guider_no IS NOT NULL

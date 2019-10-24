@@ -121,5 +121,94 @@ CREATE TABLE IF NOT EXISTS ods_feedback_customer_contact_log(
 
 
 
-select memberName,memberCard,memberGender,wechatId,memberGrade,memberScore,memberPhoneNumber,memberBirthday,memberHobby,memberProfession,computingDuration,holdCouponInfo,memberRegisterTime,memberRegisterStore,memberRegisterClerk,gradeExpiration,userId,memberManageStore,memberManageClerk,lastContactDays,brandCode from temp_getmemberinfobyquery
-where brandCode = ${brandCode} and memberNoOrMobile = ${memberNoOrMobile} group by memberName,memberCard,memberGender,wechatId,memberGrade,memberScore,memberPhoneNumber,memberBirthday,memberHobby,memberProfession,computingDuration,holdCouponInfo,memberRegisterTime,memberRegisterStore,memberRegisterClerk,gradeExpiration,userId,memberManageStore,memberManageClerk,lastContactDays,brandCode ;
+SELECT memberName,memberCard,memberGender,wechatId,memberGrade,memberScore,memberPhoneNumber,memberBirthday,memberHobby,memberProfession,computingDuration,holdCouponInfo,memberRegisterTime,memberRegisterStore,memberRegisterClerk,gradeExpiration,userId,memberManageStore,memberManageClerk,lastContactDays,brandCode FROM temp_getmemberinfobyquery
+WHERE brandCode = ${brandCode} AND memberNoOrMobile = ${memberNoOrMobile} GROUP BY memberName,memberCard,memberGender,wechatId,memberGrade,memberScore,memberPhoneNumber,memberBirthday,memberHobby,memberProfession,computingDuration,holdCouponInfo,memberRegisterTime,memberRegisterStore,memberRegisterClerk,gradeExpiration,userId,memberManageStore,memberManageClerk,lastContactDays,brandCode ;
+
+
+
+SELECT  to_char( create_time, 'YYYY-MM-DD' ) AS order_create_date
+, shopping_guider_no
+, COUNT( DISTINCT member_no ) AS member_qty
+FROM   sales_order
+WHERE  CAST( member_no AS integer ) > 1
+AND   channel_endpoint_code = '1102'
+AND   create_time BETWEEN '2019-08-23 00:00:00' AND '2019-08-23 23:59:59'
+GROUP BY
+to_char( create_time, 'YYYY-MM-DD' ), shopping_guider_no
+HAVING  sum( price_amt_discount ) > 0
+ORDER BY
+shopping_guider_no;
+
+
+
+SELECT '${bdp.system.bizdate}' AS report_date
+,      channel_endpoint_code
+,      COUNT(DISTINCT member_no) AS member_qty
+FROM ods_sales_order
+
+WHERE CAST(member_no AS BIGINT) > 1 AND ds = '${bdp.system.bizdate}'
+AND datediff(to_date('${bdp.system.bizdate}', 'yyyymmdd'), to_date(create_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 90
+AND 180
+GROUP BY channel_endpoint_code
+HAVING sum(price_amt_discount) > 0;
+
+
+
+SELECT '${bdp.system.bizdate}' AS report_date
+,      channel_endpoint_code
+,      COUNT(DISTINCT member_no) AS member_qty
+,max(create_time)
+,datediff(to_date('${bdp.system.bizdate}', 'yyyymmdd'), to_date(max(create_time), 'yyyy-mm-dd hh:mi:ss'), 'dd')
+FROM ods_sales_order
+
+WHERE CAST(member_no AS BIGINT) > 1 AND ds = '${bdp.system.bizdate}'
+AND datediff(to_date('${bdp.system.bizdate}', 'yyyymmdd'), to_date(create_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 90
+AND 180
+GROUP BY channel_endpoint_code;
+--having sum(price_amt_discount) > 0;
+
+
+
+
+
+
+SELECT '${bdp.system.bizdate}' AS report_date
+,      channel_endpoint_code
+,      COUNT(DISTINCT member_no) AS member_qty
+FROM ods_sales_order
+
+WHERE CAST(member_no AS BIGINT) > 1 AND ds = '${bdp.system.bizdate}'
+AND datediff(to_date('${bdp.system.bizdate}', 'yyyymmdd'), to_date(create_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 90
+AND 180
+GROUP BY channel_endpoint_code
+HAVING sum(price_amt_discount) > 0;
+
+
+
+
+
+
+SELECT b.org_code, b.member_manage_channel_endpoint_code, b.member_manage_clerk
+,      COUNT(DISTINCT t.member_no) AS member_qty
+FROM (
+  SELECT '2019-08-25' AS report_date
+  ,      org_code
+  ,      member_no
+  ,      sum(amt_total) AS amt_total
+  ,      max(audit_time) AS last_order_time
+  FROM ods_sales_order
+  WHERE price_amt_discount > 0 AND CAST(member_no AS BIGINT) > 1 AND amt_total > 0 AND
+  datediff(to_date('${bdp.system.bizdate}', 'yyyymmdd'), to_date(create_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 0
+  AND 365
+  GROUP BY org_code
+  , member_no
+) t
+  LEFT JOIN ods_member_card b ON b.org_code = t.org_code AND b.member_no = t.member_no
+
+GROUP BY b.org_code, b.member_manage_channel_endpoint_code, b.member_manage_clerk;
+
+
+
+
+
+

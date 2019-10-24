@@ -11,9 +11,8 @@
 -- 修改日志：
 --***********************************
 
--- drop table ods_sales_order_item;
 
-CREATE TABLE IF NOT EXISTS ods_sales_order_item_merge(
+CREATE TABLE IF NOT EXISTS ods_sales_order_item_delty(
   id                        BIGINT COMMENT '销售单商品信息 自增Id',
   sales_order_item_no       STRING COMMENT '单据明细编号',
   sales_order_no            STRING COMMENT '主单编码（XS-销售单号、TH-退货单号、TK-退款单号、HH-换货单号）',
@@ -66,7 +65,7 @@ CREATE TABLE IF NOT EXISTS ods_sales_order_item_merge(
 
 
 --修改生命周期
-ALTER TABLE ods_sales_order_item_merge SET LIFECYCLE 365;
+--ALTER TABLE ods_sales_order_item_merge SET LIFECYCLE 365;
 
 --INSERT OVERWRITE TABLE ods_sales_order_merge PARTITION(ds = '${bizdate}')
 --  SELECT id
@@ -174,7 +173,7 @@ ALTER TABLE ods_sales_order_item_merge SET LIFECYCLE 365;
 
 
 
-INSERT OVERWRITE TABLE ods_sales_order_item_merge PARTITION(ds = '${bizdate}')
+INSERT OVERWRITE TABLE ods_sales_order_item PARTITION(ds = '${bizdate}')
   SELECT DISTINCT coalesce(t2.id, t1.id) AS id
   ,               coalesce(t2.sales_order_item_no, t1.sales_order_item_no) AS sales_order_item_no
   ,               coalesce(t2.sales_order_no, t1.sales_order_no) AS sales_order_no
@@ -270,7 +269,7 @@ INSERT OVERWRITE TABLE ods_sales_order_item_merge PARTITION(ds = '${bizdate}')
     ,      amt_m_discount
     ,      price_sales
     ,      logistics_company_code
-    FROM ods_sales_order_item_merge
+    FROM ods_sales_order_item
     WHERE ds = to_char(dateadd(to_date('${bizdate}', 'yyyymmdd'), - 1, 'dd'), 'yyyymmdd') AND sales_order_item_no IS NOT
     NULL
   ) t1
@@ -322,7 +321,7 @@ INSERT OVERWRITE TABLE ods_sales_order_item_merge PARTITION(ds = '${bizdate}')
       ,      amt_m_discount
       ,      price_sales
       ,      logistics_company_code
-      FROM ods_sales_order_item
+      FROM ods_sales_order_item_delty
       WHERE ds = '${bizdate}' AND sales_order_item_no IS NOT NULL AND sales_order_no IS NOT NULL
     ) t2 ON t1.sales_order_item_no = t2.sales_order_item_no AND t1.sales_order_no = t2.sales_order_no;
 

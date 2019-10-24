@@ -2,15 +2,15 @@
 --author:zhangjunda
 --create time:2019-10-10 15:49
 
-
+--drop table ads_api_crm_ma_clerk_15mm_1;
 CREATE TABLE IF NOT EXISTS ads_api_crm_ma_clerk_15mm_1(
   date_type                                     STRING COMMENT '统计周期类型',
   date_id                                       STRING COMMENT '统计周期',
   org_code                                      STRING COMMENT '品牌编号',
   channel_endpoint_code                         STRING COMMENT '门店编号',
   clerk_no                                      STRING COMMENT '店员编号',
-  member_count                                  STRING COMMENT '注册会员总数',
-  order_member_count                            STRING COMMENT '注册有消费会员总数',
+  member_count                                  bigint COMMENT '注册会员总数',
+  order_member_count                            bigint COMMENT '注册有消费会员总数',
   biz_date                                      STRING COMMENT '统计日期'
 )COMMENT '会员分析注册会员消费统计 会员分析注册会员同环比 ' PARTITIONED BY(
   ds  STRING);
@@ -25,11 +25,11 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm_1 PARTITION(ds='${bizdate}')
   SELECT t.date_type
   ,      t.date_id
   ,      t.org_code
-  ,      t.member_manage_channel_endpoint_code
-  ,      t.member_manage_clerk
+  ,      t.member_manage_channel_endpoint_code as channel_endpoint_code
+  ,      t.member_manage_clerk as clerk_no
   ,      COUNT(DISTINCT (t.member_no)) AS member_qty
   ,      COUNT(DISTINCT (CASE WHEN order_fact_amount > 0 THEN t.member_no ELSE NULL END)) AS member_actived_qty
-  ,      '${bizdate}' AS biz_date
+  ,      '${cyctime}' AS biz_date
   FROM (
     SELECT date_type
     ,      date_id

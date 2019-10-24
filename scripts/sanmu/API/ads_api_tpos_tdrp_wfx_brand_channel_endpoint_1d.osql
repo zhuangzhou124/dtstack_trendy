@@ -47,7 +47,7 @@ LIFECYCLE 30;
 
 
 INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION(ds = '${bizdate}')
-	SELECT '${cyctime}' AS biz_date,
+	SELECT '${bizdate}' AS biz_date,
 	t1.order_time as gmt_sale,
 	       t1.org_code ,
 				 t1.channel_endpoint_code AS store_code,
@@ -291,10 +291,10 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION
 			ON t1.channel_endpoint_code = t5.channel_endpoint_code AND t1.org_code = t5.org_code;
 
 
-
-
-
-
+INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION(ds)
+	SELECT *
+	FROM ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d
+	WHERE ds = '${bizdate}' AND org_code IS NOT NULL AND channel_endpoint IS NOT NULL AND date_id IS NOT NULL;
 
 
 
