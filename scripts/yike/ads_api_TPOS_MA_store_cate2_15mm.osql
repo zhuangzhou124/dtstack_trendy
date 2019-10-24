@@ -109,6 +109,16 @@ from (
     soi.level2_cate_code,
     sop.ds
   )b on a.org_code = b.org_code and a.level2_cate_code = b.level2_cate_code and a.real_store_code = b.store_code
+  left join (
+    select
+    oci.org_code,
+    rs_r.store_code,
+    count(case when oci.role_code = '4' then clerk_no end) as clerk_num
+    from ods_clerk_info oci join ods_real_store rs_r
+      on oci.channel_endpoint_code = rs_r.store_code and rs_r.ds = '${bizdate}'
+  where oci.ds = '${bizdate}' and oci.status = '7'
+  group by oci.org_code, rs_r.store_code
+  )c on a.org_code = c.org_code and a.real_store_code = c.store_code
 ) t
 ;
 
