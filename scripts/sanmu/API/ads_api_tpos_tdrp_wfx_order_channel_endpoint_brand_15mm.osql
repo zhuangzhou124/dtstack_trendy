@@ -216,8 +216,10 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 				 so.audit_time                --营业时间
 	,
 				 substr(so.audit_time, 1, 10)   --营业日期
-	,      'day' as date_type
-	,      substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) as date_id
+	,
+				 'day' as date_type
+	,
+				 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) as date_id
 	FROM ${td_ods}.ods_sales_order so
 	LEFT JOIN ${td_ods}.ods_sales_order_item soi
 		ON so.sales_order_no = soi.sales_order_no AND soi.ds = '${bizdate}'
