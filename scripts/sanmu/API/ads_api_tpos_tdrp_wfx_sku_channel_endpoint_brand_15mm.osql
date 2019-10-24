@@ -257,7 +257,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 	,
 				 substr(so.audit_time, 1, 10)   --营业日期
 	,      'day' as date_type
-	,      so.paid_time as date_id
+	,      substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) as date_id
 	FROM ${td_ods}.ods_sales_order so
 		LEFT JOIN ${td_ods}.ods_product_brand pb
 			ON so.org_code = pb.org_code AND pb.ds = '${bizdate}'
