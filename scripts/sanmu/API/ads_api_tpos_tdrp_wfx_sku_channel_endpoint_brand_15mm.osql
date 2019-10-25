@@ -237,7 +237,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 				 ''                           --是否为赠品
 	,
 				 CASE
-				 WHEN soip.promotion_code IN ('DECIMAL_00', 'DECIMAL_01', 'DECIMAL_10', 'DECIMAL_11') THEN '抹零'
+				 WHEN soip.promotion_name like '%抹零%' THEN '抹零'
 				 ELSE '未抹零'
 				 END AS is_wipe_zero                --是否抹零
 	,
@@ -323,3 +323,4 @@ GROUP BY t1.sales_order_no) sop
 
 
 
+--soip.promotion_code IN ('DECIMAL_00', 'DECIMAL_01', 'DECIMAL_10', 'DECIMAL_11')
