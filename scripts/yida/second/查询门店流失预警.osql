@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS ads_api_crm_ma_clerk_d(
   silence_member_count                    bigint COMMENT '沉默会员数量',
   sleep_member_count                      bigint COMMENT '沉睡会员数量',
   loss_member_count                       bigint COMMENT '预流失会员数量',
-  biz_date                                STRING COMMENT '统计日期'
+  biz_date                                bigint COMMENT '统计日期'
 )COMMENT '查询门店流失预警' PARTITIONED BY(
   ds  STRING);
 
@@ -38,7 +38,7 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_d PARTITION(ds = '${bizdate}')
   ,
          COUNT(DISTINCT CASE WHEN datediff(to_date('${bizdate}', 'yyyymmdd'), to_date(last_order_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 271 AND 365 THEN t.member_no END)
          AS member_qty4
-  ,      '${cyctime}' AS biz_date
+  ,      cast('${bizdate}' as bigint) AS biz_date
 
   FROM (
     SELECT org_code

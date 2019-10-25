@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS ads_api_crm_ma_clerk_member_grade_15mm(
   clerk_no                                      STRING COMMENT '店员编号',
   member_grade_code                             STRING COMMENT '会员等级ID',
   member_count                                  bigint COMMENT '消费会员总数',
-  biz_date                                      STRING COMMENT '统计日期'
+  biz_date                                      bigint COMMENT '统计日期'
 )COMMENT '会员分析消费会员等级统计(消费门店维度)' PARTITIONED BY(
   ds  STRING);
 
@@ -23,9 +23,9 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_member_grade_15mm PARTITION(ds='${bi
   ,      t.org_code
   ,      coalesce(t.channel_endpoint_code , '-110')
   ,      coalesce(t.shopping_guider_no, '-110')
-  ,      t.member_grade_code
+  ,      t.grade_id
   ,      COUNT(DISTINCT (CASE WHEN order_fact_amount > 0 THEN t.member_no ELSE NULL END)) AS member_actived_qty
-  ,      '${cyctime}' AS biz_date
+  ,      cast('${bizdate}' as bigint) AS biz_date
   FROM (
     SELECT date_type
     ,      date_id
@@ -34,21 +34,28 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_member_grade_15mm PARTITION(ds='${bi
     ,      channel_endpoint_code
     ,      shopping_guider_no
     ,      member_grade_code
+           ,grade_id
     ,      sum(price_amt_discount) AS order_fact_amount
     FROM ods_sales_order a1
       JOIN (
-        SELECT ds1,date_type,date_id,time_id
+        SELECT ds1, date_type, date_id, time_id
         FROM td_ads_dev.dim_time
         WHERE ds = '${bizdate}'
-      ) time ON to_char(to_date(paid_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd') = time.time_id -- 改为过账时间to_char(to_date(audit_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd')
+      ) time ON to_char(to_date(paid_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd') = time.time_id
+    -- 改为过账时间to_char(to_date(audit_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd')
+      LEFT JOIN (
+        SELECT grade_code, grade_id,is_vip
+        FROM ods_member_grade_info
+        WHERE ds = '${bizdate}' AND is_vip = '1') a3 ON a1.member_grade_code = a3.grade_code
     WHERE a1.ds = '${bizdate}' AND CAST(a1.member_no AS BIGINT) > 1
     GROUP BY date_type
     , date_id
     , org_code
     , member_no
     , channel_endpoint_code
-    , shopping_guider_no
-    , member_grade_code
+  , shopping_guider_no
+    ,grade_id
+  , member_grade_code
   ) t
     JOIN (
       SELECT date_type
@@ -71,7 +78,7 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_member_grade_15mm PARTITION(ds='${bi
   , t.org_code
   , t.channel_endpoint_code
   , t.shopping_guider_no
-  , t.member_grade_code;
+  , t.grade_id;
 
 
 

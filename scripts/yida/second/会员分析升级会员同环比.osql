@@ -28,7 +28,7 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm_2 PARTITION(ds = '${bizdate}')
   ,      store_no as channel_endpoint_code
   ,      clerk_no
   ,      COUNT(DISTINCT member_no) AS member_cnt
-  ,      '${cyctime}' AS biz_date
+  ,      cast('${bizdate}' as bigint)
   FROM (
     SELECT date_type
     ,      date_id
