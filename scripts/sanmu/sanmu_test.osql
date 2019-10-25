@@ -8,29 +8,16 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+SELECT a.sales_order_no,
+			 wm_concat(',', a.promotion_code) AS promotion_code,
+			 wm_concat(',', a.promotion_name) AS promotion_name
+FROM (
+	SELECT DISTINCT sales_order_no,
+									promotion_code,
+									promotion_name
+	FROM ${td_ods}.ods_sales_order_item_promotion
+WHERE ds = '${bizdate}') as a
+GROUP BY sales_order_no;
 
 
 
@@ -41,61 +28,9 @@ and paid_time = '2019-06-30 22:43:42';
 --联营
 --FP190630009SJ
 
-desc ods_channel_endpoint;
+desc ods_sales_order_item_promotion;
 
-desc ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d;
-SELECT  '' as salesAmountRankNo,
-				'' as quantityRankNo,
-				skc,
-			 thumbnail_img_url as thumbnailImgUrl,
-			 year,
-			 product_code as projects,
-			 spu_name as spuName,
-			 color,
-			 price,
-			 discount_rate as discountRate,
-			 sales_amt_rate as SalesAmountRate,
-			 sales_amt AS salesAmount,
-			 sales_num AS quantity
-FROM ads_api_tpos_tdrp_wfx_clerkno_skc_15min
-WHERE org_code = ${org_code}
-AND clerk_no = ${clerkNo}
-AND year = ${year}
-AND product_code IN (${projects})
-AND spu IN (${spu})
-AND skc IN (${skc})
-AND color IN (${color})
-AND date_type = ${date_type}
-AND date_id = ${date_id};
-
-
-SELECT '' as salesAmountRankNo,
-			 '' as quantityRankNo,
-			 sku,
-			 thumbnail_img_url as thumbnailImgUrl,
-			 year,
-			 product_code as projects,
-			 spu_name as spuName,
-			 price,
-			 discount_rate as discountRate,
-			 sales_amt_rate as SalesAmountRate,
-			 sales_amt AS salesAmount,
-			 null as stockNum,
-			 sales_num AS quantity
-FROM ads_api_tpos_tdrp_wfx_clerkno_sku_15min
-WHERE org_code = ${org_code}
-AND clerk_no = ${clerkNo}
-AND year = ${year}
-AND product_code IN (${projects})
-AND spu IN (${spu})
-AND skc IN (${skc})
-AND sku IN (${sku})
-AND color IN (${color})
-AND date_type = ${date_type}
-AND date_id = ${date_id};
-
-
-
+desc ods_sales_order;
 
 
 --2019-10-12 15:30:01

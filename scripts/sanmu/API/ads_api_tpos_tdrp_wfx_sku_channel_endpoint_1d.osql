@@ -67,7 +67,7 @@ LIFECYCLE 30;
 
 
 INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(ds = '${bizdate}')
-	SELECT '${cyctime}' AS biz_date,
+	SELECT '${bizdate}' AS biz_date,
 				 t3.org_code,
 				 t5.brand_code,
 				 t3.channel_endpoint_code,
@@ -141,11 +141,11 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 				 NULL AS sku_num_1d_bqxss,
 				 NULL AS sku_num_1d_bqxts,
 				 NULL AS sku_num_1d_bqzts,
-				 NULL AS sku_num_1d_qmzks,
-				 NULL AS sku_num_1d_qmzts,
-				 NULL AS sku_num_1d_qmkcs,
+				 t7.qty AS sku_num_1d_qmzks,
+				 t8.qty AS sku_num_1d_qmzts,
+				 t7.qty + t8.qty AS sku_num_1d_qmkcs,
 				 'day' AS date_type,
-				 '${cyctime}' AS date_id
+				 '${bizdate}' AS date_id
 	FROM (
 		SELECT t2.org_code,
 					 t2.channel_endpoint_code,
@@ -156,15 +156,15 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 						 qty_actual,
 						 qty_transit
 			FROM ${td_ods}.ods_stock_logic_items
-			WHERE ds = '${bizdate}') t1
-			LEFT JOIN (
+	WHERE ds = '${bizdate}') t1
+	LEFT JOIN (
 				SELECT channel_endpoint_code,
 							 org_code,
 							 id
 				FROM ${td_ods}.ods_stock_logic
 				WHERE ds = '${bizdate}') t2
-				ON t1.stock_logic_id = t2.id) AS t3
-		LEFT JOIN (
+	ON t1.stock_logic_id = t2.id) AS t3
+LEFT JOIN (
 			SELECT sku_code,
 						 sku_cn_name,
 						 spu_code,
@@ -185,26 +185,26 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 						 cn_size_desc
 			FROM ${td_ods}.ods_api_item_sku
 			WHERE ds = '${bizdate}') AS t4
-			ON t3.sku_code = t4.sku_code
-		LEFT OUTER JOIN (
+	ON t3.sku_code = t4.sku_code
+LEFT OUTER JOIN (
 			SELECT org_code,
 						 brand_code
 			FROM ${td_ods}.ods_product_brand
 			WHERE ds = '${bizdate}') AS t5
-			ON t3.org_code = t5.org_code
-		LEFT OUTER JOIN (
+	ON t3.org_code = t5.org_code
+LEFT OUTER JOIN (
 			SELECT store_code,
 						 store_name
 			FROM ${td_ods}.ods_real_store
 			WHERE ds = '${bizdate}') AS t6
-			ON t3.channel_endpoint_code = t6.store_code
-		LEFT OUTER JOIN (
+	ON t3.channel_endpoint_code = t6.store_code
+LEFT OUTER JOIN (
 			SELECT sku_code,
 						 cn_name
 			FROM ${td_ods}.ods_item_sku
 			WHERE ds = '${bizdate}') AS t0
-			ON t4.sku_code = t0.sku_code
-		LEFT JOIN (
+	ON t4.sku_code = t0.sku_code
+LEFT JOIN (
 			SELECT t1.org_code,
 						 t1.channel_endpoint_code,
 						 t1.sku_code,
@@ -242,11 +242,11 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 					LEFT JOIN ${td_ods}.ods_stock_logic sl
 						ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
 				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) = '${bizdate}' AND i.ds = '${bizdate}') AS t1
-			GROUP BY t1.org_code,
-			t1.channel_endpoint_code,
-			t1.sku_code) AS t7
-			ON t3.sku_code = t7.sku_code AND t3.channel_endpoint_code = t7.channel_endpoint_code AND t3.org_code = t7.org_code
-		LEFT JOIN (
+GROUP BY t1.org_code,
+t1.channel_endpoint_code,
+t1.sku_code) AS t7
+	ON t3.sku_code = t7.sku_code AND t3.channel_endpoint_code = t7.channel_endpoint_code AND t3.org_code = t7.org_code
+LEFT JOIN (
 			SELECT t1.org_code,
 						 t1.channel_endpoint_code,
 						 t1.sku_code,
@@ -287,11 +287,11 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = '${bizdate}' AND a.ds = '${bizdate}'
 
 			) AS t1
-			GROUP BY t1.org_code,
-			t1.channel_endpoint_code,
-			t1.sku_code) AS t8
-			ON t3.org_code = t8.org_code AND t3.sku_code = t8.sku_code AND t3.channel_endpoint_code = t8.channel_endpoint_code
-		LEFT JOIN (--跨渠道横调出数量
+GROUP BY t1.org_code,
+t1.channel_endpoint_code,
+t1.sku_code) AS t8
+	ON t3.org_code = t8.org_code AND t3.sku_code = t8.sku_code AND t3.channel_endpoint_code = t8.channel_endpoint_code
+LEFT JOIN (--跨渠道横调出数量
 			SELECT o.org_code,
 						 o.channel_endpoint_code,
 						 b.sku_code,
@@ -309,8 +309,8 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 				i.channel_endpoint_code AND i.ds = '${bizdate}'
 			WHERE a.business_order_type = '201' AND a.business_order_business_type IN ('20102') AND a.ds = '${bizdate}'
 			AND substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = '${bizdate}') AS t9
-			ON t3.org_code = t9.org_code AND t3.channel_endpoint_code = t9.channel_endpoint_code AND t3.sku_code = t9.sku_code
-		LEFT JOIN (
+	ON t3.org_code = t9.org_code AND t3.channel_endpoint_code = t9.channel_endpoint_code AND t3.sku_code = t9.sku_code
+LEFT JOIN (
 		--跨渠道横调入数量
 			SELECT i.org_code,
 						 i.channel_endpoint_code,
@@ -329,8 +329,8 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 				AND o.ds = '${bizdate}'
 			WHERE a.business_order_type = '201' AND a.business_order_business_type IN ('20102') AND a.ds = '${bizdate}'
 			AND substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = '${bizdate}') AS t10
-			ON t3.org_code = t10.org_code AND t3.channel_endpoint_code = t10.channel_endpoint_code AND t3.sku_code = t10.sku_code
-		LEFT JOIN (--盘点差异数量
+	ON t3.org_code = t10.org_code AND t3.channel_endpoint_code = t10.channel_endpoint_code AND t3.sku_code = t10.sku_code
+LEFT JOIN (--盘点差异数量
 			SELECT b.sku_code,
 						 c.org_code,
 						 c.channel_endpoint_code,
@@ -344,7 +344,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 			GROUP BY b.sku_code,
 			c.org_code,
 			c.channel_endpoint_code) AS t13
-			ON t3.org_code = t13.org_code AND t3.channel_endpoint_code = t13.channel_endpoint_code AND t3.sku_code = t13.sku_code;
+	ON t3.org_code = t13.org_code AND t3.channel_endpoint_code = t13.channel_endpoint_code AND t3.sku_code = t13.sku_code;
 
 
 INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(ds = '${bizdate}')
@@ -543,15 +543,15 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 							 qty_actual,
 							 qty_transit
 				FROM ${td_ods}.ods_stock_logic_items
-				WHERE ds = '${bizdate}') t0
-				LEFT JOIN (
+	WHERE ds = '${bizdate}') t0
+	LEFT JOIN (
 					SELECT channel_endpoint_code,
 								 org_code,
 								 id
 					FROM ${td_ods}.ods_stock_logic
 					WHERE ds = '${bizdate}') AS t00 ON t0.stock_logic_id = t00.id) as t2
-					ON t1.org_code = t2.org_code AND t1.sku_code = t2.sku_code AND t1.channel_endpoint = t2.channel_endpoint_code
-				LEFT JOIN (--配货出数量、配退出数量、调退出数量
+	ON t1.org_code = t2.org_code AND t1.sku_code = t2.sku_code AND t1.channel_endpoint = t2.channel_endpoint_code
+LEFT JOIN (--配货出数量、配退出数量、调退出数量
 					SELECT o.org_code,
 								 o.channel_endpoint_code,
 								 b.sku_code,
@@ -564,10 +564,10 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 						INNER JOIN ${td_ods}.ods_stock_logic AS o
 							ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
 					WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = '${bizdate}' AND a.ds = '${bizdate}') AS
-				t11
-					ON t2.org_code = t11.org_code AND t2.sku_code = t11.sku_code
-				AND t2.channel_endpoint_code = t11.channel_endpoint_code
-				LEFT JOIN (
+t11
+	ON t2.org_code = t11.org_code AND t2.sku_code = t11.sku_code
+AND t2.channel_endpoint_code = t11.channel_endpoint_code
+LEFT JOIN (
 				--配货入数量、配退入数量、调拨入数量
 					SELECT o.org_code,
 								 o.channel_endpoint_code,
@@ -582,7 +582,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 						INNER JOIN ${td_ods}.ods_stock_logic AS o
 							ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
 					WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = '${bizdate}' AND a.ds = '${bizdate}') AS
-				t12
-					ON t2.org_code = t12.org_code AND t2.sku_code = t12.sku_code
-				AND t2.channel_endpoint_code = t12.channel_endpoint_code;
+t12
+	ON t2.org_code = t12.org_code AND t2.sku_code = t12.sku_code
+AND t2.channel_endpoint_code = t12.channel_endpoint_code;
 

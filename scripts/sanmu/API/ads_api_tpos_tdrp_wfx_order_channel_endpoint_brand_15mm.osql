@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15
 	ec_id                                                                   STRING COMMENT 'EC单号       ',
 	outer_order_no                                                          STRING COMMENT 'OMS临时单号    ',
 	order_type                                                              STRING COMMENT '订单类型       ',
+	business_type                                                           STRING COMMENT '业务单据类型       ',
 	oms_order_no                                                            STRING COMMENT 'OMS订单号     ',
 	tracking_no                                                             STRING COMMENT '快递单号       ',
 	order_item_num                                                          BIGINT COMMENT '订单商品数量     ',
@@ -101,6 +102,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 				 ''                      --OMS临时单号
 	,
 				 so.order_type           --订单类型
+				 ,so.business_type       --业务单据类型
 	,
 				 ''                      --OMS订单号
 	,
@@ -122,45 +124,25 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 	,
 				 so.amt_total AS totla_amt_order                 --订单总金额
 	,
-				 CASE
-				 WHEN sop.pay_way = 'CASH' THEN sop.amt_pay
-				 END AS discount_coupon_amt --现金券抵扣金额
+				 sop.discount_coupon_amt --现金券抵扣金额
 	,
-				 CASE
-				 WHEN sop.pay_way = 'COUPON' THEN sop.amt_pay
-				 END AS promotion_discount_coupon_amt --折扣券优惠总额
+				 sop.promotion_discount_coupon_amt --折扣券优惠总额
 	,
-				 CASE
-				 WHEN sop.pay_way = 'CARD' THEN sop.amt_pay
-				 END AS stored_value_card_pay_amt --储值卡支付金额
+				 sop.stored_value_card_pay_amt --储值卡支付金额
 	,
-				 CASE
-				 WHEN sop.pay_way = 'WXPAY' THEN sop.amt_pay
-				 END AS wxpay_amt                    --微信
+				 sop.wxpay_amt                    --微信
 	,
-				 CASE
-				 WHEN sop.pay_way = 'ALIPAY' THEN sop.amt_pay
-				 END AS alipay_amt                       --支付宝
+				 sop.alipay_amt                       --支付宝
 	,
-				 CASE
-				 WHEN sop.pay_way = 'CARD' THEN sop.amt_pay
-				 END AS card_amt                       --借记卡/信用卡
+				 sop.card_amt                       --借记卡/信用卡
 	,
-				 CASE
-				 WHEN sop.pay_way = 'CASH' THEN sop.amt_pay
-				 END AS cash_amt                      --现金
+				 sop.cash_amt                      --现金
 	,
-				 CASE
-				 WHEN sop.pay_way = 'MALLPROXY' THEN sop.amt_pay
-				 END AS mall_proxy_amt                      --商场代收
+				 sop.mall_proxy_amt                      --商场代收
 	,
-				 CASE
-				 WHEN sop.pay_way = 'FOODPROXY' THEN sop.amt_pay
-				 END AS food_proxy_amt                      --餐饮代收
+				 sop.food_proxy_amt                      --餐饮代收
 	,
-				 CASE
-				 WHEN sop.pay_way = 'THIRD_ONLINE' THEN sop.amt_pay
-				 END AS third_online_amt                       --第三方支付方式
+				 sop.third_online_amt                       --第三方支付方式
 	,
 				 sop.pay_way                      --支付方式
 	,
@@ -216,8 +198,10 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 				 so.audit_time                --营业时间
 	,
 				 substr(so.audit_time, 1, 10)   --营业日期
-	,      'day' as date_type
-	,      so.paid_time as date_id
+	,
+				 'day' as date_type
+	,
+				 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) as date_id
 	FROM ${td_ods}.ods_sales_order so
 	LEFT JOIN ${td_ods}.ods_sales_order_item soi
 		ON so.sales_order_no = soi.sales_order_no AND soi.ds = '${bizdate}'
@@ -229,10 +213,46 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 			ON so.member_no = mi.member_no AND mi.ds = '${bizdate}'
 		LEFT JOIN ${td_ods}.ods_member_card mc
 			ON so.org_code = mc.org_code AND so.member_no = mc.member_no AND mc.ds = '${bizdate}'
-		LEFT JOIN ${td_ods}.ods_sales_order_payment sop
-			ON so.sales_order_no = sop.sales_order_no AND sop.ds = '${bizdate}'
-		LEFT JOIN ${td_ods}.ods_sales_order_item_promotion soip
-			ON so.sales_order_no = soip.sales_order_no AND soip.ds = '${bizdate}'
+		LEFT JOIN (SELECT t1.sales_order_no,
+			 wm_concat('', discount_coupon_amt) AS discount_coupon_amt,
+			 wm_concat('', promotion_discount_coupon_amt) AS promotion_discount_coupon_amt,
+			 wm_concat('', stored_value_card_pay_amt) AS stored_value_card_pay_amt,
+			 wm_concat('', wxpay_amt) AS wxpay_amt,
+			 wm_concat('', alipay_amt) AS alipay_amt,
+			 wm_concat('', card_amt) AS card_amt,
+			 wm_concat('', cash_amt) AS cash_amt,
+			 wm_concat('', mall_proxy_amt) AS mall_proxy_amt,
+			 wm_concat('', food_proxy_amt) AS food_proxy_amt,
+			 wm_concat('', third_online_amt) AS third_online_amt,
+			 wm_concat(',', pay_way) AS pay_way
+FROM (
+	SELECT sales_order_no,
+				 CASE WHEN pay_way = 'CASH' THEN amt_pay END AS discount_coupon_amt, --现金券抵扣金额
+				 CASE WHEN pay_way = 'COUPON' THEN amt_pay END AS promotion_discount_coupon_amt, --折扣券优惠总额
+				 CASE WHEN pay_way = 'CARD' THEN amt_pay END AS stored_value_card_pay_amt, --储值卡支付金额
+				 CASE WHEN pay_way = 'WXPAY' THEN amt_pay END AS wxpay_amt,                    --微信
+				 CASE WHEN pay_way = 'ALIPAY' THEN amt_pay END AS alipay_amt  ,                     --支付宝
+				 CASE WHEN pay_way = 'CARD' THEN amt_pay END AS card_amt  ,                     --借记卡/信用卡
+				 CASE WHEN pay_way = 'CASH' THEN amt_pay END AS cash_amt  ,                    --现金
+				 CASE WHEN pay_way = 'MALLPROXY' THEN amt_pay END AS mall_proxy_amt   ,                   --商场代收
+				 CASE WHEN pay_way = 'FOODPROXY' THEN amt_pay END AS food_proxy_amt  ,                    --餐饮代收
+				 CASE WHEN pay_way = 'THIRD_ONLINE' THEN amt_pay END AS third_online_amt  ,             --第三方支付方式
+				 pay_way                      --支付方式
+	FROM ${td_ods}.ods_sales_order_payment
+	WHERE ds = '${bizdate}') AS t1
+GROUP BY t1.sales_order_no) sop
+			ON so.sales_order_no = sop.sales_order_no
+		LEFT JOIN (SELECT a.sales_order_no,
+              			 wm_concat(',', a.promotion_code) AS promotion_code,
+              			 wm_concat(',', a.promotion_name) AS promotion_name
+              FROM (
+              	SELECT DISTINCT sales_order_no,
+              									promotion_code,
+              									promotion_name
+              	FROM ${td_ods}.ods_sales_order_item_promotion
+              WHERE ds = '${bizdate}') as a
+              GROUP BY sales_order_no) soip
+			ON so.sales_order_no = soip.sales_order_no
 		LEFT JOIN ${td_ods}.ods_api_channel_endpoint ace
 			ON so.channel_endpoint_code = ace.channel_endpoint_code AND ace.ds = '${bizdate}'
 		LEFT JOIN ${td_ods}.ods_user_auth ua
