@@ -93,7 +93,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 	,
 				 so.shopping_guider_no         --导购员代码
 	,
-				 ''                      --导购员名称
+				 oci.clerk_name                      --导购员名称
 	,
 				 so.sales_order_no             --销售单号
 	,
@@ -261,4 +261,6 @@ GROUP BY t1.sales_order_no) sop
 	on soip.promotion_code = pi.promotion_no and pi.ds = '${bizdate}'
 	left join ${td_ods}.ods_sales_delivery_order sdo
 	on so.sales_order_no = sdo.sales_order_no and sdo.ds = '${bizdate}'
+left join ${td_ods}.ods_clerk_info oci
+	on so.shopping_guider_no = oci.clerk_no and oci.ds = '${bizdate}'
 	WHERE so.ds = '${bizdate}' and so.order_status = 1;
