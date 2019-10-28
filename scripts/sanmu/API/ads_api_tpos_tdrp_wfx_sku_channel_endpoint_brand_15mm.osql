@@ -320,8 +320,8 @@ GROUP BY t1.sales_order_no) sop
 			ON so.channel_endpoint_code = rs.store_code AND rs.ds = '${bizdate}'
 		LEFT JOIN ${td_ods}.ods_api_item_sku ais
 			ON soi.sku_code = ais.sku_code and ais.ds = '${bizdate}'
-    left join ${td_ods}.ods_clerk_info oci
-      on so.shopping_guider_no = oci.clerk_no and oci.ds = '${bizdate}'
+left join (select clerk_no,clerk_name from ${td_ods}.ods_clerk_info where ds = '${bizdate}' and status = 7) oci
+	on so.shopping_guider_no = oci.clerk_no
 	WHERE so.ds = '${bizdate}' and so.order_status = 1;
 
 

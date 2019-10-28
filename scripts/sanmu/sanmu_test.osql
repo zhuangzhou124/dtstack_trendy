@@ -6,7 +6,10 @@
 --ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm
 --ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d
 
-
+--多个周期的
+--ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d
+--ads_api_tpos_tdrp_wfx_channel_endpoint_1d
+--ads_api_crm_emr_tcrm_member_1d
 
 SELECT a.sales_order_no,
 			 wm_concat(',', a.promotion_code) AS promotion_code,
