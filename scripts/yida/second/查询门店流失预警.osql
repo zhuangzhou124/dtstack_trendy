@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS ads_api_crm_ma_clerk_d(
 
 INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_d PARTITION(ds = '${bizdate}')
 
-  SELECT b.org_code
+  SELECT coalesce(b.org_code, '-110')
   ,      coalesce(b.member_manage_channel_endpoint_code, '-110')
   ,      coalesce(b.member_manage_clerk, '-110')
   ,      COUNT(DISTINCT t.member_no) AS member_qty
@@ -59,7 +59,7 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_d PARTITION(ds = '${bizdate}')
       WHERE ds = '${bizdate}'
     ) b ON b.org_code = t.org_code AND b.member_no = t.member_no
   WHERE b.org_code IS NOT NULL
-  GROUP BY b.org_code, b.member_manage_channel_endpoint_code, b.member_manage_clerk;
+  GROUP BY coalesce(b.org_code, '-110'), coalesce(b.member_manage_channel_endpoint_code, '-110'), coalesce(b.member_manage_clerk, '-110');
 
 
 

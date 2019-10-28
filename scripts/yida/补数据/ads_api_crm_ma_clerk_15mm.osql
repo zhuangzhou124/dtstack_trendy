@@ -17,17 +17,19 @@ CREATE TABLE IF NOT EXISTS ads_api_crm_ma_clerk_15mm(
 )COMMENT '会员分析注册会员消费统计 会员分析注册会员同环比 ' PARTITIONED BY(
   ds  STRING);
 
-INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm PARTITION(ds = '${bizdate}')
+
+
+INSERT OVERWRITE TABLE td_ads.ads_api_crm_ma_clerk_15mm PARTITION(ds = '20190101')
   SELECT coalesce(t1.date_type, t2.date_type) AS date_type
   ,      coalesce(t1.date_id, t2.date_id) AS date_id
   ,      coalesce(t1.org_code, t2.org_code) AS org_code
-  ,      coalesce(t1.channel_endpoint_code, t2.channel_endpoint_code , '-110') AS channel_endpoint_code
-  ,      coalesce(t1.clerk_no, t2.clerk_no , '-110') AS clerk_no
+  ,      coalesce(t1.channel_endpoint_code, t2.channel_endpoint_code, '-110') AS channel_endpoint_code
+  ,      coalesce(t1.clerk_no, t2.clerk_no, '-110') AS clerk_no
   ,      coalesce(t1.member_count, 0) AS member_count
   ,      coalesce(t1.order_member_count, 0) AS order_member_count
   ,      coalesce(t1.upgrade_member_count, 0) AS upgrade_member_count
   ,      coalesce(t2.consumer_member_count, 0) AS consumer_member_count
-  ,      cast('${bizdate}' as bigint)
+  ,      CAST('${bizdate}' AS BIGINT)
   FROM (
     SELECT coalesce(t1.date_type, t2.date_type) AS date_type
     ,      coalesce(t1.date_id, t2.date_id) AS date_id
@@ -53,11 +55,12 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm PARTITION(ds = '${bizdate}')
         ,      a1.member_manage_channel_endpoint_code
         ,      a1.member_manage_clerk
         ,      to_char(to_date(a1.member_register_time, 'yyyy-mm-dd'), 'yyyymmdd') AS member_register_time
-        FROM ods_member_card a1
+        FROM td_ods.ods_member_card a1
           JOIN (
-            SELECT ds1, date_type, date_id, time_id
+            SELECT max(ds1), date_type, date_id, time_id
             FROM td_ads_dev.dim_time
-            WHERE ds = '${bizdate}'
+            WHERE ds >= '${start}' AND ds <= '${end}'
+            GROUP BY date_type, date_id, time_id
           ) time ON to_char(to_date(member_register_time, 'yyyy-mm-dd'), 'yyyymmdd') = time.time_id
         WHERE a1.ds = '${bizdate}' AND a1.STATUS > 0 AND CAST(a1.member_no AS BIGINT) > 1 AND a1.member_register_time IS
         NOT NULL
@@ -68,19 +71,15 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm PARTITION(ds = '${bizdate}')
           ,      org_code
           ,      member_no
           ,      sum(price_amt_discount) AS order_fact_amount
-          FROM ods_sales_order a1
+          FROM td_ods.ods_sales_order a1
             JOIN (
---              SELECT ds1, date_type, date_id, time_id
---              FROM td_ads_dev.dim_time
---              WHERE ds = '${bizdate}'
               SELECT max(ds1), date_type, date_id, time_id
               FROM td_ads_dev.dim_time
-              WHERE ds >= '20150101' AND ds <= '${bizdate}'
+              WHERE ds >= '${start}' AND ds <= '${end}'
               GROUP BY date_type, date_id, time_id
             ) time ON to_char(to_date(paid_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd') = time.time_id
           -- 改为过账时间to_char(to_date(paid_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd')
           WHERE a1.ds = '${bizdate}' AND CAST(a1.member_no AS BIGINT) > 1
-
           GROUP BY date_type
           , date_id
           , org_code
@@ -101,7 +100,6 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm PARTITION(ds = '${bizdate}')
         ,      store_no AS channel_endpoint_code
         ,      clerk_no
         ,      COUNT(DISTINCT member_no) AS member_cnt
-        ,      '${cyctime}' AS biz_date
         FROM (
           SELECT date_type
           ,      date_id
@@ -124,14 +122,11 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm PARTITION(ds = '${bizdate}')
             ,      after_grade_id  -- 会员升级后等级  可能会用上
             ,      create_time
             ,      a1.member_no
-            FROM ods_member_grade_log a1
+            FROM td_ods.ods_member_grade_log a1
               JOIN (
-              --              SELECT ds1, date_type, date_id, time_id
-              --              FROM td_ads_dev.dim_time
-              --              WHERE ds = '${bizdate}'
                 SELECT max(ds1), date_type, date_id, time_id
                 FROM td_ads_dev.dim_time
-                WHERE ds >= '20150101' AND ds <= '${bizdate}'
+                WHERE ds >= '${start}' AND ds <= '${end}'
                 GROUP BY date_type, date_id, time_id
               ) time ON substr(REPLACE(grade_change_time, '-', ''), 1, 8) = time.time_id
             WHERE a1.ds = '${bizdate}' AND a1.grade_change_time IS NOT NULL
@@ -154,7 +149,6 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm PARTITION(ds = '${bizdate}')
       ,      t.channel_endpoint_code
       ,      t.shopping_guider_no AS clerk_no
       ,      COUNT(DISTINCT (CASE WHEN order_fact_amount > 0 THEN t.member_no ELSE NULL END)) AS consumer_member_count
-      ,      '${cyctime}' AS biz_date
       FROM (
         SELECT date_type
         ,      date_id
@@ -163,14 +157,11 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm PARTITION(ds = '${bizdate}')
         ,      channel_endpoint_code
         ,      shopping_guider_no
         ,      sum(price_amt_discount) AS order_fact_amount
-        FROM ods_sales_order a1
+        FROM td_ods.ods_sales_order a1
           JOIN (
-          --              SELECT ds1, date_type, date_id, time_id
-          --              FROM td_ads_dev.dim_time
-          --              WHERE ds = '${bizdate}'
             SELECT max(ds1), date_type, date_id, time_id
             FROM td_ads_dev.dim_time
-            WHERE ds >= '20150101' AND ds <= '${bizdate}'
+            WHERE ds >= '${start}' AND ds <= '${end}'
             GROUP BY date_type, date_id, time_id
           ) time ON to_char(to_date(paid_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd') = time.time_id
         -- 改为过账时间to_char(to_date(audit_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd')
@@ -188,18 +179,15 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm PARTITION(ds = '${bizdate}')
           ,      a1.org_code
           ,      a1.member_no
           ,      to_char(to_date(a1.member_register_time, 'yyyy-mm-dd'), 'yyyymmdd') AS member_register_time
-          FROM ods_member_card a1
+          FROM td_ods.ods_member_card a1
             JOIN (
-            --              SELECT ds1, date_type, date_id, time_id
-            --              FROM td_ads_dev.dim_time
-            --              WHERE ds = '${bizdate}'
               SELECT max(ds1), date_type, date_id, time_id
               FROM td_ads_dev.dim_time
-              WHERE ds >= '20150101' AND ds <= '${bizdate}'
+              WHERE ds >= '${start}' AND ds <= '${end}'
               GROUP BY date_type, date_id, time_id
             ) time ON to_char(to_date(member_register_time, 'yyyy-mm-dd'), 'yyyymmdd') = time.time_id
-          WHERE a1.ds = '${bizdate}' AND a1.STATUS > 0 AND CAST(a1.member_no AS BIGINT) > 1 AND a1.member_register_time
-          IS NOT NULL
+          WHERE a1.ds = '${bizdate}' AND a1.STATUS > 0 AND CAST(a1.member_no AS BIGINT) > 1 AND a1.member_register_time IS
+          NOT NULL
         ) b ON b.org_code = t.org_code AND b.member_no = t.member_no AND b.date_type = t.date_type AND b.date_id = t.
         date_id
       WHERE t.org_code IS NOT NULL AND t.shopping_guider_no IS NOT NULL
@@ -211,4 +199,5 @@ INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm PARTITION(ds = '${bizdate}')
     ) t2 ON t1.date_type = t2.date_type AND t1.date_id = t2.date_id AND coalesce(t1.org_code, '') =
     coalesce(t2.org_code, '') AND coalesce(t1.clerk_no, '') = coalesce(t2.clerk_no, '') AND
     coalesce(t1.channel_endpoint_code, '') = coalesce(t2.channel_endpoint_code, '');
+
 

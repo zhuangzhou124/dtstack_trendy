@@ -194,6 +194,21 @@ INSERT OVERWRITE TABLE dim_time PARTITION(ds)
 
 
 
+
+select trans_cols(1, ds, login_ip1, login_ip2) as (idx, login_id, login_ip) from dim_time_mapping where ds ='20190303';
+
+select posexplode(q) from (select explode(array(array(a,b,'s1'),array(a,c,'s2'))) as q from (
+select 1 as a, 'x1' as b,'x2' as c union all
+select 1 as a, 'x11' as b,'x12' as c union all
+select 1 as a, 'x21' as b,'x22' as c union all
+select 2 as a, 'x1' as b,'x2' as c union all
+select 2 as a, 'x11' as b,'x12' as c
+)a)a;
+
+
+select GET_IDCARD_AGE('332624199510140015'),GET_IDCARD_BIRTHDAY('332624199510140015'),GET_IDCARD_SEX('332624199510140015');
+
+
 WITH t1 AS(
   SELECT *
   FROM dim_time_mapping
