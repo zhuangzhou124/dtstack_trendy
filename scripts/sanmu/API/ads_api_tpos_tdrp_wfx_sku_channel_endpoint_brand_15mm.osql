@@ -108,17 +108,18 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 	,
 				 so.channel_endpoint_code AS channel_endpoint         --门店编码
 	,
-				 rs.store_type AS channel_endpoint_type                --门店类型
-	,
-				 ace.endpoint_code AS endpoint_code                 --终端代码
-	,
-				 ace.endpoint_name AS endpoint_name ,               --终端名称
+				 rs.store_type AS channel_endpoint_type    ,            --门店类型
 				 rs.region_name,
 				 rs.city_name
 	,
+				 ace.endpoint_code AS endpoint_code                 --终端代码
+	,
+				 ace.endpoint_name AS endpoint_name ,              --终端名称
+
+	,
 				 so.shopping_guider_no AS clerk_no      --导购员代码
 	,
-				 '' AS clerk_name    --导购员名称
+				 oci.clerk_name AS clerk_name    --导购员名称
 	,
 				 so.sales_order_no AS sales_order_no      --销售单号
 	,
@@ -237,7 +238,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 				 ''                           --是否为赠品
 	,
 				 CASE
-				 WHEN soip.promotion_code IN ('DECIMAL_00', 'DECIMAL_01', 'DECIMAL_10', 'DECIMAL_11') THEN '抹零'
+				 WHEN soip.promotion_name like '%抹零%' THEN '抹零'
 				 ELSE '未抹零'
 				 END AS is_wipe_zero                --是否抹零
 	,
@@ -319,7 +320,10 @@ GROUP BY t1.sales_order_no) sop
 			ON so.channel_endpoint_code = rs.store_code AND rs.ds = '${bizdate}'
 		LEFT JOIN ${td_ods}.ods_api_item_sku ais
 			ON soi.sku_code = ais.sku_code and ais.ds = '${bizdate}'
-	WHERE so.ds = '${bizdate}';
+left join (select clerk_no,clerk_name from ${td_ods}.ods_clerk_info where ds = '${bizdate}' and status = 7) oci
+	on so.shopping_guider_no = oci.clerk_no
+	WHERE so.ds = '${bizdate}' and so.order_status = 1;
 
 
 
+--soip.promotion_code IN ('DECIMAL_00', 'DECIMAL_01', 'DECIMAL_10', 'DECIMAL_11')

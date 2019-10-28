@@ -236,7 +236,7 @@ INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_type_1d PARTITION(ds = '${biz
 							 a.amt_total,
 							 substr(regexp_replace(a.paid_time, '-', '', 0), 1, 8) AS order_time,
 							 a.channel_endpoint_code,
-							 min(a.create_time)OVER (PARTITION BY a.org_code, a.member_no) AS first_order_time
+							 min(a.paid_time)OVER (PARTITION BY a.org_code, a.member_no) AS first_order_time
 				FROM ${td_ods}.ods_sales_order a
 				WHERE substr(regexp_replace(a.audit_time, '-', '', 0), 1, 8) <= '${bizdate}' AND a.amt_total > 0
 				AND a.order_status = 1 AND a.price_amt_discount > 0
@@ -246,8 +246,7 @@ INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_type_1d PARTITION(ds = '${biz
 				ON bb.org_code = cc.org_code AND bb.member_no = cc.member_no
 		WHERE substr(regexp_replace(cc.member_register_time, '-', '', 0), 1, 8) <= '${bizdate}' AND aa.STATUS > 0
 		AND cc.member_no NOT IN ('-1', '1') AND aa.ds = '${bizdate}'
-		--AND substr(regexp_replace(bb.first_order_time, '-', '', 0), 1, 8) = '${bizdate}';
-		AND substr(regexp_replace(bb.first_order_time, '-', '', 0), 1, 8) = '20191012') AS t1
+		AND substr(regexp_replace(bb.first_order_time, '-', '', 0), 1, 8) = '${bizdate}') AS t1
 		JOIN (
 			SELECT sales_order_no,
 						 price_sales,

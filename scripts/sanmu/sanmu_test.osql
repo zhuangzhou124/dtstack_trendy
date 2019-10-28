@@ -6,7 +6,10 @@
 --ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm
 --ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d
 
-
+--多个周期的
+--ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d
+--ads_api_tpos_tdrp_wfx_channel_endpoint_1d
+--ads_api_crm_emr_tcrm_member_1d
 
 SELECT a.sales_order_no,
 			 wm_concat(',', a.promotion_code) AS promotion_code,
@@ -21,7 +24,7 @@ GROUP BY sales_order_no;
 
 
 
-select count(*) from td_ods.ods_sales_order where ds = '20191021' and channel_endpoint_code = '13251'
+select count(*) from ods_sales_order where ds = '20191021' and channel_endpoint_code = '13251'
 and member_no not in ('-1','1') and external_order_no = 'FP190630009SJ'
 and paid_time = '2019-06-30 22:43:42';
 
