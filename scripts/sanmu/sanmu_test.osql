@@ -873,3 +873,102 @@ where t1.is_vip = 1 group by t1.channel_endpoint_code;
 
 
 
+
+SELECT so.id
+,so.sales_order_no             --订单编号
+,so.app_id
+,so.online_store_order_no      --网络单号
+,so.original_order_no          --源单号
+,so.order_type
+,so.price_print_type           --入机类型
+,so.transaction_flow_code
+,so.shipping_type
+,so.order_status
+,so.pay_status
+,so.shipping_status
+,so.refund_status
+,so.refund_payment_status
+,so.org_code                   --品牌编码
+,so.channel_endpoint_code      --渠道终端编码
+,''                      --终端代码
+,''                      --终端名称
+,so.shopping_guider_app_code
+,so.sales_app_code
+,so.shopping_guider_no         --导购
+,so.has_rma
+,so.rma_contact_number
+,so.rma_reason
+,so.member_no                  --会员编号
+,mi.member_mobile              --会员手机号
+,so.member_source_type
+,so.member_grade_code          --会员等级
+
+,so.external_member_type
+,so.qty_order_item
+,so.qty_sales_item
+,so.qty_return_item
+,so.price_amt_retail            --吊牌价总计
+,so.price_amt_discount          --实收金额
+,so.amt_total                   --订单总金额
+,CASE WHEN sop.pay_way = 'COUPON' THEN sop.amt_pay END AS coupon_amt --现金券抵扣金额
+,CASE WHEN sop.pay_way = 'CARD' THEN sop.amt_pay END AS card_amt --储值卡支付金额
+, so.amt_discount                --折扣总额
+,so.amt_sales_item
+,so.amt_return_item
+,so.amt_paid
+,so.amt_freight
+,so.refund_logistics_no
+,so.average_discount
+,so.remark
+,so.paid_time                  --支付时间
+,so.shipping_time
+,so.warehouse_receiving_time
+,so.customer_receiving_time
+,so.create_user_id
+,so.create_user_name
+,so.create_time
+,so.last_update_user_id
+,so.last_update_user_name
+,so.last_update_time
+,so.deleted
+,so.external_order_no          --EC单号
+,so.outer_order_id             --外部单号
+,so.business_type
+,so.related_rma_order_id
+,so.statemachine
+,so.amt_m_discount
+,so.channel_stock_code
+,so.oms_version
+,so.channel_code
+,so.member_mobile
+,so.stock_receive_code
+,so.point_deduction             --商场扣点
+,so.sales_platform_code
+,so.logistics_company_no
+,so.buyer_nick_name
+,so.made_order_time
+,so.audit_time
+,soc.coupon_no
+,soc.coupon_name
+,soc.coupon_type
+,soc.coupon_password
+FROM ods_sales_order so
+	LEFT JOIN ods_sales_order_coupon soc
+		ON so.sales_order_no = soc.sales_order_no
+	AND soc.ds = '20190920'
+	LEFT JOIN ods_member_info mi
+		ON so.member_no = mi.member_no
+	AND mi.ds = '20190920'
+	LEFT JOIN ods_member_card mc
+		ON so.org_code = mc.org_code
+	AND so.member_no = mc.member_no
+	AND mc.ds = '20190920'
+	LEFT JOIN ods_sales_order_payment sop
+		ON so.sales_order_no = sop.sales_order_no
+	AND sop.ds = '20190920'
+WHERE so.ds = '20190920';
+
+
+
+
+

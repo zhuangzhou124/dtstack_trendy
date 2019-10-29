@@ -114,7 +114,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 	,
 				 ace.endpoint_code AS endpoint_code                 --终端代码
 	,
-				 ace.endpoint_name AS endpoint_name ,              --终端名称
+				 ace.endpoint_name AS endpoint_name               --终端名称
 
 	,
 				 so.shopping_guider_no AS clerk_no      --导购员代码
@@ -322,7 +322,7 @@ GROUP BY t1.sales_order_no) sop
 			ON soi.sku_code = ais.sku_code and ais.ds = '${bizdate}'
 left join (select clerk_no,clerk_name from ${td_ods}.ods_clerk_info where ds = '${bizdate}' and status = 7) oci
 	on so.shopping_guider_no = oci.clerk_no
-	WHERE so.ds = '${bizdate}' and so.order_status = 1;
+	WHERE so.ds = '${bizdate}' and so.order_status = 1 and so.paid_time is not null;
 
 
 
