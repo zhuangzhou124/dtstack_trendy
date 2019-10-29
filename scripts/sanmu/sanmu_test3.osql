@@ -1,48 +1,14 @@
-SELECT
-ods_member_card.create_time AS card_create_month,
-ods_member_card.brand_code,
-ods_member_card.member_manage_store,
-ods_member_grade_state.grade_id,
-COUNT ( DISTINCT ( ods_member_card.member_no )) AS member_qty_card
-FROM
-ods_member_card LEFT JOIN ods_member_grade_state on ods_member_card.id = ods_member_grade_state.member_card_id
-WHERE
-ods_member_card.create_time BETWEEN '2019-08-01 00:00:00'
-AND '2019-08-23 23:59:59'
-AND ods_member_card.status > 0
-AND CAST ( ods_member_card.member_no AS integer ) > 1
-AND ods_member_card.member_manage_store = '1102'
-AND ods_member_card.brand_code = '2'
-GROUP BY
-ods_member_card.create_time,
-ods_member_card.brand_code,
-ods_member_card.member_manage_store,
-ods_member_grade_state.grade_id
-ORDER BY;
+-- COUNT ( DISTINCT ( CASE WHEN ods_member_card.id IS NOT NULL THEN ods_member_card.member_no ELSE NULL END ) ) AS member_qty_card
+--substr(regexp_replace(t1.member_register_time, '-', '', 0), 1, 8)
+
+SELECT member_register_channel_endpoint_code,
+			 member_no,
+			 min(member_register_time)
+
+FROM ods_member_card
+WHERE ds = '${bizdate}' AND STATUS > 0
+group by member_register_channel_endpoint_code,
+			 member_no;
 
 
 
-
-
-
-SELECT ods_member_card.brand_code,
-			 ods_member_card.member_manage_store,
-			 ods_member_grade_state.grade_id,
-			 COUNT ( DISTINCT ods_member_card.member_no ) AS member_qty_all,
-			 COUNT ( DISTINCT ( CASE WHEN ods_member_card.member_register_time IS NOT NULL THEN ods_member_card.member_no ELSE NULL END ) ) AS member_qty_reg,
-			 COUNT ( DISTINCT ( CASE WHEN ods_member_card.id IS NOT NULL THEN ods_member_card.member_no ELSE NULL END ) ) AS member_qty_card
-FROM
-ods_member_card left join ods_member_grade_state on ods_member_card.id = ods_member_grade_state.member_card_id
-WHERE
-ods_member_card.status > 0
-AND CAST ( ods_member_card.member_no AS INTEGER ) > 1
-AND ods_member_card.member_manage_store = '1102'
-AND ods_member_card.brand_code = '2'
-GROUP BY
-ods_member_card.brand_code,
-ods_member_card.member_manage_store,
-ods_member_grade_state.grade_id
-ORDER BY
-ods_member_card.brand_code,
-ods_member_card.member_manage_store,
-ods_member_grade_state.grade_id
