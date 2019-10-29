@@ -258,8 +258,6 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 	,
 				 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) as date_id
 	FROM ${td_ods}.ods_sales_order so
-		LEFT JOIN ${td_ods}.ods_product_brand pb
-			ON so.org_code = pb.org_code AND pb.ds = '${bizdate}'
 		left join ${td_ods}.ods_sales_delivery_order sdo
 			on so.sales_order_no = sdo.sales_order_no and sdo.ds = '${bizdate}'
 		LEFT JOIN ${td_ods}.ods_sales_order_coupon soc
@@ -320,7 +318,9 @@ GROUP BY t1.sales_order_no) sop
 			ON so.channel_endpoint_code = rs.store_code AND rs.ds = '${bizdate}'
 		LEFT JOIN ${td_ods}.ods_api_item_sku ais
 			ON soi.sku_code = ais.sku_code and ais.ds = '${bizdate}'
-left join (select clerk_no,clerk_name from ${td_ods}.ods_clerk_info where ds = '${bizdate}' and status = 7) oci
+    LEFT JOIN ${td_ods}.ods_product_brand pb
+    	ON ais.brand_code = pb.brand_code AND pb.ds = '${bizdate}'
+    left join (select clerk_no,clerk_name from ${td_ods}.ods_clerk_info where ds = '${bizdate}' and status = 7) oci
 	on so.shopping_guider_no = oci.clerk_no
 	WHERE so.ds = '${bizdate}' and so.order_status = 1 and so.paid_time is not null;
 

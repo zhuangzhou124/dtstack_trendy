@@ -11,6 +11,9 @@
 --ads_api_tpos_tdrp_wfx_channel_endpoint_1d
 --ads_api_crm_emr_tcrm_member_1d
 
+
+
+
 SELECT a.sales_order_no,
 			 wm_concat(',', a.promotion_code) AS promotion_code,
 			 wm_concat(',', a.promotion_name) AS promotion_name
@@ -31,7 +34,7 @@ and paid_time = '2019-06-30 22:43:42';
 --联营
 --FP190630009SJ
 
-desc ods_sales_order_item_promotion;
+desc ods_member_card;
 
 desc ods_sales_order;
 
