@@ -29,17 +29,22 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = 
 				 t5.member_register_channel_endpoint_code,
 				 t5.new_card_num_1d_store_vip,
 				 t6.total_card_num_td_store_vip,
-				 t5.date_type as date_type,
-				 t5.date_id as date_id
+				 t5.date_type AS date_type,
+				 t5.date_id AS date_id
 	FROM (
 		SELECT t4.member_register_channel_endpoint_code,
 					 t4.date_type,
 					 t4.date_id,
-					 COUNT ( DISTINCT ( CASE WHEN t4.id IS NOT NULL THEN t4.member_no ELSE NULL END ) )  AS new_card_num_1d_store_vip
+					 t4.ds1,
+					 COUNT(DISTINCT (CASE
+					 WHEN t4.id IS NOT NULL THEN t4.member_no
+					 ELSE NULL
+					 END)) AS new_card_num_1d_store_vip
 		FROM (
 			SELECT t1.member_register_channel_endpoint_code,
 						 t1.date_type,
 						 t1.date_id,
+						 t1.ds1,
 						 t3.is_vip,
 						 t1.id,
 						 t1.member_no
@@ -48,16 +53,17 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = 
 							 member_no,
 							 date_type,
 							 date_id,
+							 ds1,
 							 id
 				FROM (
 					SELECT member_register_channel_endpoint_code,
 								 member_no,
 								 regexp_replace(member_register_time, '-', '', 0) AS member_register_time,
 								 id
-					FROM ${td_ods}.ods_member_card
-					WHERE ds = '${bizdate}' AND STATUS > 0 AND member_register_channel_endpoint_code IS NOT NULL) AS mc
+					FROM ods_member_card
+					WHERE ds = '${bizdate}' AND STATUS > 0) AS mc
 					JOIN (
-						SELECT max(ds1),
+						SELECT max(ds1) as ds1,
 									 date_type,
 									 date_id,
 									 time_id
@@ -67,55 +73,116 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = 
 					) time
 						ON mc.member_register_time = time.time_id) t1
 				LEFT JOIN (
-					SELECT          member_card_id,
-													grade_code
-					FROM ${td_ods}.ods_member_grade_state
-					WHERE ds = '${bizdate}' AND CAST(member_no AS BIGINT) > 1) t2
+					SELECT member_card_id,
+								 grade_code
+					FROM ods_member_grade_state
+					WHERE ds = '${bizdate}' ) t2
 					ON t1.id = t2.member_card_id
 				LEFT JOIN (
-					SELECT          grade_code,
-													is_vip
-					FROM ${td_ods}.ods_member_grade_info
+					SELECT grade_code,
+								 is_vip
+					FROM ods_member_grade_info
 					WHERE ds = '${bizdate}' AND is_vip = '1') t3
 					ON t2.grade_code = t3.grade_code) AS t4
 		WHERE t4.is_vip = '1'
 		GROUP BY t4.member_register_channel_endpoint_code,
 		t4.date_type,
-		t4.date_id) AS t5
-
+		t4.date_id,t4.ds1) AS t5
 		LEFT JOIN (
-			SELECT t4.member_register_channel_endpoint_code,
-						 COUNT(DISTINCT (t4.member_no)) AS total_card_num_td_store_vip
+			SELECT t0.member_register_channel_endpoint_code,
+						 time.ds1,
+						 time.date_type,
+						 t0.total_card_num_td_store_vip
 			FROM (
-				SELECT t1.member_register_channel_endpoint_code,
-							 t3.is_vip,
-							 t1.member_no
+				SELECT /*+MAPJOIN(a) */ a.member_register_channel_endpoint_code,
+																a.member_register_time,
+																COUNT(DISTINCT (b.member_no)) AS total_card_num_td_store_vip
 				FROM (
 					SELECT DISTINCT member_register_channel_endpoint_code,
-													member_no,
-													id
-					FROM ${td_ods}.ods_member_card
-					WHERE ds <= '${bizdate}' AND STATUS > 0) t1
+													regexp_replace(member_register_time, '-', '', 0) AS member_register_time
+					FROM ods_member_card
+					WHERE ds = '${bizdate}' AND STATUS > 0 ) AS a
 					LEFT JOIN (
-						SELECT member_card_id,
-									 grade_code
-						FROM ${td_ods}.ods_member_grade_state
-						WHERE ds = '${bizdate}' AND CAST(member_no AS BIGINT) > 1) t2
-						ON t1.id = t2.member_card_id
-					LEFT JOIN (
-						SELECT grade_code,
-									 is_vip
-						FROM ${td_ods}.ods_member_grade_info
-						WHERE ds = '${bizdate}' AND is_vip = '1') t3
-						ON t2.grade_code = t3.grade_code) AS t4
-			WHERE t4.is_vip = '1'
-			GROUP BY t4.member_register_channel_endpoint_code) AS t6
-			ON t5.member_register_channel_endpoint_code = t6.member_register_channel_endpoint_code;
+						SELECT t4.member_register_channel_endpoint_code,
+									 t4.member_register_time,
+									 t4.member_no
+						FROM (
+							SELECT t1.member_register_channel_endpoint_code,
+										 t3.is_vip,
+										 t1.member_register_time,
+										 t1.member_no
+							FROM (
+								SELECT DISTINCT member_register_channel_endpoint_code,
+																member_no,
+																regexp_replace(member_register_time, '-', '', 0) AS member_register_time,
+																id
+								FROM ods_member_card
+								WHERE ds = '${bizdate}' AND STATUS > 0 ) t1
+								LEFT JOIN (
+									SELECT member_card_id,
+												 grade_code
+									FROM ods_member_grade_state
+									WHERE ds = '${bizdate}' ) t2
+									ON t1.id = t2.member_card_id
+								LEFT JOIN (
+									SELECT grade_code,
+												 is_vip
+									FROM ods_member_grade_info
+									WHERE ds = '${bizdate}' AND is_vip = '1') t3
+									ON t2.grade_code = t3.grade_code) AS t4
+						WHERE t4.is_vip = '1') AS b
+						ON a.member_register_channel_endpoint_code = b.member_register_channel_endpoint_code
+					AND a.member_register_time > b.member_register_time
+				GROUP BY a.member_register_channel_endpoint_code, a.member_register_time) as t0
+				JOIN (
+					SELECT max(ds1) as ds1,
+								 date_type,
+								 date_id,
+								 time_id
+					FROM td_ads_dev.dim_time
+					WHERE ds >= '20150101' AND ds <= '${bizdate}'
+					GROUP BY date_type, date_id, time_id
+				) time
+					ON t0.member_register_time = time.time_id) AS t6
+			ON t5.member_register_channel_endpoint_code = t6.member_register_channel_endpoint_code
+		AND t5.ds1 = t6.ds1 and t5.date_type = t6.date_type;
 
 
-
-
-
+INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = '${bizdate}')
+	SELECT coalesce(t2.biz_date, NULL)
+	,
+				 coalesce(t2.channel_endpoint, NULL)
+	,
+				 coalesce(t2.new_card_num_1d_store_vip, NULL)
+	,
+				 coalesce(t2.total_card_num_td_store_vip, NULL)
+	,
+				 coalesce(t2.date_type, NULL)
+	,
+				 coalesce(t2.date_id, t1.time_id)
+	FROM (
+		SELECT time_id
+		FROM td_ads_dev.dim_time
+		WHERE ds >= '20150101' AND ds <= '${bizdate}') AS t1
+		LEFT JOIN (
+			SELECT biz_date
+			,
+						 channel_endpoint
+			,
+						 max(new_card_num_1d_store_vip) AS new_card_num_1d_store_vip
+			,
+						 max(total_card_num_td_store_vip) AS total_card_num_td_store_vip
+			,
+						 date_type
+			,
+						 date_id
+			FROM ads_api_tpos_tdrp_wfx_channel_endpoint_1d
+			WHERE ds = '${bizdate}'
+			GROUP BY biz_date
+			, channel_endpoint
+			, date_type
+			, date_id) AS t2
+			ON t1.time_id = t2.date_id;
 
 
 

@@ -1,14 +1,116 @@
 -- COUNT ( DISTINCT ( CASE WHEN ods_member_card.id IS NOT NULL THEN ods_member_card.member_no ELSE NULL END ) ) AS member_qty_card
 --substr(regexp_replace(t1.member_register_time, '-', '', 0), 1, 8)
 
-SELECT member_register_channel_endpoint_code,
-			 member_no,
-			 min(member_register_time)
 
-FROM ods_member_card
-WHERE ds = '${bizdate}' AND STATUS > 0
-group by member_register_channel_endpoint_code,
-			 member_no;
+SELECT t0.member_register_channel_endpoint_code,
+			 time.ds1,
+			 t0.total_card_num_td_store_vip
+FROM (
+	SELECT /*+MAPJOIN(a) */ a.member_register_channel_endpoint_code,
+													a.member_register_time,
+													COUNT(DISTINCT (b.member_no)) AS total_card_num_td_store_vip
+	FROM (
+		SELECT DISTINCT member_register_channel_endpoint_code,
+										regexp_replace(member_register_time, '-', '', 0) AS member_register_time
+		FROM ods_member_card
+		WHERE ds <= '${bizdate}' AND STATUS > 0 AND member_register_channel_endpoint_code IS NOT NULL) AS a
+		LEFT JOIN (
+			SELECT t4.member_register_channel_endpoint_code,
+						 t4.member_register_time,
+						 t4.member_no
+			FROM (
+				SELECT t1.member_register_channel_endpoint_code,
+							 t3.is_vip,
+							 t1.member_register_time,
+							 t1.member_no
+				FROM (
+					SELECT DISTINCT member_register_channel_endpoint_code,
+													member_no,
+													regexp_replace(member_register_time, '-', '', 0) AS member_register_time,
+													id
+					FROM ods_member_card
+					WHERE ds <= '${bizdate}' AND STATUS > 0 AND member_register_channel_endpoint_code IS NOT NULL) t1
+					LEFT JOIN (
+						SELECT member_card_id,
+									 grade_code
+						FROM ods_member_grade_state
+						WHERE ds = '${bizdate}' AND CAST(member_no AS BIGINT) > 1) t2
+						ON t1.id = t2.member_card_id
+					LEFT JOIN (
+						SELECT grade_code,
+									 is_vip
+						FROM ods_member_grade_info
+						WHERE ds = '${bizdate}' AND is_vip = '1') t3
+						ON t2.grade_code = t3.grade_code) AS t4
+			WHERE t4.is_vip = '1') AS b
+			ON a.member_register_channel_endpoint_code = b.member_register_channel_endpoint_code
+		AND a.member_register_time > b.member_register_time
+	GROUP BY a.member_register_channel_endpoint_code, a.member_register_time) as t0
+		JOIN (
+			SELECT max(ds1) as ds1,
+						 date_type,
+						 date_id,
+						 time_id
+			FROM td_ads_dev.dim_time
+			WHERE ds >= '20150101' AND ds <= '${bizdate}'
+			GROUP BY date_type, date_id, time_id
+		) time
+			ON t0.member_register_time = time.time_id;
 
 
 
+
+
+
+
+
+SELECT max(ds1),
+			 date_type,
+			 date_id,
+			 time_id
+FROM td_ads_dev.dim_time
+WHERE ds >= '20150101' AND ds <= '${bizdate}' and time_id = '20190701'
+GROUP BY date_type, date_id, time_id
+
+
+
+
+
+
+
+--RDS
+SELECT 	SUM(new_card_num_1d_store_vip) AS vipSignal
+, SUM(total_card_num_td_store_vip) AS vipDouble
+FROM 		ads_api_tpos_tdrp_wfx_channel_endpoint_1d
+WHERE 	1 = 1
+and 		channel_endpoint = '3246'
+AND 		date_type = 'month'
+AND 		date_id = '201909'
+GROUP BY
+channel_endpoint
+limit 1000
+;
+
+--ODS
+select  a.member_manage_channel_endpoint_code
+, count( distinct case when date(a.member_register_time) between '2019-09-01' and '2019-09-30' then a.member_no end ) as new_reg_vip
+, count( distinct a.member_no ) as total_reg_vip
+from    ods_member_card a
+	left join ods_member_grade_state aa
+		on     	a.org_code = aa.org_code
+	and    	a.member_no = aa.member_no
+	left join ods_member_grade_info b
+		on     	aa.grade_id = b.grade_id
+where   1 = 1
+and    	a.ds = '20191028'
+and    	aa.ds = '20191028'
+and    	b.ds = '20191028'
+and    	a.org_code = 'TRE'
+and     a.status > -1
+and 		b.is_vip = 1
+and    	a.member_manage_channel_endpoint_code = '3246'
+and    	date( a.member_register_time ) <= '2019-09-30'
+group by
+a.member_manage_channel_endpoint_code
+limit 1000
+;
