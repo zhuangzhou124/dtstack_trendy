@@ -33,14 +33,14 @@
         <counts>
           <entry key="java" value="16" />
           <entry key="json" value="220" />
-          <entry key="osql" value="3957" />
+          <entry key="osql" value="4004" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="JAVA" value="16" />
           <entry key="JSON" value="220" />
-          <entry key="OdpsQL" value="3957" />
+          <entry key="OdpsQL" value="4004" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -134,6 +134,8 @@
           <entry key="2019102910440169g5xxr392" value="1" />
           <entry key="20191029112756543gjyrs38" value="1" />
           <entry key="20191029120910947gjazr392" value="1" />
+          <entry key="20191030013439260gfdr5692" value="1" />
+          <entry key="20191030013443552gkvlz192" value="1" />
           <entry key="ads_api_tpos_tdrp_wfx_clerkno_skc_15min" value="1" />
           <entry key="ads_api_tpos_tdrp_wfx_clerkno_sku_15min" value="3" />
           <entry key="ads_api_tpos_tdrp_wfx_clerkno_spu_15min" value="1" />
@@ -169,7 +171,7 @@
           <entry key="JAVA" value="10" />
           <entry key="JSON" value="2" />
           <entry key="OdpsQL" value="255" />
-          <entry key="UNKNOWN" value="121" />
+          <entry key="UNKNOWN" value="123" />
           <entry key="XML" value="4" />
         </counts>
       </usages-collector>
@@ -199,31 +201,21 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/scripts/yida/dim_time_mapping.osql">
+        <entry file="file://$PROJECT_DIR$/scripts/sanmu/API/ads_api_tpos_tdrp_wfx_channel_endpoint_1d.osql">
           <provider editor-type-id="OdpsQlGraph" />
           <provider selected="true" editor-type-id="OdpsQlEditor">
-            <state relative-caret-position="-770">
-              <caret line="68" column="41" lean-forward="true" selection-start-line="68" selection-start-column="41" selection-end-line="68" selection-end-column="41" />
+            <state relative-caret-position="204">
+              <caret line="26" lean-forward="true" selection-start-line="26" selection-end-line="147" selection-end-column="56" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/scripts/sanmu/API/ads_api_tpos_tdrp_wfx_channel_endpoint_1d.osql">
-          <provider editor-type-id="OdpsQlGraph" />
-          <provider selected="true" editor-type-id="OdpsQlEditor">
-            <state relative-caret-position="966">
-              <caret line="98" column="28" lean-forward="true" selection-start-line="98" selection-start-column="28" selection-end-line="98" selection-end-column="28" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/sanmu/sanmu_test3.osql">
           <provider editor-type-id="OdpsQlGraph" />
           <provider selected="true" editor-type-id="OdpsQlEditor">
-            <state relative-caret-position="645">
-              <caret line="113" column="37" lean-forward="true" selection-start-line="113" selection-start-column="37" selection-end-line="113" selection-end-column="37" />
+            <state relative-caret-position="3061">
+              <caret line="271" lean-forward="true" selection-start-line="271" selection-end-line="271" />
             </state>
           </provider>
         </entry>
@@ -262,16 +254,16 @@
       <find>total_amt_without_cash</find>
       <find>sop</find>
       <find>net_sales_num_1d_brand_channel_endpoint</find>
-      <find>${td_ods}.ods</find>
       <find>ods</find>
+      <find>${td_ods}.ods</find>
     </findStrings>
     <replaceStrings>
       <replace>int</replace>
       <replace>decimal(10,4)</replace>
       <replace>bigint</replace>
       <replace>bigint(20)</replace>
-      <replace>ods</replace>
       <replace>${td_ods}.ods</replace>
+      <replace>ods</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -316,8 +308,8 @@
         <option value="$PROJECT_DIR$/scripts/sanmu/API/ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm.osql" />
         <option value="$PROJECT_DIR$/scripts/sanmu/API/ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm.osql" />
         <option value="$PROJECT_DIR$/scripts/sanmu/sanmu_test.osql" />
-        <option value="$PROJECT_DIR$/scripts/sanmu/sanmu_test3.osql" />
         <option value="$PROJECT_DIR$/scripts/sanmu/API/ads_api_tpos_tdrp_wfx_channel_endpoint_1d.osql" />
+        <option value="$PROJECT_DIR$/scripts/sanmu/sanmu_test3.osql" />
       </list>
     </option>
   </component>
@@ -990,7 +982,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="MaxCompute SQL.sanmu_test3.osql">
+  <component name="RunManager" selected="MaxCompute SQL.ads_api_tpos_tdrp_wfx_channel_endpoint_1d.osql">
     <configuration default="true" type="Applet" factoryName="Applet">
       <option name="HEIGHT" value="0" />
       <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
@@ -1286,7 +1278,7 @@
       <workItem from="1571730887614" duration="33472000" />
       <workItem from="1571884814527" duration="33586000" />
       <workItem from="1572260753050" duration="15000" />
-      <workItem from="1572311642233" duration="24732000" />
+      <workItem from="1572311642233" duration="29315000" />
     </task>
     <task id="LOCAL-00001" summary="heshang">
       <created>1570527581837</created>
@@ -1299,13 +1291,13 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="227754000" />
+    <option name="totallyTimeSpent" value="232337000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1440" height="900" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.23247497" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.23247497" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.24964234" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -1635,19 +1627,19 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/sanmu/sanmu_test3.osql">
-      <provider editor-type-id="OdpsQlGraph" />
-      <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="645">
-          <caret line="113" column="37" lean-forward="true" selection-start-line="113" selection-start-column="37" selection-end-line="113" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/sanmu/API/ads_api_tpos_tdrp_wfx_channel_endpoint_1d.osql">
       <provider editor-type-id="OdpsQlGraph" />
       <provider selected="true" editor-type-id="OdpsQlEditor">
-        <state relative-caret-position="966">
-          <caret line="98" column="28" lean-forward="true" selection-start-line="98" selection-start-column="28" selection-end-line="98" selection-end-column="28" />
+        <state relative-caret-position="204">
+          <caret line="26" lean-forward="true" selection-start-line="26" selection-end-line="147" selection-end-column="56" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/sanmu/sanmu_test3.osql">
+      <provider editor-type-id="OdpsQlGraph" />
+      <provider selected="true" editor-type-id="OdpsQlEditor">
+        <state relative-caret-position="3061">
+          <caret line="271" lean-forward="true" selection-start-line="271" selection-end-line="271" />
         </state>
       </provider>
     </entry>
