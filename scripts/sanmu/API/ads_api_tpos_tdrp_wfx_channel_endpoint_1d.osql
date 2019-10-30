@@ -11,6 +11,7 @@
 -- 创建日期：20191008
 -- 修改日志：
 --***********************************
+查询门店VIP开卡信息
 
 
 CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_channel_endpoint_1d(
@@ -26,13 +27,13 @@ CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_channel_endpoint_1d(
 
 INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = '${bizdate}')
 	SELECT '${bizdate}' AS biz_date,
-				 t5.member_register_channel_endpoint_code,
+				 t5.member_manage_channel_endpoint_code,
 				 t5.new_card_num_1d_store_vip,
 				 t6.total_card_num_td_store_vip,
 				 t5.date_type AS date_type,
 				 t5.date_id AS date_id
 	FROM (
-		SELECT t4.member_register_channel_endpoint_code,
+		SELECT t4.member_manage_channel_endpoint_code,
 					 t4.date_type,
 					 t4.date_id,
 					 t4.ds1,
@@ -41,7 +42,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = 
 					 ELSE NULL
 					 END)) AS new_card_num_1d_store_vip
 		FROM (
-			SELECT t1.member_register_channel_endpoint_code,
+			SELECT t1.member_manage_channel_endpoint_code,
 						 t1.date_type,
 						 t1.date_id,
 						 t1.ds1,
@@ -49,19 +50,19 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = 
 						 t1.org_code,
 						 t1.member_no
 			FROM (
-				SELECT member_register_channel_endpoint_code,
+				SELECT member_manage_channel_endpoint_code,
 							 member_no,
 							 date_type,
 							 date_id,
 							 ds1,
 							 org_code
 				FROM (
-					SELECT member_register_channel_endpoint_code,
+					SELECT member_manage_channel_endpoint_code,
 								 member_no,
 								 regexp_replace(member_register_time, '-', '', 0) AS member_register_time,
 								 org_code
-					FROM ods_member_card
-					WHERE ds = '${bizdate}' AND STATUS > 0 and member_register_channel_endpoint_code is not null) AS mc
+					FROM ${td_ods}.ods_member_card
+					WHERE ds = '${bizdate}' AND STATUS > -1 and member_manage_channel_endpoint_code is not null) AS mc
 					JOIN (
 						SELECT max(ds1) as ds1,
 									 date_type,
@@ -74,66 +75,70 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = 
 						ON mc.member_register_time = time.time_id) t1
 				LEFT JOIN (
 					SELECT org_code,
+								 member_no,
 								 grade_code
-					FROM ods_member_grade_state
+					FROM ${td_ods}.ods_member_grade_state
 					WHERE ds = '${bizdate}' ) t2
 					ON t1.org_code = t2.org_code
+				and t1.member_no = t2.member_no
 				LEFT JOIN (
 					SELECT grade_code,
 								 is_vip
-					FROM ods_member_grade_info
+					FROM ${td_ods}.ods_member_grade_info
 					WHERE ds = '${bizdate}' AND is_vip = '1') t3
 					ON t2.grade_code = t3.grade_code) AS t4
 		WHERE t4.is_vip = '1'
-		GROUP BY t4.member_register_channel_endpoint_code,
+		GROUP BY t4.member_manage_channel_endpoint_code,
 		t4.date_type,
 		t4.date_id,t4.ds1) AS t5
 		LEFT JOIN (
-			SELECT t0.member_register_channel_endpoint_code,
+			SELECT t0.member_manage_channel_endpoint_code,
 						 time.ds1,
 						 time.date_type,
 						 t0.total_card_num_td_store_vip
 			FROM (
-				SELECT /*+MAPJOIN(a) */ a.member_register_channel_endpoint_code,
+				SELECT /*+MAPJOIN(a) */ a.member_manage_channel_endpoint_code,
 																a.member_register_time,
 																COUNT(DISTINCT (b.member_no)) AS total_card_num_td_store_vip
 				FROM (
-					SELECT DISTINCT member_register_channel_endpoint_code,
+					SELECT DISTINCT member_manage_channel_endpoint_code,
 													regexp_replace(member_register_time, '-', '', 0) AS member_register_time
-					FROM ods_member_card
-					WHERE ds = '${bizdate}' AND STATUS > 0 and member_register_channel_endpoint_code is not null) AS a
+					FROM ${td_ods}.ods_member_card
+					WHERE ds = '${bizdate}' AND STATUS > -1 and member_manage_channel_endpoint_code is not null) AS a
 					LEFT JOIN (
-						SELECT t4.member_register_channel_endpoint_code,
+						SELECT t4.member_manage_channel_endpoint_code,
 									 t4.member_register_time,
 									 t4.member_no
 						FROM (
-							SELECT t1.member_register_channel_endpoint_code,
+							SELECT t1.member_manage_channel_endpoint_code,
 										 t3.is_vip,
 										 t1.member_register_time,
 										 t1.member_no
 							FROM (
-								SELECT DISTINCT member_register_channel_endpoint_code,
+								SELECT DISTINCT member_manage_channel_endpoint_code,
 																member_no,
 																regexp_replace(member_register_time, '-', '', 0) AS member_register_time,
 																org_code
-								FROM ods_member_card
-								WHERE ds = '${bizdate}' AND STATUS > 0 and member_register_channel_endpoint_code is not null) t1
+								FROM ${td_ods}.ods_member_card
+								WHERE ds = '${bizdate}' AND STATUS > -1 and member_manage_channel_endpoint_code is not null) t1
 								LEFT JOIN (
 									SELECT org_code,
+												 member_no,
 												 grade_code
-									FROM ods_member_grade_state
+									FROM ${td_ods}.ods_member_grade_state
 									WHERE ds = '${bizdate}' ) t2
 									ON t1.org_code = t2.org_code
+								and t1.member_no = t2.member_no
 								LEFT JOIN (
 									SELECT grade_code,
 												 is_vip
-									FROM ods_member_grade_info
+									FROM ${td_ods}.ods_member_grade_info
 									WHERE ds = '${bizdate}' AND is_vip = '1') t3
 									ON t2.grade_code = t3.grade_code) AS t4
 						WHERE t4.is_vip = '1') AS b
-						ON a.member_register_channel_endpoint_code = b.member_register_channel_endpoint_code
+						ON a.member_manage_channel_endpoint_code = b.member_manage_channel_endpoint_code
 					AND a.member_register_time >= b.member_register_time
-				GROUP BY a.member_register_channel_endpoint_code, a.member_register_time) as t0
+				GROUP BY a.member_manage_channel_endpoint_code, a.member_register_time) as t0
 				JOIN (
 					SELECT max(ds1) as ds1,
 								 date_type,
@@ -144,7 +149,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = 
 					GROUP BY date_type, date_id, time_id
 				) time
 					ON t0.member_register_time = time.time_id) AS t6
-			ON t5.member_register_channel_endpoint_code = t6.member_register_channel_endpoint_code
+			ON t5.member_manage_channel_endpoint_code = t6.member_manage_channel_endpoint_code
 		AND t5.ds1 = t6.ds1 and t5.date_type = t6.date_type;
 
 
