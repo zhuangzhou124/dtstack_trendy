@@ -63,7 +63,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d PAR
 					 channel_endpoint_code,
 					 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) AS order_time,
 					 sum(soi.price_sales * soi.qty_product) AS sales_amt_1d_brand_channel_endpoint,
-					 sum(case when (soi.price_discount <> 0 OR soi.qty_product <> 0) then soi.qty_product end) as sales_num_1d_brand_channel_endpoint
+					 sum(case when soi.price_sales <> 0 then soi.qty_product end) as sales_num_1d_brand_channel_endpoint
 		FROM ${td_ods}.ods_sales_order so
 			INNER JOIN ${td_ods}.ods_sales_order_item soi
 				ON soi.sales_order_no = so.sales_order_no AND soi.ds = '${bizdate}'
@@ -78,7 +78,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d PAR
 			FROM ${td_ods}.ods_product_brand
 			WHERE ds = '${bizdate}') AS t2
 			ON t1.org_code = t2.org_code
-		LEFT OUTER JOIN (
+		INNER JOIN (
 			SELECT sales_order_no,
 						 sku_code
 			FROM ${td_ods}.ods_sales_order_item

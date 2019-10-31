@@ -178,7 +178,7 @@ INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_type_1d PARTITION(ds = '${biz
 									 '' AS sales_amt_ratio_total_1d_member_type,
 									 '' AS sales_amt_1d_member_type_last_year,
 									 sum(CASE
-									 WHEN (t5.price_discount <> 0 OR t5.qty_product <> 0) THEN t5.qty_product
+									 WHEN t5.price_sales  THEN t5.qty_product
 									 END) AS sales_num_1d_member_type,
 									 '' AS discount_rate_1d_member_type,
 									 COUNT(DISTINCT CASE
