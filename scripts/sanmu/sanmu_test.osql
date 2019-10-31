@@ -975,3 +975,65 @@ WHERE so.ds = '20190920';
 
 
 
+select  a.org_code
+    , a.channel_endpoint_code
+    , 0 as customer_qty -- 客流
+    , sum( b.qty_product ) as sales_item_qty -- 件数
+    , sum( b.amt_sales * b.qty_product - c.amt_cash_coupon_contribution ) as after_coupon_amount --券后金额
+    , sum( case when a.order_type = '103' then - b.qty_product else 0 end ) as sales_item_qty -- 退货件数
+    , sum( case when a.order_type = '103' then - ( b.amt_sales * b.qty_product - c.amt_cash_coupon_contribution ) else 0 end ) as after_coupon_amount --退货金额
+    , sum( case when b.amt_sales > 0 then b.qty_product else 0 end ) as net_sales_item_qty --净销售件数
+    , sum( case when b.amt_sales > 0 then b.amt_sales * b.qty_product - c.amt_cash_coupon_contribution else 0 end ) as net_after_coupon_amount -- 净销售金额（扣券）
+    , sum( case when b.amt_sales > 0 then b.amt_sales * b.qty_product else 0 end ) as net_before_coupon_amount -- 净销售金额（未扣券）
+    , sum( c.amt_cash_coupon_contribution ) as coupon_amount -- 现金券金额
+    , sum( b.price_retail * b.qty_product ) as retail_price -- 吊牌金额
+    , count( distinct case when a.order_type <> '103' then a.sales_order_no end ) as deal_order_qty -- 成交笔数
+    , 0 as deal_ratio
+    , count( distinct case when a.order_type in ( '103','104' ) then a.sales_order_no end ) as return_order_qty -- 退换笔数
+    , case when sum( b.price_retail * b.qty_product ) = 0 then null else sum( b.amt_sales * b.qty_product - c.amt_cash_coupon_contribution ) / sum( b.price_retail * b.qty_product ) end as discount_date
+    , case when ( count( distinct case when a.amt_total > 0 then a.sales_order_no end ) - count( distinct case when a.amt_total < 0 then a.sales_order_no end ) ) = 0 then null else sum( b.amt_sales * b.qty_product - c.amt_cash_coupon_contribution ) / ( count( distinct case when a.amt_total > 0 then a.sales_order_no end ) - count( distinct case when a.amt_total < 0 then a.sales_order_no end ) ) end as apt
+    , case when ( count( distinct case when a.amt_total > 0 then a.sales_order_no end ) - count( distinct case when a.amt_total < 0 then a.sales_order_no end ) ) = 0 then null else sum( b.qty_product ) / ( count( distinct case when a.amt_total > 0 then a.sales_order_no end ) - count( distinct case when a.amt_total < 0 then a.sales_order_no end ) ) end as upt
+    , sum( case when d.is_vip = 1 then b.qty_product else 0 end ) as vip_sales_item_qty
+    , sum( case when d.is_vip = 1 then b.amt_sales * b.qty_product - c.amt_cash_coupon_contribution else 0 end ) as vip_after_coupon_amount
+    , case when sum( b.amt_sales * b.qty_product - c.amt_cash_coupon_contribution ) = 0 then null else sum( case when d.is_vip = 1 then b.amt_sales * b.qty_product - c.amt_cash_coupon_contribution else 0 end ) / sum( b.amt_sales * b.qty_product - c.amt_cash_coupon_contribution ) end as vip_sales_ratio
+from   ods_sales_order a
+join   ods_sales_order_item b
+	on    a.sales_order_no = b.sales_order_no
+join   ods_sales_order_item_price c
+	on    b.sales_order_item_no = c.sales_order_item_no
+left join ods_member_grade_info d
+	on    a.member_grade_code = d.grade_code
+where  1 = 1
+and   a.ds = '20191026'
+and   b.ds = '20191026'
+and   c.ds = '20191026'
+and   d.ds = '20191026'
+and   a.org_code = 'TRE'
+and   a.app_id = 'APP-SYSN-TPOS'
+and   date( a.paid_time ) = '20190827'
+and   a.channel_endpoint_code = '1201'
+group by
+    a.org_code
+    , a.channel_endpoint_code
+order by
+    a.org_code
+    , a.channel_endpoint_code
+limit 1000
+;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

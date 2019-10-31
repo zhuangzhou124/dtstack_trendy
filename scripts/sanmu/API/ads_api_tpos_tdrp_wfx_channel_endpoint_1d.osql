@@ -11,7 +11,7 @@
 -- 创建日期：20191008
 -- 修改日志：
 --***********************************
-查询门店VIP开卡信息
+
 
 
 CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_channel_endpoint_1d(
@@ -76,17 +76,17 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = 
 				LEFT JOIN (
 					SELECT org_code,
 								 member_no,
-								 grade_code
+								 grade_id
 					FROM ${td_ods}.ods_member_grade_state
 					WHERE ds = '${bizdate}' ) t2
 					ON t1.org_code = t2.org_code
 				and t1.member_no = t2.member_no
 				LEFT JOIN (
-					SELECT grade_code,
+					SELECT grade_id,
 								 is_vip
 					FROM ${td_ods}.ods_member_grade_info
 					WHERE ds = '${bizdate}' AND is_vip = '1') t3
-					ON t2.grade_code = t3.grade_code) AS t4
+					ON t2.grade_id = t3.grade_id) AS t4
 		WHERE t4.is_vip = '1'
 		GROUP BY t4.member_manage_channel_endpoint_code,
 		t4.date_type,
@@ -124,17 +124,17 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = 
 								LEFT JOIN (
 									SELECT org_code,
 												 member_no,
-												 grade_code
+												 grade_id
 									FROM ${td_ods}.ods_member_grade_state
 									WHERE ds = '${bizdate}' ) t2
 									ON t1.org_code = t2.org_code
 								and t1.member_no = t2.member_no
 								LEFT JOIN (
-									SELECT grade_code,
+									SELECT grade_id,
 												 is_vip
 									FROM ${td_ods}.ods_member_grade_info
 									WHERE ds = '${bizdate}' AND is_vip = '1') t3
-									ON t2.grade_code = t3.grade_code) AS t4
+									ON t2.grade_id = t3.grade_id) AS t4
 						WHERE t4.is_vip = '1') AS b
 						ON a.member_manage_channel_endpoint_code = b.member_manage_channel_endpoint_code
 					AND a.member_register_time >= b.member_register_time
