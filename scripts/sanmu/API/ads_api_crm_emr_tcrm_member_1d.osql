@@ -15,31 +15,31 @@
 
 
 CREATE TABLE IF NOT EXISTS ads_api_crm_emr_tcrm_member_1d(
-	biz_date                                                                        STRING COMMENT '统计日期',
-	org_code                                                                        STRING COMMENT '品牌         ',
-	member_no                                                                       STRING COMMENT '会员编号  ',
-	member_mobile                                                                   STRING COMMENT '会员手机号 ',
-	gmt_member_first_order                                                          STRING COMMENT '首单时间  ',
-	member_register_channel_endpoint                                                STRING COMMENT '注册门店  ',
-	member_manage_channel_endpoint                                                  STRING COMMENT '管理门店  ',
-	operation_name                                                                  STRING COMMENT '管理门店的经营方式',
-	manage_region                                                                   STRING COMMENT '管理门店大区    ',
-	manage_province                                                                 STRING COMMENT '管理门店省     ',
-	manage_city                                                                     STRING COMMENT '管理门店城市    ',
-	outer_order_no                                                                  STRING COMMENT '外部单号  ',
-	trade_source                                                                    STRING COMMENT '交易来源  ',
-	member_grade_no                                                                 STRING COMMENT '订单对应会员等级  ',
-	order_fact_amt_with_coupon                                                      STRING COMMENT '订单扣券金额',
-	totla_amt_order                                                                 STRING COMMENT '订单金额  ',
-	member_consumed_channel_endpoint                                                STRING COMMENT '会员消费的门店      ',
-	member_consumed_region                                                          STRING COMMENT '会员消费的大区      ',
-	before_grade_id                                                                 BIGINT COMMENT '上一等级id',
-	after_grade_id                                                                  BIGINT COMMENT '下一等级id',
-	gmt_grade_change                                                                STRING COMMENT '等级变更时间',
-	change_reason_desc                                                              STRING COMMENT '变更原因  ',
-	create_user                                                                     STRING COMMENT '创建人   ',
-	gmt_pay                                                                         STRING COMMENT '支付时间  ',
-	gmt_create                                                                      STRING COMMENT '订单创建时间'
+	biz_date                                                 STRING COMMENT '统计日期',
+	org_code                                                 STRING COMMENT '品牌         ',
+	member_no                                                STRING COMMENT '会员编号  ',
+	member_mobile                                            STRING COMMENT '会员手机号 ',
+	gmt_member_first_order                                   STRING COMMENT '首单时间  ',
+	member_register_channel_endpoint                         STRING COMMENT '注册门店  ',
+	member_manage_channel_endpoint                           STRING COMMENT '管理门店  ',
+	operation_name                                           STRING COMMENT '管理门店的经营方式',
+	manage_region                                            STRING COMMENT '管理门店大区    ',
+	manage_province                                          STRING COMMENT '管理门店省     ',
+	manage_city                                              STRING COMMENT '管理门店城市    ',
+	outer_order_no                                           STRING COMMENT '外部单号  ',
+	trade_source                                             STRING COMMENT '交易来源  ',
+	member_grade_no                                          STRING COMMENT '订单对应会员等级  ',
+	order_fact_amt_with_coupon                               STRING COMMENT '订单扣券金额',
+	totla_amt_order                                          STRING COMMENT '订单金额  ',
+	member_consumed_channel_endpoint                         STRING COMMENT '会员消费的门店      ',
+	member_consumed_region                                   STRING COMMENT '会员消费的大区      ',
+	before_grade_id                                          BIGINT COMMENT '上一等级id',
+	after_grade_id                                           BIGINT COMMENT '下一等级id',
+	gmt_grade_change                                         STRING COMMENT '等级变更时间',
+	change_reason_desc                                       STRING COMMENT '变更原因  ',
+	create_user                                              STRING COMMENT '创建人   ',
+	gmt_pay                                                  STRING COMMENT '支付时间  ',
+	gmt_create                                               STRING COMMENT '订单创建时间'
 
 )COMMENT '日期+会员+品牌粒度汇总表' PARTITIONED BY(
 	ds STRING COMMENT '时间分区')
@@ -47,12 +47,11 @@ LIFECYCLE 30;
 
 
 INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_1d PARTITION(ds = '${bizdate}')
-	SELECT distinct '${bizdate}' AS biz_date,
+	SELECT  '${bizdate}' AS biz_date,
 				 t1.org_code,
 				 t1.member_no,
 				 t1.member_mobile,
---				 min(t1.paid_time) over (partition by t1.org_code,t1.member_no) AS gmt_member_first_order,
-				 '' as gmt_member_first_order,
+				 min(t1.paid_time) over (partition by t1.org_code,t1.member_no) AS gmt_member_first_order,
 				 t3.member_register_channel_endpoint_code,
 				 t3.member_manage_channel_endpoint_code,
 				 t4.operation_name,
@@ -86,7 +85,7 @@ INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_1d PARTITION(ds = '${bizdate}
 					 paid_time,
 					 create_time
 		FROM ${td_ods}.ods_sales_order
-		WHERE ds = '${bizdate}' and member_no not in ('-1','1')) AS t1
+		WHERE ds = '${bizdate}' and member_no not in ('-1','1') and order_status = 1) AS t1
 		LEFT OUTER JOIN (
 			SELECT sales_order_no,
 						 pay_way,
@@ -99,7 +98,7 @@ INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_1d PARTITION(ds = '${bizdate}
 						 member_register_channel_endpoint_code,
 						 member_manage_channel_endpoint_code
 			FROM ${td_ods}.ods_member_card
-			WHERE ds = '${bizdate}') AS t3
+			WHERE ds = '${bizdate}' AND STATUS > -1) AS t3
 			ON t1.member_no = t3.member_no
 		LEFT OUTER JOIN (
 			SELECT channel_endpoint_code,

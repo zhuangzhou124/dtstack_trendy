@@ -1,44 +1,249 @@
---name:ads_api_crm_ma_clerk_grade_15mm_1
---author:xuzhengzhi
---create time:2019-10-14 19:01
---desc:当天增量 15min更新一次
+--***********************************
+-- 表   名：ads_api_tpos_ma_store_15mm
+-- 功能描述：tpos_ma门店粒度小时、天，周和月周期指标统计
+-- 生命周期：3650天
+-- 调度周期：15min调度
+-- 创建者：  yike
+-- 创建日期：20191010
+-- 修改日志：
+--***********************************
+drop table ads_api_tpos_ma_store_15mm;
+create table if not exists ads_api_tpos_ma_store_15mm(
+	biz_date                      bigint COMMENT '统计日期',
+	date_type                     string comment '日期类型',
+	date_id                       string comment '日期id',
+	channel_endpoint_code          string comment '门店列表编码',
+	order_type                     string comment '订单类型-写死1，2，3',
+	status                        string comment '订单状态-写死11',
+	org_code                       string comment '品牌编码',
+	sales_amount                   double comment '销售总额未扣券',
+	sales_rate                     double comment '销售总额占比（本品牌）',
+	sales_sub_coupon_amount          double comment '扣卷销售总额-真实金额',
+	sales_sub_coupon_rate           double comment '扣券销售总额占比（本品牌）',
+	rank                             bigint comment '销售金额排名',
+	order_max_amount                double comment '最大单金额',
+	item_quantity                  bigint comment '商品数量',
+	order_quantity                 bigint comment '订单数量',
+	average_discount               double comment '平均折扣',
+	retail_price_amount             double comment '吊牌价总额',
+	per_customer_transaction        double comment '客单价未扣券',
+	per_customer_transaction_sub_coupon        double comment '客单价扣券',
+	associated_purchase_rate        double comment '连带率',
+	common_vip_sales_rate            double comment '普通会员未扣券销售占比',
+	common_vip_sales_rate_sub_coupon             double comment '普通会员扣券销售占比',
+	return_sales_amount             double comment '退货金额',
+	cash_coupon                    double comment '现金券金额',
+	per_item_amount     double comment '件单价未扣券',
+	per_item_amount_sub_coupon                 double comment '件单价扣券',
+	return_item_quantity            bigint comment '退货商品数量',
+	rma_order_quantity              bigint comment '退换货单数',
+	vip_per_customer_transaction    double comment 'VIP客单价未扣券',
+	vip_per_customer_transaction_sub_coupon     double comment 'VIP客单价扣券',
+	vip_associated_purchase_rate     double comment 'VIP连带率',
+	order_amt_vip_sub_coupon                double comment 'VIP销售额扣券',
+	order_amt_vip                 double comment 'VIP销售额未扣券',
+	vip_sales_rate           double comment 'VIP未扣券销售占比',
+	vip_sales_rate_sub_coupon                   double comment 'VIP扣券销售占比',
+	vip_sales_item_quantity          bigint comment 'VIP销售商品数量',
+	vip_per_item_amount      double comment  'VIP件单价未扣券',
+	vip_per_item_amount_sub_coupon              double comment 'VIP件单价扣券',
+	vip_order_quantity              bigint comment 'VIP订单数量',
+	lasted_project_sales_amount      double comment '最近3波段销售金额',
+	lasted_project_sales_rate        double comment '最近3波段销售占比'
+) comment '门店销售排行（含券或扣券）' partitioned by (
+	ds string
+);
+
+INSERT OVERWRITE TABLE ads_api_tpos_ma_store_15mm PARTITION(ds = '${bizdate}')
+	select
+	cast('${bizdate}' as bigint）
+	,   date_type
+	,   tmpx.date_id
+	,   channel_endpoint_code
+	,   '1,2,3'
+	,   '11'
+	,   tmpx.org_code
+	,   before_coupon_amount--销售总额（未扣券）
+	,   case when before_coupon_amount_all <> 0 then before_coupon_amount/before_coupon_amount_all else 0 end as before_coupon_sales_rate--未扣券销售占比
+	,   sales_amt--扣券销售总额/真实金额
+	,   case when sale_amt_all <> 0 then sales_amt/sale_amt_all else 0 end as sales_rate--扣券销售占比
+	,   rank
+	,   max_amount
+	,   item_num
+	,   order_num
+	,   avg_discount
+	,   retail_price
+	,   before_coupon_per_customer_transaction--客单价未扣券
+	,   per_customer_transaction--客单价扣券
+	,   associated_purchase_rate--连带率
+	,   case when before_coupon_amount_all <> 0 then before_coupon_order_amt_ptvip/before_coupon_amount_all else 0 end as before_coupon_common_vip_sales_rate--普通会员未扣券销售占比
+	,   case when sale_amt_all <> 0 then order_amt_ptvip/sale_amt_all else 0 end as common_vip_sales_rate--普通会员扣券销售占比
+	,   return_item_amount
+	,   cash_coupon
+	,   before_coupon_per_item_amount--件单价未扣券
+	,   per_item_amount--件单价扣券
+	,   return_item_qty
+	,   return_order_num
+	,   before_coupon_vip_per_customer_transaction--vip客单价(未扣券)
+	,   vip_per_customer_transaction--vip客单价(扣券)
+	,   vip_associated_purchase_rate--连带率
+	,   order_amt_vip--vip销售额(扣券)
+	,   before_coupon_order_amt_vip--vip销售额（未扣券）
+	,   case when before_coupon_amount_all <> 0 then before_coupon_order_amt_vip/before_coupon_amount_all else 0 end as before_coupon_vip_sales_rate--vip会员未扣券销售占比
+	,   case when sale_amt_all <> 0 then order_amt_vip/sale_amt_all else 0 end as vip_sales_rate--vip会员扣券销售占比
+	,   vip_sales_item_qty
+	,   before_coupon_vip_per_item_amount--vip件单价(未扣券)
+	,   vip_per_item_amount--vip件单价(扣券)
+	,   vip_order_num
+	,   lastedProjectSalesAmount--最近三波段销售额
+	,   'null'--最近三波段销售额占比
+	from (
+		select
+		date_type
+		,   date_id
+		,   org_code --品牌
+		,   channel_endpoint_code--门店
+		,   avg_discount--平均折扣
+		,   sales_amt--销售额(扣券)
+		,   before_coupon_amount--销售额(未扣券)
+		,   max_amount--最大单金额
+		,   before_coupon_max_amount--最大单金额（扣券）
+		,   item_num--商品件数
+		,   order_num--订单数量
+		,   retail_price--吊牌价总额
+		,   cash_coupon--现金券
+		,   case when order_num <> 0 then before_coupon_amount/order_num else 0 end as before_coupon_per_customer_transaction--客单价(未扣券)
+		,   case when order_num <> 0 then sales_amt/order_num else 0 end as per_customer_transaction--客单价(扣券)
+		,   case when order_num <> 0 then item_num/order_num else 0 end as associated_purchase_rate--连带率
+		,   case when item_num <> 0 then before_coupon_amount/item_num else 0 end as before_coupon_per_item_amount--件单价(未扣券)
+		,   case when item_num <> 0 then sales_amt/item_num else 0 end as per_item_amount--件单价(扣券)
+		--退货相关
+		,   return_item_amount--退货金额
+		,   return_item_qty--退货商品数量
+		,   return_order_num --退换货单数
+		--普通会员系列
+		,   order_amt_ptvip--普通会员销售金额
+		,   before_coupon_order_amt_ptvip--未扣券普通会员销售金额
+		--vip会员系列
+		,   order_amt_vip--vip销售额(扣券)
+		,   before_coupon_order_amt_vip--vip销售额（未扣券）
+		,   vip_order_num--vip订单数
+		,   vip_sales_item_qty--vip销售件数
+		,   case when vip_order_num <> 0 then before_coupon_order_amt_vip/vip_order_num else 0 end as before_coupon_vip_per_customer_transaction--vip客单价(未扣券)
+		,   case when vip_order_num <> 0 then order_amt_vip/vip_order_num else 0 end as vip_per_customer_transaction--vip客单价(扣券)
+		,   case when vip_order_num <> 0 then vip_sales_item_qty/vip_order_num else 0 end as vip_associated_purchase_rate--连带率
+		,   case when vip_sales_item_qty <> 0 then before_coupon_order_amt_vip/vip_sales_item_qty else 0 end as before_coupon_vip_per_item_amount--vip件单价(未扣券)
+		,   case when vip_sales_item_qty <> 0 then order_amt_vip/vip_sales_item_qty else 0 end as vip_per_item_amount--vip件单价(扣券)
+
+		--开窗做分母的数据字段
+		,   sum(sales_amt) over (partition by date_type,date_id,org_code) as sale_amt_all--本品牌总销售额（供所有类型销售额占比使用）
+		,   sum(before_coupon_amount) over (partition by date_type,date_id,org_code) as before_coupon_amount_all--本品牌未扣券总销售额（供所有类型销售额占比使用）
+
+		--门店销售额排行
+		,   dense_rank() over (partition by date_type,date_id order by sales_amt desc) as rank
 
 
-INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_grade_15mm_1 PARTITION(ds = '${cycdate}')
-	SELECT coalesce(tmp1.org_code, '-110')
-	,
-				 coalesce(tmp1.store_no, '-110')
-	,
-				 coalesce(tmp1.clerk_no, '-110')
-	,
-				 coalesce(tmp1.grade_id, '-110')
-	,
-				 'today' AS date_type
-	,
-				 '${cycdate}' AS date_id
-	,
-				 tmp1.member_cnt
-	,
-				 '${cycdate}' AS biz_date
-	FROM (
-		SELECT org_code
-		,
-					 store_no
-		,
-					 clerk_no
-		,
-					 after_grade_id
-		,
-					 COUNT(DISTINCT member_no) AS member_cnt
-		FROM ${td_ods}.ods_member_grade_log
-	WHERE ds = ${cycdate}
-	AND REPLACE(grade_change_time, '-', '') = ${cycdate}
-	AND after_grade_id > before_grade_id
-	GROUP BY org_code
-	, store_no
-	, clerk_no
-	, after_grade_id
-)tmp1;
+		from (
+			select  a.org_code
+			, 'day' as date_type
+			, to_char(cast(paid_time as datetime),'yyyymmdd') as date_id
+			, a.channel_endpoint_code
+			, case when sum( b.price_retail * b.qty_product ) <> 0 then sum( b.price_sales * b.qty_product) / sum( b.price_retail * b.qty_product ) else 0 end as avg_discount --平均折扣
+			--总体销售
+			, coalesce(count(distinct case when a.order_type = '101' or (a.order_type = '104' and a.amt_total > 0) then a.sales_order_no end),0) -
+			coalesce(count(distinct case when a.order_type in ('102','103') then a.sales_order_no end ),0) as order_num --订单数
+			, sum( b.price_sales * b.qty_product - c.amt_cash_coupon_contribution ) as sales_amt  --销售金额（扣券）
+			, sum( b.price_sales * b.qty_product ) as before_coupon_amount  --销售金额（未扣券）
+			, sum( case when b.price_sales <> 0 then b.qty_product else 0 end) as item_num   --销售件数
+			--vip销售
+			, coalesce(count(distinct case when d.is_vip = 1 and (a.order_type = '101' or (a.order_type = '104' and a.amt_total > 0)) then a.sales_order_no end),0) -
+			coalesce(count(distinct case when d.is_vip = 1 and a.order_type in ('102','103') then a.sales_order_no end ),0) as vip_order_num --vip订单数
+			, sum( case when d.is_vip = 1 then b.price_sales * b.qty_product - c.amt_cash_coupon_contribution else 0 end ) as order_amt_vip --vip销售金额（扣券）
+			, sum( case when d.is_vip = 1 then b.price_sales * b.qty_product else 0 end ) as before_coupon_order_amt_vip --vip销售金额（未扣券）
+			, sum( case when d.is_vip = 1 and b.price_sales <> 0 then b.qty_product else 0 end ) as vip_sales_item_qty --VIP销售件数
+			--退货相关
+			, sum(case when a.order_type = 103 then b.qty_product * b.price_sales - c.amt_cash_coupon_contribution else 0 end ) as return_item_amount --退货金额
+
+			, count(distinct case when a.order_type in ('103','104') then a.sales_order_no end ) as return_order_num --退换货单数
+			, sum( case when a.order_type = 103 then b.qty_product else 0 end ) as return_item_qty --退货件数
+			--吊牌价+现金券
+			, sum( b.price_retail * b.qty_product ) as retail_price  --吊牌金额
+			, sum( c.amt_cash_coupon_contribution ) as cash_coupon  --现金券
+			from ods_sales_order a
+		left join ods_sales_order_item b
+			on a.sales_order_no = b.sales_order_no
+		and b.ds = '${bizdate}'
+		left join ods_sales_order_item_price c
+			on b.sales_order_item_no = c.sales_order_item_no
+		and c.ds = '${bizdate}'
+		left join ods_member_grade_info d
+			on 	a.member_grade_code = d.grade_code
+		and d.ds = '${bizdate}'
+	where 	a.ds = '${bizdate}' and order_status = 1
+	group by a.org_code
+	, a.channel_endpoint_code
+	, to_char(cast(paid_time as datetime),'yyyymmdd') 
+    )tmp
+	)tmpx
+	left join (
+    --去最近三个波段的sku关联拿到指定订单的销售金额
+      select
+      a.store_code,
+      a.org_code,
+      sum(a.amt_total) as lastedProjectSalesAmount,--最近10个波段的销售数据
+      a.date_id
+      from(
+        select
+        rs_r.store_code,
+        oso.org_code,
+        oso.sales_order_no,--到订单粒度
+        osoi.sku_code,
+        osoi.price_sales*osoi.qty_product as amt_total,
+        replace(substr(oso.paid_time,1,10),'-','') as date_id
+        from ods_sales_order oso
+          INNER join ods_sales_order_item osoi on oso.sales_order_no = osoi.sales_order_no
+          join ods_real_store rs_r on oso.channel_endpoint_code = rs_r.store_code and rs_r.ds = '${bizdate}'
+        where oso.ds = '${bizdate}' and osoi.ds = '${bizdate}'
+      )a join (
+        select
+        sku_code
+        from (
+          select
+          store_code,
+          org_code,
+          case when ranking<= 10 then sku_code end as sku_code--最近三个波段销售的sku
+          from (
+            select
+            rs_r.store_code,
+            osr.org_code,
+            osi.sku_code,
+            replace(ops.list_date,'-',''),--通过渠道库存id关联拿到商品SKU再拿到波段和上市日期
+            ops.band,--波段
+            dense_rank() over (partition by osr.channel_endpoint_code order by replace(ops.list_date,'-','') desc) as ranking
+            from ods_stock_channel_terminal_rel osr
+              left join ods_stock_channel_items osi on osr.stock_channel_id = osi.stock_channel_id
+              left join ods_api_item_sku ops on osi.sku_code = ops.sku_code
+              join ods_real_store rs_r on osr.channel_endpoint_code = rs_r.store_code and rs_r.ds = '${bizdate}'
+            where osr.ds = '${bizdate}' and osi.ds = '${bizdate}' and ops.ds = '${bizdate}'
+          )T0
+)T where sku_code is not null
+group by sku_code
+)b on a.sku_code = b.sku_code
+group by a.store_code, a.org_code, a.date_id
+)e on e.date_id = tmpx.date_id and e.org_code = tmpx.org_code and e.store_code = tmpx.channel_endpoint_code
+;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
