@@ -65,10 +65,11 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d PAR
 					 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) AS order_time,
 					 sum(soi.price_sales * soi.qty_product) AS sales_amt_1d_brand_channel_endpoint,
 					 sum(case when soi.price_sales <> 0 then soi.qty_product end) as sales_num_1d_brand_channel_endpoint
-		FROM ${td_ods}.ods_sales_order so
-			INNER JOIN ${td_ods}.ods_sales_order_item soi
+		FROM ods_sales_order so
+			INNER JOIN ods_sales_order_item soi
 				ON soi.sales_order_no = so.sales_order_no AND soi.ds = '${bizdate}'
-		WHERE so.order_status = 1 AND so.ds = '${bizdate}' and so.member_no is not null
+		WHERE so.order_status = 1 AND so.ds = '${bizdate}'
+		and (so.member_no is not null or member_no in ('-1','1'))
 		GROUP BY so.org_code, so.sales_order_no,
 		so.order_type,
 		so.member_no,
@@ -84,13 +85,8 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d PAR
 						 band,
 						 sku_status,
 						 YEAR
-			FROM ${td_ods}.ods_api_item_sku
+			FROM ods_api_item_sku
 			WHERE ds = '${bizdate}') AS t3
 			ON t1.sku_code = t3.sku_code;
 
 
-INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d PARTITION(ds)
-	SELECT *
-	FROM ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d
-	WHERE ds = '${bizdate}' AND product_code IS NOT NULL AND date_id IS NOT NULL AND org_code IS NOT NULL
-	AND order_type IS NOT NULL AND channel_endpoint IS NOT NULL;
