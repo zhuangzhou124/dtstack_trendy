@@ -1,74 +1,102 @@
---name:ads_api_tpos_tdrp_wfx_channel_endpoint_1d
---author:sanmu
---create time:2019-10-09 11:29
---drop table ads_api_tpos_tdrp_wfx_channel_endpoint_1d
 --***********************************
--- 表   名：ads_api_tpos_tdrp_wfx_channel_endpoint_1d
--- 功能描述：日期+门店粒度汇总表
--- 生命周期：30天
--- 调度周期：周期调度
--- 创建者：  三木
--- 创建日期：20191008
+-- 表   名：ads_api_tpos_ma_channel_endpoint_15mm
+-- 功能描述：tpos_ma门店粒度小时、天，周和月周期指标统计
+-- 生命周期：3650天
+-- 调度周期：15min调度
+-- 创建者：  duruo
+-- 创建日期：20191010
 -- 修改日志：
 --***********************************
-
-
-
-CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_channel_endpoint_1d(
-	biz_date                                              STRING COMMENT '统计日期',
-	channel_endpoint                                      STRING COMMENT '门店编码',
-	new_card_num_1d_store_vip                             BIGINT COMMENT 'VIP新开卡数',
-	total_card_num_td_store_vip                           BIGINT COMMENT 'VIP累计开卡数',
-	date_type                                             STRING COMMENT '日期类型',
-	date_id                                               STRING COMMENT '日期'
-)COMMENT '日期+门店粒度汇总表' PARTITIONED BY(
+CREATE TABLE IF NOT EXISTS ads_api_tpos_ma_channel_endpoint_15mm(
+	biz_date                STRING COMMENT '插入日期',
+	store_code              STRING COMMENT '门店编码',
+	org_code                STRING COMMENT '品牌编码',
+	salesAmount             STRING COMMENT '销售总额',
+	salesSubCouponAmount    STRING COMMENT '扣券销售总额',
+	vipSalesAmount          STRING COMMENT '会员销售金额',
+	vipSalesSubCouponAmount STRING COMMENT '扣券会员销售金额',
+	date_type               STRING COMMENT '统计周期类型',
+	date_id                 STRING COMMENT '统计周期'
+)COMMENT '门店周期销售(含券和扣券)' PARTITIONED BY(
 	ds STRING COMMENT '时间分区');
 
 
-INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = '${today}')
-	SELECT '${today}' AS biz_date,
-				 t5.member_manage_channel_endpoint_code,
-				 t5.new_card_num_1d_store_vip,
-				 t5.total_card_num_td_store_vip,
-				 'today' AS date_type,
-				 '${today}' AS date_id
+insert overwrite table ads_api_tpos_ma_channel_endpoint_15mm partition (ds='${today}')
+	--时间周期为天
+	SELECT '${today}' as biz_date,
+				 so.channel_endpoint_code as real_store_code,
+				 so.org_code,
+				 sum(d.price_sales * d.qty_product) AS sale_amt, --销售总额
+				 sum(d.price_sales * d.qty_product - e.amt_cash_coupon_contribution) as sub_coupon_amount,--扣券销售总额
+				 sum(CASE WHEN mgi.is_vip = 1 THEN d.price_sales * d.qty_product ELSE 0 END) AS member_sale_amt, --会员销售总额
+				 sum(CASE WHEN mgi.is_vip = 1 THEN d.price_sales * d.qty_product - e.amt_cash_coupon_contribution ELSE 0 END) as member_sale_ticket_amt,--扣券会员销售总额
+				 'today' as date_type,
+				 case when date_day is null then -110 else date_day end as date_id
 	FROM (
-		SELECT t4.member_manage_channel_endpoint_code,
-					 COUNT(DISTINCT CASE
-					 WHEN t4.member_register_time = '${today}' THEN t4.member_no
-					 END) AS new_card_num_1d_store_vip,
-					 COUNT(DISTINCT t4.member_no) AS total_card_num_td_store_vip
-		FROM (
-			SELECT t1.member_manage_channel_endpoint_code,
-						 t3.is_vip,
-						 t1.org_code,
-						 t1.member_register_time,
-						 t1.member_no
-			FROM (
-				SELECT member_manage_channel_endpoint_code,
-							 member_no,
-							 substr(regexp_replace(member_register_time, '-', '', 0),1,8)
-							 AS member_register_time,
-							 org_code
-				FROM ${td_ods}.ods_member_card
-				WHERE ds = '${today}' AND STATUS > -1
-				AND member_manage_channel_endpoint_code IS NOT NULL) t1
-				LEFT JOIN (
-					SELECT org_code,
-								 member_no,
-								 grade_id
-					FROM ${td_ods}.ods_member_grade_state
-					WHERE ds = '${today}') t2
-					ON t1.org_code = t2.org_code AND t1.member_no = t2.member_no
-				LEFT JOIN (
-					SELECT grade_id,
-								 is_vip
-					FROM ${td_ods}.ods_member_grade_info
-					WHERE ds = '${today}' AND is_vip = '1') t3
-					ON t2.grade_id = t3.grade_id) AS t4
-		WHERE t4.is_vip = '1'
-		GROUP BY t4.member_manage_channel_endpoint_code) AS t5;
 
+		SELECT member_no,
+					 amt_total,
+					 channel_endpoint_code,
+					 org_code,
+					 member_grade_code,
+					 sales_order_no,
+					 to_char(cast(paid_time as datetime),'yyyyMMdd') as date_day,
+					 ds
+		FROM ${td_ods}.ods_sales_order
+	WHERE ds = '${today}' and to_char(cast(paid_time as datetime),'yyyyMMdd') = '${today}'
+	and order_status = 1
+) so
+	left join ${td_ods}.ods_sales_order_item d
+		on d.org_code = so.org_code
+	and d.sales_order_no = so.sales_order_no
+	and d.ds=so.ds
+	left join ${td_ods}.ods_sales_order_item_price e
+		on e.org_code = d.org_code
+	and e.sales_order_item_no = d.sales_order_item_no
+	and e.ds=so.ds
+	left join ${td_ods}.ods_member_grade_info mgi
+		on 	so.member_grade_code = mgi.grade_code
+	and mgi.ds = '${bizdate}'
+	GROUP BY so.channel_endpoint_code,
+	so.org_code,
+	so.date_day
+	union all
 
+	--时间周期为小时
+	SELECT '${today}' as biz_date,
+				 so.channel_endpoint_code as real_store_code,
+				 so.org_code,
+				 sum(d.price_sales * d.qty_product) AS sale_amt, --销售总额
+				 sum(d.price_sales * d.qty_product - e.amt_cash_coupon_contribution) as sub_coupon_amount,--扣券销售总额
+				 sum(CASE WHEN mgi.is_vip = 1 THEN d.price_sales * d.qty_product ELSE 0 END) AS member_sale_amt, --会员销售总额
+				 sum(CASE WHEN mgi.is_vip = 1 THEN d.price_sales * d.qty_product - e.amt_cash_coupon_contribution ELSE 0 END) as member_sale_ticket_amt,--扣券会员销售总额
+				 'hour' as date_type,
+				 case when date_hour is null then -110 else date_hour end as date_id
 
-
+	FROM (
+		SELECT member_no,
+					 amt_total,
+					 channel_endpoint_code,
+					 org_code,
+					 member_grade_code,
+					 sales_order_no,
+					 to_char(cast(paid_time as datetime),'yyyyMMddHH') as date_hour,
+					 ds
+		FROM ${td_ods}.ods_sales_order
+	WHERE ds = '${today}' and to_char(cast(paid_time as datetime),'yyyyMMdd') = '${today}'
+	and order_status = 1
+) so
+	left join ${td_ods}.ods_sales_order_item d
+		on d.org_code = so.org_code
+	and d.sales_order_no = so.sales_order_no
+	and d.ds=so.ds
+	left join ${td_ods}.ods_sales_order_item_price e
+		on e.org_code = d.org_code
+	and e.sales_order_item_no = d.sales_order_item_no
+	and e.ds=so.ds
+	left join ${td_ods}.ods_member_grade_info mgi
+		on 	so.member_grade_code = mgi.grade_code
+	and mgi.ds = '${bizdate}'
+	GROUP BY so.channel_endpoint_code,
+	so.org_code,
+	so.date_hour;
