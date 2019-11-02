@@ -212,7 +212,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 												WHEN pay_way = 'COUPON' THEN amt_pay
 												END AS promotion_discount_coupon_amt, --折扣券优惠总额
 												CASE
-												WHEN pay_way = 'CARD' THEN amt_pay
+												WHEN pay_way = 'STORED_VALUE_CARD' THEN amt_pay
 												END AS stored_value_card_pay_amt, --储值卡支付金额
 												CASE
 												WHEN pay_way = 'WXPAY' THEN amt_pay

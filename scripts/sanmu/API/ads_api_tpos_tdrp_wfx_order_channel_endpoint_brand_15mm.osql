@@ -102,7 +102,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 				 soc.coupon_no,
 				 soc.coupon_name,
 				 '',   --商场卡
-				 (soi.price_sales * soi.qty_product) - osoip.amt_cash_coupon_contribution,  --实收金额
+				 t3.order_amt - t3.amt_cash_coupon_contribution,  --实收金额
 				 so.amt_total AS totla_amt_order,             --订单总金额
 				 sop.discount_coupon_amt,--现金券抵扣金额
 				 sop.promotion_discount_coupon_amt,--折扣券优惠总额
@@ -123,10 +123,10 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 				 so.point_deduction, --促销商场扣点
 				 so.original_order_no,     --源单号
 				 so.price_print_type,    --入机类型
-				 (soi.price_sales * soi.qty_product) - osoip.amt_cash_coupon_contribution AS sales_amt_deduct_coupon,--销售金额(扣券)
-				 soi.price_sales * soi.qty_product AS sales_amt_with_coupon,    --销售金额(未扣券)
-				 (soi.price_sales * soi.qty_product) - osoip.amt_cash_coupon_contribution AS actual_amt_deduct_coupon,--实际成交额(扣券)
-				 soi.price_sales * soi.qty_product AS actual_amt_with_coupon,       --实际成交额(未扣券)
+				 t3.order_amt - t3.amt_cash_coupon_contribution AS sales_amt_deduct_coupon,--销售金额(扣券)
+				 t3.order_amt AS sales_amt_with_coupon,    --销售金额(未扣券)
+				 t3.order_amt - t3.amt_cash_coupon_contribution AS actual_amt_deduct_coupon,--实际成交额(扣券)
+				 t3.order_amt AS actual_amt_with_coupon,       --实际成交额(未扣券)
 				 so.paid_time AS original_audit_date,       --原单营业日期
 				 mi.crm_info_id,       --会员id
 				 mi.member_mobile,   --会员手机号
@@ -146,10 +146,29 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 				 'day' AS date_type,
 				 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) AS date_id
 	FROM ${td_ods}.ods_sales_order so
-		INNER JOIN ${td_ods}.ods_sales_order_item soi
-			ON so.sales_order_no = soi.sales_order_no AND soi.ds = '${bizdate}'
-		INNER JOIN ${td_ods}.ods_sales_order_item_price osoip
-			ON osoip.sales_order_item_no = soi.sales_order_item_no AND osoip.ds = '${bizdate}'
+		INNER JOIN (
+			SELECT t2.sales_order_no,
+						 t2.order_amt,
+						 t2.amt_cash_coupon_contribution
+			FROM (
+				SELECT          soi.sales_order_no,
+												sum(soi.price_sales * soi.qty_product) AS order_amt,
+												sum(osoip.amt_cash_coupon_contribution) AS amt_cash_coupon_contribution
+				FROM (
+					SELECT sales_order_no,
+								 sales_order_item_no,
+								 price_sales,
+								 qty_product
+					FROM ${td_ods}.ods_sales_order_item
+					WHERE ds = '${bizdate}') soi
+					INNER JOIN (
+						SELECT sales_order_item_no,
+									 amt_cash_coupon_contribution
+						FROM ${td_ods}.ods_sales_order_item_price
+						WHERE ds = '${bizdate}') osoip
+						ON osoip.sales_order_item_no = soi.sales_order_item_no
+				GROUP BY soi.sales_order_no) AS t2) AS t3
+			ON so.sales_order_no = t3.sales_order_no
 		LEFT JOIN ${td_ods}.ods_sales_order_coupon soc
 			ON so.sales_order_no = soc.sales_order_no AND soc.ds = '${bizdate}'
 		LEFT JOIN ${td_ods}.ods_member_info mi
@@ -178,7 +197,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 												WHEN pay_way = 'COUPON' THEN amt_pay
 												END AS promotion_discount_coupon_amt, --折扣券优惠总额
 												CASE
-												WHEN pay_way = 'CARD' THEN amt_pay
+												WHEN pay_way = 'STORED_VALUE_CARD' THEN amt_pay
 												END AS stored_value_card_pay_amt, --储值卡支付金额
 												CASE
 												WHEN pay_way = 'WXPAY' THEN amt_pay

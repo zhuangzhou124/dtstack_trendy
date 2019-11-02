@@ -1,38 +1,22 @@
-select * from (
-	select t1.org_code,
-				 t1.channel_endpoint_code,
-	--       t1.sku_code,
-				 sum(qty) as qty
-	from (
-		select sl.org_code,sl.channel_endpoint_code,sli.sku_code,sli.qty_actual as qty
-		from ods_stock_logic_items sli
-			left join ods_stock_logic sl on sli.stock_logic_id = sl.id
-		where 1=1
-		and sli.ds='20191014'
-		and sl.ds='20191014'
-		union all
-		--出库单，加回去
-		select sl.org_code,sl.channel_endpoint_code,ii.sku_code,ii.qty_sended as qty
-		from ods_stock_logic_order_out as o
-			inner join ods_stock_logic_order_out_items as ii on  o.id=ii.logic_order_out_id
-			left join ods_stock_logic sl on o.stock_logic_id=sl.id
-		where o.made_order_time>='2019-09-01 00:00:00'
-		and o.ds='20191014'
-		and ii.ds='20191014'
-		and sl.ds='20191014'
-		union all
-		--入库单，库存反减回去
-		select sl.org_code,sl.channel_endpoint_code,ii.sku_code,-1*ii.qty_received as qty
-		from ods_stock_logic_order_in as i
-			inner join ods_stock_logic_order_in_items as ii on  i.id=ii.logic_order_in_id
-			left join ods_stock_logic sl on i.stock_logic_id=sl.id
-		where i.made_order_time>='2019-09-01 00:00:00'
-		and i.ds='20191014'
-		and ii.ds='20191014'
-		and sl.ds='20191014'
-	) as t1
-	where t1.org_code='TRE'
-	group by 1,2
-)t
-where qty<>0
-order by 1
+SELECT t2.sales_order_no,
+			 t2.order_amt,
+			 t2.cash_amt
+FROM (
+	SELECT soi.sales_order_no,
+				 sum(soi.price_sales * soi.qty_product) AS order_amt,
+				 sum(osoip.amt_cash_coupon_contribution) AS cash_amt
+	FROM (
+		SELECT sales_order_no,
+					 sales_order_item_no,
+					 price_sales,
+					 qty_product
+		FROM ods_sales_order_item
+		WHERE ds = '${bizdate}') soi
+		INNER JOIN (
+			SELECT sales_order_item_no,
+						 amt_cash_coupon_contribution
+			FROM ods_sales_order_item_price
+			WHERE ds = '${bizdate}') osoip
+			ON osoip.sales_order_item_no = soi.sales_order_item_no
+	GROUP BY soi.sales_order_no) AS t2;
+
