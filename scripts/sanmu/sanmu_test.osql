@@ -13,6 +13,62 @@
 
 
 
+SELECT
+product_code,
+year,
+season,
+band,
+SUM(sales_num_1d_brand_channel_endpoint) AS itemQuantity,
+SUM(sales_amt_1d_brand_channel_endpoint) AS salesAmount
+FROM ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d
+WHERE 1=1
+--     and order_type IN ({orderTypeList})
+-- 	AND member_grade_code IN ({customerTypeList})
+-- 	AND product_code = {productCode}
+-- 	AND band IN ({projects})
+-- 	AND season = {season}
+-- 	AND sku_status IN ('1')
+AND channel_endpoint IN ('1201')
+AND org_code = 'TRE'
+AND date_type = 'day'
+AND date_id = '20190827'
+-- 	AND brand_code = '3'
+-- 	AND member_no = {vipno}
+-- 	AND year = '2019';
+group by 1,2,3,4
+
+--数据中台
+select
+ sk.spu_code,
+sk."year",
+sk.scene,
+sk.band,
+sum( soi.qty_product ) as qty_product,
+sum( soi.price_sales * soi.qty_product ) as order_amount -- 销售金额(券前)
+--, sum( case when so.order_status=1 then soi.price_sales * soi.qty_product - soip.amt_cash_coupon_contribution else 0 end ) as sales_amount_after_coupon -- 销售金额(券后)
+--, dense_rank() over(order by sales_amount_after_coupon desc)
+from 		ods_sales_order so
+	inner join ods_sales_order_item soi
+		on 			soi.sales_order_no = so.sales_order_no
+	inner join ods_sales_order_item_price soip
+		on 			soip.sales_order_item_no = soi.sales_order_item_no
+	inner join ods_api_item_sku sk
+		on          sk.sku_code=soi.sku_code
+where  	1 = 1
+and 		so.ds = '20191030'
+and 		soi.ds = '20191030'
+and 		soip.ds = '20191030'
+and 		sk.ds = '20191030'
+and 		so.paid_time >= '20190827'
+and 		so.paid_time < '20190828'
+and         so.channel_endpoint_code='1201'
+and         so.org_code='TRE'
+and         so.order_status='1'
+group by 1,2,3,4
+order by 1
+
+
+
 
 SELECT a.sales_order_no,
 			 wm_concat(',', a.promotion_code) AS promotion_code,

@@ -165,7 +165,7 @@ INSERT OVERWRITE TABLE ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm PARTITION
 						ON o.id = ii.logic_order_out_id AND ii.ds = '${bizdate}'
 					LEFT JOIN ${td_ods}.ods_stock_logic sl
 						ON o.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-				WHERE substr(regexp_replace(o.made_order_time, '-', '', 0), 1, 8)  = '${bizdate}' AND o.ds = '${bizdate}'
+				WHERE substr(regexp_replace(o.made_order_time, '-', '', 0), 1, 8)  <= '${bizdate}' AND o.ds = '${bizdate}'
 				UNION ALL
 				--入库单，库存反减回去
 				SELECT sl.org_code,
@@ -177,7 +177,7 @@ INSERT OVERWRITE TABLE ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm PARTITION
 						ON i.id = ii.logic_order_in_id AND ii.ds = '${bizdate}'
 					LEFT JOIN ${td_ods}.ods_stock_logic sl
 						ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8)  = '${bizdate}' AND i.ds = '${bizdate}'
+				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8)  <= '${bizdate}' AND i.ds = '${bizdate}'
 
 			) AS t1
 			GROUP BY t1.org_code,
@@ -209,7 +209,7 @@ INSERT OVERWRITE TABLE ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm PARTITION
 						ON i.id = ii.logic_order_in_notify_id AND ii.ds = '${bizdate}'
 					INNER JOIN ${td_ods}.ods_stock_logic sl
 						ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8)  = '${bizdate}' AND i.ds = '${bizdate}'
+				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8)  <= '${bizdate}' AND i.ds = '${bizdate}'
 				UNION ALL
 				--收发差异单，+差异数
 
@@ -222,7 +222,7 @@ INSERT OVERWRITE TABLE ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm PARTITION
 						ON a.id = b.logic_order_difference_id AND b.ds = '${bizdate}'
 					INNER JOIN ${td_ods}.ods_stock_logic s
 						ON a.stock_logic_in_id = s.id AND s.ds = '${bizdate}'
-				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8)  = '${bizdate}' AND a.ds = '${bizdate}'
+				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8)  <= '${bizdate}' AND a.ds = '${bizdate}'
 
 			) AS t1
 			GROUP BY t1.org_code,

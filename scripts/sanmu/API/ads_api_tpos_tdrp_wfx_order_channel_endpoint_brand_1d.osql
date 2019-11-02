@@ -69,7 +69,8 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_1d PAR
 			INNER JOIN ods_sales_order_item soi
 				ON soi.sales_order_no = so.sales_order_no AND soi.ds = '${bizdate}'
 		WHERE so.order_status = 1 AND so.ds = '${bizdate}'
-		and (so.member_no is not null or member_no in ('-1','1'))
+		and so.member_no is not null
+		and so.member_no not in ('-1','1')
 		GROUP BY so.org_code, so.sales_order_no,
 		so.order_type,
 		so.member_no,
