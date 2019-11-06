@@ -148,8 +148,8 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 				 ais.size_id,  --商品尺寸id
 				 ais.cn_size_desc,  --商品尺寸名称
 				 ais.cny_price,  --商品rmb吊牌价
-				 ais.spu_code, --商品款号
 				 ais.YEAR,  --商品年份
+				 ais.spu_code, --商品款号
 				 ais.quarter, --商品季节
 				 ais.band,  --商品波段
 				 ais.level1_cate_name,                  --商品大类
