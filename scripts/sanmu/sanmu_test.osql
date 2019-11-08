@@ -3,19 +3,79 @@
 --create time:2019-09-26 14:45
 --drop table sanmu_test
 
---ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm
---ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d
-
---多个周期的
---ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d
---ads_api_tpos_tdrp_wfx_channel_endpoint_1d
---ads_api_crm_emr_tcrm_member_1d
+customerQuantity客流统计
+closeRate成交率
+dealQuantity成交笔数（不减去退货笔数）
+--perCustomerTransaction客单价
+--associatedPurchaseRate连带率
 
 
 
+-- 日结报表
+SELECT gmt_sale AS salesDateStr,
+			 org_code AS org_code,
+			 channel_endpoint AS storeCode,
+			 endpoint_name AS terminalName,
+			 customer_num_1d_brand_channel_endpoint AS customerQuantity,
+			 sales_num_1d_brand_channel_endpoint AS salesItemQuantity,
+			 sales_amt_1d_brand_channel_endpoint AS salesItemAmount,
+			 return_num_1d_brand_channel_endpoint AS returnItemQuantity,
+			 return_amt_1d_brand_channel_endpoint AS returnItemAmount,
+			 net_sales_num_1d_brand_channel_endpoint AS netSalesItemQuantity,
+			 net_sales_amt_1d_brand_store_coupon AS netSalesItemAmount,
+			 cash_coupon_amt_1d_brand_channel_endpoint AS cashCoupon,
+			 net_sales_amt_1d_brand_store_without_coupon AS netSalesItemAmountWithoutCoupon,
+			 retail_price_amt_1d_brand_channel_endpoint AS retailPriceAmount,
+			 deal_num_1d_brand_channel_endpoint AS dealQuantity,
+			 deal_rate_1d_brand_channel_endpoint AS closeRate,
+			 rma_num_1d_brand_channel_endpoint AS rmaQuantity,
+			 avg_discount_1d_brand_channel_endpoint AS averageDiscount,
+			 sales_per_1d_brand_channel_endpoint AS perCustomerTransaction,
+			 joint_rate_1d_brand_channel_endpoint AS associatedPurchaseRate,
+			 sales_num_1d_brand_sotre_vip AS itemQuantityOfVipSalesOrder,
+			 sales_amt_1d_brand_store_vip AS itemAmountOfVipSalesOrder,
+			 sales_ratio_1d_brand_store_vip AS vipSalesRatio
+FROM ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d
+WHERE org_code = 'TRE' AND date_type = 'day' AND date_id IN ('20190816') AND channel_endpoint IN ('1201');
 
 
 
+
+-- 数据中台
+select so.org_code,so.channel_endpoint_code,
+			 max(pf.in_count) as customerQuantity,
+			 sum(case when soi.price_sales<> 0 then soi.qty_product else 0 end) AS salesItemQuantity,
+			 sum(soi.price_sales*soi.qty_product) AS salesItemAmount,
+			 sum(case when so.order_type = '103' then so.qty_return_item else 0 end) AS returnItemQuantity,
+			 sum(case when so.order_type = '103' then so.amt_return_item else 0 end) AS returnItemAmount,
+			 sum(case when (soi.price_sales*soi.qty_product)>0 then soi.qty_product else 0 end ) AS netSalesItemQuantity,
+			 sum(case when (soi.price_sales*soi.qty_product)>0 then soi.price_sales* soi.qty_product else 0 end) as netSalesItemAmount,
+			 sum(p.amt_cash_coupon_contribution) AS cashCoupon,
+			 sum(soi.price_sales* soi.qty_product-p.amt_cash_coupon_contribution) as netSalesItemAmountWithoutCoupon,
+			 sum(soi.price_retail*soi.qty_product) AS retailPriceAmount,
+			 coalesce(count (distinct case when so.order_type = '101' or(so.order_type = '104' and so.amt_total > 0)
+			 then so.sales_order_no END),0) -
+			 coalesce( count(distinct case when so.order_type in ('102','103') then so.sales_order_no END),0) AS dealQuantity,
+			 COUNT(DISTINCT so.sales_order_no)/max(pf.in_count) AS closeRate,
+			 COUNT(DISTINCT CASE WHEN so.order_type in ('103','104') THEN so.sales_order_no END) AS rmaQuantity,
+			 sum(soi.price_sales*soi.qty_product)/sum(soi.price_retail*soi.qty_product) AS averageDiscount,
+			 sum(soi.price_sales * soi.qty_product)/COUNT(DISTINCT case when so.price_amt_discount != 0 then so.sales_order_no end) as perCustomerTransaction,
+			 sum(case when soi.price_sales != 0 then soi.qty_product end)/COUNT(DISTINCT case when so.price_amt_discount != 0 then so.sales_order_no end) as associatedPurchaseRate,
+			 sum(case when mgi.is_vip = '1' and soi.price_sales<> 0 then soi.qty_product else 0 end) as itemQuantityOfVipSalesOrder,
+			 sum(case when mgi.is_vip = '1' then soi.price_sales * soi.qty_product else 0 end) as itemAmountOfVipSalesOrder,
+			 sum(case when mgi.is_vip = '1' then soi.price_sales * soi.qty_product else 0 end)/sum(soi.price_sales*soi.qty_product) as vipSalesRatio
+from ods_sales_order so
+	INNER JOIN ods_sales_order_item soi on soi.sales_order_no = so.sales_order_no
+	INNER JOIN ods_sales_order_item_price p
+		on soi.sales_order_no=p.sales_order_no and soi.sales_order_item_no=p.sales_order_item_no
+	left join ods_member_grade_info mgi on so.member_grade_code = mgi.grade_code
+	left JOIN (select sum(in_count) as in_count,store_code,date(create_time) as time from ods_store_passenger_flow
+	where ds = '20191104' group by store_code,date(create_time))as pf
+		on so.channel_endpoint_code = pf.store_code and date(so.paid_time) = pf.time
+where	so.ds = '20191104' and soi.ds = '20191104' and p.ds = '20191104' and mgi.ds = '20191104' and
+so.order_status = 1 and so.paid_time between '2019-08-16 00:00:00' and '2019-08-16 23:59:59'
+group by so.org_code,so.channel_endpoint_code
+having so.channel_endpoint_code in ('1201')
 
 
 

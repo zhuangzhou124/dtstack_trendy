@@ -57,7 +57,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION
 				 t1.sales_amt_1d_brand_channel_endpoint,
 				 t1.return_num_1d_brand_channel_endpoint,
 				 t1.return_amt_1d_brand_channel_endpoint,
-				 t1.sales_num_1d_brand_channel_endpoint AS net_sales_num_1d_brand_channel_endpoint,
+				 t1.net_sales_num_1d_brand_channel_endpoint,
 				 t1.net_sales_amt_1d_brand_store_coupon,
 				 t1.net_sales_amt_1d_brand_store_without_coupon,
 				 t1.cash_coupon_amt_1d_brand_channel_endpoint,
@@ -76,11 +76,9 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION
 				 ELSE (t1.sales_amt_1d_brand_channel_endpoint / t1.retail_price_amt_1d_brand_channel_endpoint)
 				 END AS avg_discount_1d_brand_channel_endpoint,
 				 CASE
-				 WHEN t1.sales_amt_1d_brand_channel_endpoint IS NULL OR t1.sales_amt_1d_brand_channel_endpoint <> 0 OR t1.
-				 deal_num_1d_brand_channel_endpoint IS NULL OR t1.deal_num_1d_brand_channel_endpoint <> 0 OR (t1.
-				 sales_amt_1d_brand_channel_endpoint - t1.cash_coupon_amt_1d_brand_channel_endpoint) <= 0 THEN 0.0
-				 ELSE ((t1.sales_amt_1d_brand_channel_endpoint - t1.cash_coupon_amt_1d_brand_channel_endpoint) / t1.
-				 deal_num_1d_brand_channel_endpoint)
+				 WHEN t1.deal_num_1d_brand_channel_endpoint IS NULL OR t1.deal_num_1d_brand_channel_endpoint <> 0
+				 THEN 0.0
+				 ELSE (t1.sales_amt_1d_brand_channel_endpoint / t1.deal_num_1d_brand_channel_endpoint)
 				 END AS sales_per_1d_brand_channel_endpoint,
 				 CASE
 				 WHEN t1.deal_num_1d_brand_channel_endpoint IS NULL OR t1.deal_num_1d_brand_channel_endpoint = 0 THEN 0.0
@@ -110,21 +108,15 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION
 					 WHEN so.order_type = 103 THEN soi.qty_product * soi.price_sales - soip.amt_cash_coupon_contribution
 					 ELSE 0
 					 END) AS return_amt_1d_brand_channel_endpoint, --退货金额
-					 sum(CASE
-					 WHEN soi.price_sales <> 0 THEN soi.qty_product
-					 ELSE 0
-					 END) AS net_sales_num_1d_brand_channel_endpoint, --净销售量
-					 sum(soi.price_sales * soi.qty_product) AS net_sales_amt_1d_brand_store_coupon, --净销售额（含现金券）
+					 sum(case when (soi.price_sales*soi.qty_product)>0 then soi.qty_product else 0 end ) AS net_sales_num_1d_brand_channel_endpoint, --净销售量
+					 sum(case when (soi.price_sales*soi.qty_product)>0 then soi.price_sales* soi.qty_product else 0 end) AS net_sales_amt_1d_brand_store_coupon, --净销售额（含现金券）
 					 sum(soi.price_sales * soi.qty_product - soip.amt_cash_coupon_contribution) AS
 					 net_sales_amt_1d_brand_store_without_coupon,  --净销售额（不含现金券
 					 sum(soip.amt_cash_coupon_contribution) AS cash_coupon_amt_1d_brand_channel_endpoint,  --现金券金额
 					 sum(soi.price_retail * soi.qty_product) AS retail_price_amt_1d_brand_channel_endpoint, --吊牌金额
-					 sum(CASE
-					 WHEN so.order_type = '101' THEN 1
-					 WHEN so.order_type IN ('102', '103') THEN -1
-					 WHEN so.order_type = '104' AND so.amt_total > 0 THEN 1
-					 WHEN so.order_type = '104' AND so.amt_total = 0 THEN 0
-					 END) AS deal_num_1d_brand_channel_endpoint,    --成交笔数（不减去退货笔数)
+					 coalesce(COUNT ( DISTINCT CASE WHEN so.order_type = '101' OR(so.order_type = '104' AND so.amt_total > 0)
+					 THEN so.sales_order_no END), 0) -
+					 coalesce( COUNT ( DISTINCT CASE WHEN so.order_type IN('102', '103')THEN so.sales_order_no END), 0) AS deal_num_1d_brand_channel_endpoint,    --成交笔数（)
 					 COUNT(DISTINCT CASE
 					 WHEN so.order_type IN ('103', '104') THEN so.sales_order_no
 					 END) AS rma_num_1d_brand_channel_endpoint, --退换笔数
@@ -137,12 +129,12 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION
 					 ELSE 0
 					 END) AS sales_amt_1d_brand_store_vip, --vip销售金额（未扣券）
 					 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) AS order_time
-		FROM ods_sales_order so
-			INNER JOIN ods_sales_order_item soi
+		FROM ${td_ods}.ods_sales_order so
+			INNER JOIN ${td_ods}.ods_sales_order_item soi
 				ON soi.sales_order_no = so.sales_order_no AND soi.ds = '${bizdate}'
-			INNER JOIN ods_sales_order_item_price soip
+			INNER JOIN ${td_ods}.ods_sales_order_item_price soip
 				ON soi.sales_order_item_no = soip.sales_order_item_no AND soip.ds = '${bizdate}'
-			LEFT OUTER JOIN ods_member_grade_info mgi
+			LEFT OUTER JOIN ${td_ods}.ods_member_grade_info mgi
 				ON so.member_grade_code = mgi.grade_code AND mgi.ds = '${bizdate}'
 		WHERE so.order_status = 1 AND so.ds = '${bizdate}'
 		GROUP BY so.org_code,
@@ -151,21 +143,21 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION
 		LEFT OUTER JOIN (
 
 		-------客流统计
-			SELECT brand_code,
+			SELECT
 						 store_code,
 						 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time,
 						 sum(in_count) AS customer_num_1d_brand_store
-			FROM ods_store_passenger_flow
+			FROM ${td_ods}.ods_store_passenger_flow
 			WHERE ds = '${bizdate}'
-			GROUP BY brand_code, store_code, substr(regexp_replace(create_time, '-', '', 0), 1, 8)) AS t10
-			ON t1.channel_endpoint_code = t10.store_code AND t1.org_code = t10.brand_code AND t1.order_time = t10.order_time
+			GROUP BY store_code, substr(regexp_replace(create_time, '-', '', 0), 1, 8)) AS t10
+			ON t1.channel_endpoint_code = t10.store_code AND t1.order_time = t10.order_time
 		LEFT OUTER JOIN (
 
 		-------endpoint_name
 			SELECT org_code,
 						 channel_endpoint_code,
 						 endpoint_name
-			FROM ods_api_channel_endpoint
+			FROM ${td_ods}.ods_api_channel_endpoint
 			WHERE ds = '${bizdate}') AS t5
 			ON t1.channel_endpoint_code = t5.channel_endpoint_code AND t1.org_code = t5.org_code;
 

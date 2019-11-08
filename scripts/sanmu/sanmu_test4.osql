@@ -55,13 +55,13 @@ LIFECYCLE 30;
 
 INSERT OVERWRITE TABLE ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm PARTITION(ds = '${bizdate}')
 	SELECT '${bizdate}' AS biz_date,
-				 t9.org_code,
+				 t3.org_code,
 				 t6.region_code,
 				 t5.endpoint_code,
 				 t5.endpoint_name,
-				 t9.channel_endpoint_code,
+				 t3.channel_endpoint_code,
 				 t5.operation_name,
-				 t9.sku_code,
+				 t3.sku_code,
 				 t4.sku_cn_name,
 				 t4.spu_code,
 				 t4.cny_price,
@@ -77,27 +77,74 @@ INSERT OVERWRITE TABLE ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm PARTITION
 				 t4.cn_color_desc,
 				 t4.size_id,
 				 t4.cn_size_desc,
-				 case when t9.sku_num_1d_zckc = 0 then 'ZERO'
+				 case when t7.qty = 0 then 'ZERO'
 							else 'NONZERO' end AS sku_type_1d_zckc,
-				 t9.sku_num_1d_zckc AS sku_num_1d_zckc,
-				 t4.cny_price * t9.sku_num_1d_zckc AS sku_amt_1d_zckc_retail,
-				 case when t9.sku_num_1d_ztkc = 0 then 'ZERO'
-              else 'NONZERO' end AS sku_type_1d_ztkc,
-				 t9.sku_num_1d_ztkc AS sku_num_1d_ztkc,
-				 t4.cny_price * t9.sku_num_1d_ztkc AS sku_amt_1d_ztkc_retail,
+				 t7.qty AS sku_num_1d_zckc,
+				 t4.cny_price * t7.qty AS sku_amt_1d_zckc_retail,
+				 case when t8.qty = 0 then 'ZERO'
+							else 'NONZERO' end AS sku_type_1d_ztkc,
+				 t8.qty AS sku_num_1d_ztkc,
+				 t4.cny_price * t8.qty AS sku_amt_1d_ztkc_retail,
 				 '${bizdate}' AS gmt_sku_effective,
-         'day' as date_type,
-         '${bizdate}' as date_id
+				 'day' as date_type,
+				 '${bizdate}' as date_id
 	FROM (
-		select coalesce(t7.org_code,t8.org_code) as org_code,
-           coalesce(t7.channel_endpoint_code,t8.channel_endpoint_code) as channel_endpoint_code,
-		       coalesce(t7.sku_code,t8.sku_code) as sku_code,
-           t7.sku_num_1d_zckc,
-           t8.sku_num_1d_ztkc from
-		(SELECT t1.org_code,
+		SELECT t2.org_code,
+					 t2.channel_endpoint_code,
+					 t1.sku_code
+		FROM (
+			SELECT stock_logic_id,
+						 sku_code,
+						 qty_actual,
+						 qty_transit
+			FROM ${td_ods}.ods_stock_logic_items
+	WHERE ds = '${bizdate}') t1
+	LEFT JOIN (
+				SELECT channel_endpoint_code,
+							 org_code,
+							 id
+				FROM ${td_ods}.ods_stock_logic
+				WHERE ds = '${bizdate}') t2
+	ON t1.stock_logic_id = t2.id) AS t3
+LEFT JOIN (
+			SELECT sku_code,
+						 sku_cn_name,
+						 spu_code,
+						 cny_price,
+						 YEAR,
+						 quarter,
+						 band,
+						 series,
+						 class_cn_name,
+						 level1_cate_name,
+						 level2_cate_name,
+						 level3_cate_name,
+						 color_id,
+						 cn_color_desc,
+						 size_id,
+						 cn_size_desc
+			FROM ${td_ods}.ods_api_item_sku
+			WHERE ds = '${bizdate}') AS t4
+	ON t3.sku_code = t4.sku_code
+LEFT JOIN (
+			SELECT channel_endpoint_code,
+						 endpoint_name,
+						 endpoint_code,
+						 operation_name
+			FROM ${td_ods}.ods_api_channel_endpoint
+			WHERE ds = '${bizdate}') AS t5
+	ON t3.channel_endpoint_code = t5.channel_endpoint_code
+LEFT OUTER JOIN (
+			SELECT store_code,
+						 region_code
+			FROM ${td_ods}.ods_real_store
+			WHERE ds = '${bizdate}') AS t6
+	ON t3.channel_endpoint_code = t6.store_code
+LEFT JOIN (
+			SELECT t1.org_code,
 						 t1.channel_endpoint_code,
 						 t1.sku_code,
-						 sum(qty) AS sku_num_1d_zckc
+						 sum(qty) AS qty
 			FROM (
 				SELECT sl.org_code,
 							 sl.channel_endpoint_code,
@@ -133,14 +180,15 @@ INSERT OVERWRITE TABLE ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm PARTITION
 				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8)  <= '${bizdate}' AND i.ds = '${bizdate}'
 
 			) AS t1
-			GROUP BY t1.org_code,
-			t1.channel_endpoint_code,
-			t1.sku_code) AS t7
-		full JOIN (
+GROUP BY t1.org_code,
+t1.channel_endpoint_code,
+t1.sku_code) AS t7
+	ON t3.sku_code = t7.sku_code AND t3.channel_endpoint_code = t7.channel_endpoint_code AND t3.org_code = t7.org_code
+LEFT JOIN (
 			SELECT t1.org_code,
 						 t1.channel_endpoint_code,
 						 t1.sku_code,
-						 sum(qty) AS sku_num_1d_ztkc
+						 sum(qty) AS qty
 			FROM (
 				SELECT sl.org_code,
 							 sl.channel_endpoint_code,
@@ -177,46 +225,10 @@ INSERT OVERWRITE TABLE ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm PARTITION
 				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8)  <= '${bizdate}' AND a.ds = '${bizdate}'
 
 			) AS t1
-			GROUP BY t1.org_code,
-			t1.channel_endpoint_code,
-			t1.sku_code) AS t8
-			ON t7.org_code = t8.org_code AND t7.sku_code = t8.sku_code AND t7.channel_endpoint_code = t8.channel_endpoint_code) as t9
-			LEFT JOIN (
-				SELECT sku_code,
-							 sku_cn_name,
-							 spu_code,
-							 cny_price,
-							 YEAR,
-							 quarter,
-							 band,
-							 series,
-							 class_cn_name,
-							 level1_cate_name,
-							 level2_cate_name,
-							 level3_cate_name,
-							 color_id,
-							 cn_color_desc,
-							 size_id,
-							 cn_size_desc
-				FROM ${td_ods}.ods_api_item_sku
-				WHERE ds = '${bizdate}') AS t4
-				ON t9.sku_code = t4.sku_code
-			LEFT JOIN (
-				SELECT channel_endpoint_code,
-							 endpoint_name,
-							 endpoint_code,
-							 operation_name
-				FROM ${td_ods}.ods_api_channel_endpoint
-				WHERE ds = '${bizdate}') AS t5
-				ON t9.channel_endpoint_code = t5.channel_endpoint_code
-			LEFT OUTER JOIN (
-				SELECT store_code,
-							 region_code
-				FROM ${td_ods}.ods_real_store
-				WHERE ds = '${bizdate}') AS t6
-				ON t9.channel_endpoint_code = t6.store_code
-
-;
+GROUP BY t1.org_code,
+t1.channel_endpoint_code,
+t1.sku_code) AS t8
+	ON t3.org_code = t8.org_code AND t3.sku_code = t8.sku_code AND t3.channel_endpoint_code = t8.channel_endpoint_code;
 
 
 

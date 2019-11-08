@@ -110,7 +110,7 @@ INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_type_1d PARTITION(ds = '${biz
 					 substr(regexp_replace(paid_time, '-', '', 0), 1, 8) AS order_time
 		FROM ${td_ods}.ods_sales_order
 		WHERE ds = '${bizdate}' AND order_status = 1 AND price_amt_discount > 0 AND member_no != - 1
-		AND (member_grade_code IS NOT NULL OR member_grade_code NOT LIKE '%ANONYMOUS%')) AS t1
+		AND (member_grade_code IS NOT NULL AND member_grade_code NOT LIKE '%ANONYMOUS%')) AS t1
 		JOIN (
 			SELECT sales_order_no,
 						 price_sales,
@@ -240,7 +240,7 @@ INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_type_1d PARTITION(ds = '${biz
 				AND a.amt_total > 0
 				AND a.order_status = 1
 				AND a.price_amt_discount > 0
-				AND (a.member_grade_code IS NOT NULL OR a.member_grade_code NOT LIKE '%ANONYMOUS%')
+				AND a.member_grade_code IS NOT NULL
 				AND a.ds = '${bizdate}'
 				AND a.member_no NOT IN ('-1', '1')
 			) bb
