@@ -9,7 +9,7 @@ dealQuantity成交笔数（不减去退货笔数）
 --perCustomerTransaction客单价
 --associatedPurchaseRate连带率
 
-
+--business_type in ('10103','10104','10202','10203','10302','10303','10403','10404')
 
 -- 日结报表
 SELECT gmt_sale AS salesDateStr,

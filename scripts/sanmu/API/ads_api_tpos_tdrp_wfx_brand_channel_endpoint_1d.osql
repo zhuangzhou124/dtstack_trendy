@@ -91,7 +91,6 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION
 				 'day' AS date_type,
 				 t1.order_time AS date_id
 	FROM (
-
 		SELECT so.org_code,
 					 so.channel_endpoint_code,
 					 sum(CASE
@@ -136,6 +135,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION
 			LEFT OUTER JOIN ods_member_grade_info mgi
 				ON so.member_grade_code = mgi.grade_code AND mgi.ds = '${bizdate}'
 		WHERE so.order_status = 1 AND so.ds = '${bizdate}'
+		AND so.business_type in ('10103','10104','10202','10203','10302','10303','10403','10404')
 		GROUP BY so.org_code,
 		so.channel_endpoint_code,
 		substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8)) AS t1

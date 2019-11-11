@@ -251,4 +251,6 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 			FROM ${td_ods}.ods_clerk_info
 			WHERE ds = '${bizdate}' AND STATUS = 7) oci
 			ON so.shopping_guider_no = oci.clerk_no
-	WHERE so.ds = '${bizdate}' AND so.order_status = 1 AND so.paid_time IS NOT NULL;
+	WHERE so.ds = '${bizdate}' AND so.order_status = 1 AND so.paid_time IS NOT NULL
+AND so.business_type in ('10103','10104','10202','10203','10302','10303','10403','10404')
+;
