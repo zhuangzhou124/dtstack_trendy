@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d(
 	sales_amt_1d_brand_store_vip                                DOUBLE COMMENT 'vip销售金额      ',
 	deal_rate_1d_brand_channel_endpoint                         DOUBLE COMMENT '成交率(成交笔数 /客流统计)          ',
 	avg_discount_1d_brand_channel_endpoint                      DOUBLE COMMENT '平均折扣(销售金额/吊牌金额)         ',
-	sales_per_1d_brand_channel_endpoint                         DOUBLE COMMENT '客单价:实际销售金额(销售金额-现金券金额)/销售单数 (成交笔数)        ',
+	sales_per_1d_brand_channel_endpoint                         DOUBLE COMMENT '客单价:实际销售金额（销售金额）/销售单数 (成交笔数)        ',
 	joint_rate_1d_brand_channel_endpoint                        DOUBLE COMMENT '连带率:销售件数/销售单数(成交笔数)         ',
 	sales_ratio_1d_brand_store_vip                              DOUBLE COMMENT 'vip销售占比：vip销售金额/销售金额      ',
 	date_type                                                   STRING COMMENT '日期类型',
@@ -76,8 +76,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION
 				 ELSE (t1.sales_amt_1d_brand_channel_endpoint / t1.retail_price_amt_1d_brand_channel_endpoint)
 				 END AS avg_discount_1d_brand_channel_endpoint,
 				 CASE
-				 WHEN t1.deal_num_1d_brand_channel_endpoint IS NULL OR t1.deal_num_1d_brand_channel_endpoint <> 0
-				 THEN 0.0
+				 WHEN t1.deal_num_1d_brand_channel_endpoint IS NULL OR t1.deal_num_1d_brand_channel_endpoint = 0 THEN 0.0
 				 ELSE (t1.sales_amt_1d_brand_channel_endpoint / t1.deal_num_1d_brand_channel_endpoint)
 				 END AS sales_per_1d_brand_channel_endpoint,
 				 CASE
@@ -129,12 +128,12 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION
 					 ELSE 0
 					 END) AS sales_amt_1d_brand_store_vip, --vip销售金额（未扣券）
 					 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) AS order_time
-		FROM ${td_ods}.ods_sales_order so
-			INNER JOIN ${td_ods}.ods_sales_order_item soi
+		FROM ods_sales_order so
+			INNER JOIN ods_sales_order_item soi
 				ON soi.sales_order_no = so.sales_order_no AND soi.ds = '${bizdate}'
-			INNER JOIN ${td_ods}.ods_sales_order_item_price soip
+			INNER JOIN ods_sales_order_item_price soip
 				ON soi.sales_order_item_no = soip.sales_order_item_no AND soip.ds = '${bizdate}'
-			LEFT OUTER JOIN ${td_ods}.ods_member_grade_info mgi
+			LEFT OUTER JOIN ods_member_grade_info mgi
 				ON so.member_grade_code = mgi.grade_code AND mgi.ds = '${bizdate}'
 		WHERE so.order_status = 1 AND so.ds = '${bizdate}'
 		GROUP BY so.org_code,
@@ -147,7 +146,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION
 						 store_code,
 						 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time,
 						 sum(in_count) AS customer_num_1d_brand_store
-			FROM ${td_ods}.ods_store_passenger_flow
+			FROM ods_store_passenger_flow
 			WHERE ds = '${bizdate}'
 			GROUP BY store_code, substr(regexp_replace(create_time, '-', '', 0), 1, 8)) AS t10
 			ON t1.channel_endpoint_code = t10.store_code AND t1.order_time = t10.order_time
@@ -157,7 +156,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION
 			SELECT org_code,
 						 channel_endpoint_code,
 						 endpoint_name
-			FROM ${td_ods}.ods_api_channel_endpoint
+			FROM ods_api_channel_endpoint
 			WHERE ds = '${bizdate}') AS t5
 			ON t1.channel_endpoint_code = t5.channel_endpoint_code AND t1.org_code = t5.org_code;
 
