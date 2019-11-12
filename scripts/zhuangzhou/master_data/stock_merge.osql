@@ -17,3 +17,4 @@ GROUP BY sl.org_code
     , sl.channel_endpint_code
     , sli.sku_code;
 
+
