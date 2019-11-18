@@ -7,22 +7,69 @@
 
 --business_type in ('10103','10104','10202','10203','10302','10303','10403','10404')
 
-
+ods_member_grade_log
 
 --三木：3个接口的其他周期为计算
 
+--***********************************
+-- 所属系统：会员中心
+-- 功能描述：物理库区表DDL
+-- 生命周期：365天
+-- 调度周期：手动调度
+-- 创建者：   行周
+-- 创建日期：20190902
+-- 修改日志：20190927,客户修改了表结构
+--***********************************
+--drop table if exists ods_member_card;
+--***********************************
+-- 所属系统：会员中心
+-- 功能描述：物理库区表DDL
+-- 生命周期：365天
+-- 调度周期：手动调度
+-- 创建者：   行周
+-- 创建日期：20190902
+-- 修改日志：
+--***********************************
+--drop table if exists ods_member_grade_info;
+
+create table if not exists ods_member_grade_info(
+	id bigint comment '主键',
+	grade_id bigint comment '等级id',
+	grade_code string comment '等级代码',
+	grade_name string comment '等级名称',
+	brand_code string comment '品牌编码',
+	grade_domain string comment '等级领域，一个会员卡下面可能有多个领域可算不同等级',
+	grade_desc string comment '等级描述',
+	parent_grade_id bigint comment '父等级id',
+	priority bigint comment '优先级',
+	store_id bigint comment '商店id',
+	grade_discount double comment '等级折扣',
+	status bigint comment '当前是否有效，1=可用，0=不再使用',
+	create_time string comment '创建时间',
+	last_update_time string comment '最后更新时间',
+	create_user string comment '创建人',
+	grade_validity_months bigint comment '等级有效期,单位:月',
+	org_code string comment '销售组织编码',
+	is_vip string comment '是否VIP',
+	app_id string comment '应用ID',
+	create_user_name string comment '创建用户名（冗余）',
+	create_user_id bigint comment '创建用户编码',
+	last_update_user_name string comment '最后更新用户名（冗余）',
+	last_update_user_id bigint comment '最后更新用户编码'
+)comment'会员中心-会员等级信息' partitioned by(
+	ds string comment '时间分区');
 
 
-select count(*) from ods_sales_order where ds = '20191021' and channel_endpoint_code = '13251'
-and member_no not in ('-1','1') and external_order_no = 'FP190630009SJ'
-and paid_time = '2019-06-30 22:43:42';
+--修改生命周期
+ALTER TABLE ods_member_grade_info SET lifecycle 365;
+
 
 --联营
 --FP190630009SJ
 
-desc ods_item_sku_price;
+desc ods_member_grade_info;
 
-desc ods_sales_order;
+desc ods_member_card;
 
 
 --2019-10-12 15:30:01

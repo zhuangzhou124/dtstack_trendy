@@ -24,155 +24,29 @@ CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_channel_endpoint_1d(
 )COMMENT '日期+门店粒度汇总表' PARTITIONED BY(
 	ds STRING COMMENT '时间分区');
 
-
-INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = '${bizdate}')
-	SELECT '${bizdate}' AS biz_date,
-				 t5.member_manage_channel_endpoint_code,
-				 t5.new_card_num_1d_store_vip,
-				 t6.total_card_num_td_store_vip,
-				 t5.date_type AS date_type,
-				 t5.date_id AS date_id
+INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds)
+	SELECT biz_date,
+				 member_manage_channel_endpoint_code,
+				 new_card_num_1d_store_vip,
+				 max(cast(total_vip as bigint)),
+				 date_type,
+				 date_id,
+				 ds
 	FROM (
-		SELECT t4.member_manage_channel_endpoint_code,
-					 t4.date_type,
-					 t4.date_id,
-					 t4.ds1,
-					 COUNT(DISTINCT (CASE
-					 WHEN t4.org_code IS NOT NULL THEN t4.member_no
-					 ELSE NULL
-					 END)) AS new_card_num_1d_store_vip
-		FROM (
-			SELECT t1.member_manage_channel_endpoint_code,
-						 t1.date_type,
-						 t1.date_id,
-						 t1.ds1,
-						 t3.is_vip,
-						 t1.org_code,
-						 t1.member_no
-			FROM (
-				SELECT member_manage_channel_endpoint_code,
-							 member_no,
-							 date_type,
-							 date_id,
-							 ds1,
-							 org_code
-				FROM (
-					SELECT member_manage_channel_endpoint_code,
-								 member_no,
-								 regexp_replace(member_register_time, '-', '', 0) AS member_register_time,
-								 org_code
-					FROM ${td_ods}.ods_member_card
-					WHERE ds = '${bizdate}' AND STATUS > -1 and member_manage_channel_endpoint_code is not null) AS mc
-					JOIN (
-						SELECT max(ds1) as ds1,
-									 date_type,
-									 date_id,
-									 time_id
-						FROM td_ads_dev.dim_time
-						WHERE ds >= '20150101' AND ds <= '${bizdate}'
-						GROUP BY date_type, date_id, time_id
-					) time
-						ON mc.member_register_time = time.time_id) t1
-				LEFT JOIN (
-					SELECT org_code,
-								 member_no,
-								 grade_id
-					FROM ${td_ods}.ods_member_grade_state
-					WHERE ds = '${bizdate}' ) t2
-					ON t1.org_code = t2.org_code
-				and t1.member_no = t2.member_no
-				LEFT JOIN (
-					SELECT grade_id,
-								 is_vip
-					FROM ${td_ods}.ods_member_grade_info
-					WHERE ds = '${bizdate}' AND is_vip = '1') t3
-					ON t2.grade_id = t3.grade_id) AS t4
-		WHERE t4.is_vip = '1'
-		GROUP BY t4.member_manage_channel_endpoint_code,
-		t4.date_type,
-		t4.date_id,t4.ds1) AS t5
-		LEFT JOIN (
-			SELECT t0.member_manage_channel_endpoint_code,
-						 time.ds1,
-						 time.date_type,
-						 t0.total_card_num_td_store_vip
-			FROM (
-				SELECT /*+MAPJOIN(a) */ a.member_manage_channel_endpoint_code,
-																a.member_register_time,
-																COUNT(DISTINCT (b.member_no)) AS total_card_num_td_store_vip
-				FROM (
-					SELECT DISTINCT member_manage_channel_endpoint_code,
-													regexp_replace(member_register_time, '-', '', 0) AS member_register_time
-					FROM ${td_ods}.ods_member_card
-					WHERE ds = '${bizdate}' AND STATUS > -1 and member_manage_channel_endpoint_code is not null) AS a
-					LEFT JOIN (
-						SELECT t4.member_manage_channel_endpoint_code,
-									 t4.member_register_time,
-									 t4.member_no
-						FROM (
-							SELECT t1.member_manage_channel_endpoint_code,
-										 t3.is_vip,
-										 t1.member_register_time,
-										 t1.member_no
-							FROM (
-								SELECT DISTINCT member_manage_channel_endpoint_code,
-																member_no,
-																regexp_replace(member_register_time, '-', '', 0) AS member_register_time,
-																org_code
-								FROM ${td_ods}.ods_member_card
-								WHERE ds = '${bizdate}' AND STATUS > -1 and member_manage_channel_endpoint_code is not null) t1
-								LEFT JOIN (
-									SELECT org_code,
-												 member_no,
-												 grade_id
-									FROM ${td_ods}.ods_member_grade_state
-									WHERE ds = '${bizdate}' ) t2
-									ON t1.org_code = t2.org_code
-								and t1.member_no = t2.member_no
-								LEFT JOIN (
-									SELECT grade_id,
-												 is_vip
-									FROM ${td_ods}.ods_member_grade_info
-									WHERE ds = '${bizdate}' AND is_vip = '1') t3
-									ON t2.grade_id = t3.grade_id) AS t4
-						WHERE t4.is_vip = '1') AS b
-						ON a.member_manage_channel_endpoint_code = b.member_manage_channel_endpoint_code
-					AND a.member_register_time >= b.member_register_time
-				GROUP BY a.member_manage_channel_endpoint_code, a.member_register_time) as t0
-				JOIN (
-					SELECT max(ds1) as ds1,
-								 date_type,
-								 date_id,
-								 time_id
-					FROM td_ads_dev.dim_time
-					WHERE ds >= '20150101' AND ds <= '${bizdate}'
-					GROUP BY date_type, date_id, time_id
-				) time
-					ON t0.member_register_time = time.time_id) AS t6
-			ON t5.member_manage_channel_endpoint_code = t6.member_manage_channel_endpoint_code
-		AND t5.ds1 = t6.ds1 and t5.date_type = t6.date_type;
-
-
-INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_channel_endpoint_1d PARTITION(ds = '${bizdate}')
-			SELECT biz_date
-			,
-						 channel_endpoint
-			,
-						 max(new_card_num_1d_store_vip) AS new_card_num_1d_store_vip
-			,
-						 max(total_card_num_td_store_vip) AS total_card_num_td_store_vip
-			,
-						 date_type
-			,
-						 date_id
-			FROM ads_api_tpos_tdrp_wfx_channel_endpoint_1d
-			WHERE ds = '${bizdate}'
-			GROUP BY biz_date
-			, channel_endpoint
-			, date_type
-			, date_id;
-
-
+		SELECT '${bizdate}' AS biz_date,
+					 a.member_manage_channel_endpoint_code,
+					 0 AS new_card_num_1d_store_vip,
+					 COUNT(DISTINCT a.member_no) AS total_vip,
+					 'day' AS date_type,
+					 '${bizdate}' AS date_id,
+					 '${bizdate}' AS ds
+		FROM ods_member_card a
+			JOIN ods_member_grade_log b
+				ON a.org_code = b.org_code AND a.member_no = b.member_no
+		WHERE a.ds = '${bizdate}' AND b.ds = '${bizdate}' AND a.STATUS > -1
+		AND regexp_replace(grade_change_time, '-', '', 0) <= '${bizdate}' AND b.before_grade_id < b.after_grade_id
+		GROUP BY a.member_manage_channel_endpoint_code) AS t1
+	GROUP BY biz_date, member_manage_channel_endpoint_code, new_card_num_1d_store_vip, date_type, date_id,ds;
 
 
 

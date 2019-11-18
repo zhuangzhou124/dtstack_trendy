@@ -131,7 +131,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 				 mi.crm_info_id,       --会员id
 				 mi.member_mobile,   --会员手机号
 				 so.member_grade_code,   --会员等级
-				 so.external_member_type, --会员类型
+				 mgi.grade_name, --会员类型
 				 so.member_no,  --会员编号
 				 CASE
 				 WHEN soip.promotion_name LIKE '%抹零%' THEN '抹零'
@@ -145,7 +145,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 				 substr(so.audit_time, 1, 10), --营业日期
 				 'day' AS date_type,
 				 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) AS date_id
-	FROM ${td_ods}.ods_sales_order so
+	FROM ods_sales_order so
 		INNER JOIN (
 			SELECT t2.sales_order_no,
 						 t2.order_amt,
@@ -159,21 +159,21 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 								 sales_order_item_no,
 								 price_sales,
 								 qty_product
-					FROM ${td_ods}.ods_sales_order_item
+					FROM ods_sales_order_item
 					WHERE ds = '${bizdate}') soi
 					INNER JOIN (
 						SELECT sales_order_item_no,
 									 amt_cash_coupon_contribution
-						FROM ${td_ods}.ods_sales_order_item_price
+						FROM ods_sales_order_item_price
 						WHERE ds = '${bizdate}') osoip
 						ON osoip.sales_order_item_no = soi.sales_order_item_no
 				GROUP BY soi.sales_order_no) AS t2) AS t3
 			ON so.sales_order_no = t3.sales_order_no
-		LEFT JOIN ${td_ods}.ods_sales_order_coupon soc
+		LEFT JOIN ods_sales_order_coupon soc
 			ON so.sales_order_no = soc.sales_order_no AND soc.ds = '${bizdate}'
-		LEFT JOIN ${td_ods}.ods_member_info mi
+		LEFT JOIN ods_member_info mi
 			ON so.member_no = mi.member_no AND mi.ds = '${bizdate}'
-		LEFT JOIN ${td_ods}.ods_member_card mc
+		LEFT JOIN ods_member_card mc
 			ON so.org_code = mc.org_code AND so.member_no = mc.member_no AND mc.ds = '${bizdate}'
 		LEFT JOIN (
 			SELECT t1.sales_order_no,
@@ -221,7 +221,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 												WHEN pay_way = 'THIRD_ONLINE' THEN amt_pay
 												END AS third_online_amt,             --第三方支付方式
 												pay_way                      --支付方式
-				FROM ${td_ods}.ods_sales_order_payment
+				FROM ods_sales_order_payment
 				WHERE ds = '${bizdate}') AS t1
 			GROUP BY t1.sales_order_no) sop
 			ON so.sales_order_no = sop.sales_order_no
@@ -233,24 +233,26 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 				SELECT DISTINCT sales_order_no,
 												promotion_code,
 												promotion_name
-				FROM ${td_ods}.ods_sales_order_item_promotion
+				FROM ods_sales_order_item_promotion
 				WHERE ds = '${bizdate}') AS a
 			GROUP BY sales_order_no) soip
 			ON so.sales_order_no = soip.sales_order_no
-		LEFT JOIN ${td_ods}.ods_api_channel_endpoint ace
+		LEFT JOIN ods_api_channel_endpoint ace
 			ON so.channel_endpoint_code = ace.channel_endpoint_code AND ace.ds = '${bizdate}'
-		LEFT JOIN ${td_ods}.ods_user_auth ua
+		LEFT JOIN ods_user_auth ua
 			ON so.member_no = ua.member_no AND ua.ds = '${bizdate}' AND ua.auth_type = 20
-		LEFT JOIN ${td_ods}.ods_promotion_info pi
+		LEFT JOIN ods_promotion_info pi
 			ON soip.promotion_code = pi.promotion_no AND pi.ds = '${bizdate}'
-		LEFT JOIN ${td_ods}.ods_sales_delivery_order sdo
+		LEFT JOIN ods_sales_delivery_order sdo
 			ON so.sales_order_no = sdo.sales_order_no AND sdo.ds = '${bizdate}'
 		LEFT JOIN (
 			SELECT clerk_no,
 						 clerk_name
-			FROM ${td_ods}.ods_clerk_info
+			FROM ods_clerk_info
 			WHERE ds = '${bizdate}' AND STATUS = 7) oci
 			ON so.shopping_guider_no = oci.clerk_no
+	  left join ods_member_grade_info mgi
+	on so.member_grade_code = mgi.grade_code and mgi.ds = '${bizdate}'
 	WHERE so.ds = '${bizdate}' AND so.order_status = 1 AND so.paid_time IS NOT NULL
 AND so.business_type in ('10103','10104','10202','10203','10302','10303','10403','10404')
 ;
