@@ -92,7 +92,19 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 				 so.sales_order_no,       --销售单号
 				 so.external_order_no,       --EC单号
 				 '',  --OMS临时单号
-				 so.order_type,      --订单类型
+				 case when so.business_type = '10103' then '线下O2O销售单'
+							when so.business_type = '10104' then '线下销售单'
+							when so.business_type = '10105' then '货到付款单'
+							when so.business_type = '10202' then '线下O2O退款单'
+							when so.business_type = '10203' then '线下退款单'
+							when so.business_type = '10302' then '线下O2O退货单'
+							when so.business_type = '10303' then '线下退货单'
+							when so.business_type = '10403' then '线下O2O换货单'
+							when so.business_type = '10404' then '线下换货单'
+							when so.business_type = '10501' then '销售调整单'
+							when so.business_type = '10601' then '销售补发单'
+							else '未知'
+							end as order_type,      --订单类型
 				 so.business_type,    --业务单据类型
 				 '',    --OMS订单号
 				 sdo.tracking_no,                --快递单号
@@ -101,11 +113,15 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 				 soc.coupon_type,        --优惠券类别
 				 soc.coupon_no,
 				 soc.coupon_name,
-				 '',   --商场卡
-				 t3.order_amt - t3.amt_cash_coupon_contribution,  --实收金额
+				 CASE
+				 WHEN soip.promotion_code LIKE '%MallVPr95%' THEN '9.5折商场卡'
+				 WHEN soip.promotion_code LIKE '%MallVPr90%' THEN '9折商场卡'
+				 ELSE '未知'
+				 END as shopping_card,   --商场卡
+				 t3.order_amt - if(t3.amt_cash_coupon_contribution is null,0,t3.amt_cash_coupon_contribution),  --实收金额
 				 so.amt_total AS totla_amt_order,             --订单总金额
 				 sop.discount_coupon_amt,--现金券抵扣金额
-				 sop.promotion_discount_coupon_amt,--折扣券优惠总额
+				 b.amt_discount as promotion_discount_coupon_amt,--折扣券优惠总额
 				 sop.stored_value_card_pay_amt,--储值卡支付金额
 				 sop.wxpay_amt,  --微信
 				 sop.alipay_amt,      --支付宝
@@ -122,10 +138,13 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 				 '',  --促销提案折扣
 				 so.point_deduction, --促销商场扣点
 				 so.original_order_no,     --源单号
-				 so.price_print_type,    --入机类型
-				 t3.order_amt - t3.amt_cash_coupon_contribution AS sales_amt_deduct_coupon,--销售金额(扣券)
+				 CASE WHEN so.price_print_type = 1 THEN '原价入机'
+							WHEN so.price_print_type = 2 THEN '折后入机'
+							WHEN so.price_print_type = 3 THEN '混合入机'
+							END as price_print_type_text,   --入机类型
+				 t3.order_amt - if(t3.amt_cash_coupon_contribution is null,0,t3.amt_cash_coupon_contribution) AS sales_amt_deduct_coupon,--销售金额(扣券)
 				 t3.order_amt AS sales_amt_with_coupon,    --销售金额(未扣券)
-				 t3.order_amt - t3.amt_cash_coupon_contribution AS actual_amt_deduct_coupon,--实际成交额(扣券)
+				 t3.order_amt - if(t3.amt_cash_coupon_contribution is null,0,t3.amt_cash_coupon_contribution) AS actual_amt_deduct_coupon,--实际成交额(扣券)
 				 t3.order_amt AS actual_amt_with_coupon,       --实际成交额(未扣券)
 				 so.paid_time AS original_audit_date,       --原单营业日期
 				 mi.crm_info_id,       --会员id
@@ -232,6 +251,8 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 			FROM (
 				SELECT DISTINCT sales_order_no,
 												promotion_code,
+												promotion_base_on,
+												amt_discount,
 												promotion_name
 				FROM ods_sales_order_item_promotion
 				WHERE ds = '${bizdate}') AS a
@@ -246,13 +267,25 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 		LEFT JOIN ods_sales_delivery_order sdo
 			ON so.sales_order_no = sdo.sales_order_no AND sdo.ds = '${bizdate}'
 		LEFT JOIN (
-			SELECT clerk_no,
+			SELECT distinct channel_endpoint_code,
+						 clerk_no,
 						 clerk_name
 			FROM ods_clerk_info
-			WHERE ds = '${bizdate}' AND STATUS = 7) oci
+			WHERE ds = '${bizdate}') oci
 			ON so.shopping_guider_no = oci.clerk_no
+	    AND so.channel_endpoint_code = oci.channel_endpoint_code
 	  left join ods_member_grade_info mgi
 	on so.member_grade_code = mgi.grade_code and mgi.ds = '${bizdate}'
+	  left join
+		(	SELECT  sales_order_no,
+							 sum(amt_discount) as amt_discount
+										 FROM ods_sales_order_item_promotion
+											 WHERE ds = '${bizdate}'
+											 and promotion_code != 'KEEP_INTEGER'
+											 and promotion_code IS NULL
+		                   and promotion_base_on = 'DISCOUNT_COUPON'
+											 group by sales_order_no) AS b
+	on so.sales_order_no = b.sales_order_no
 	WHERE so.ds = '${bizdate}' AND so.order_status = 1 AND so.paid_time IS NOT NULL
 AND so.business_type in ('10103','10104','10202','10203','10302','10303','10403','10404')
 ;

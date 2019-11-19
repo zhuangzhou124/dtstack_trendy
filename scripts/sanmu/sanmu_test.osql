@@ -32,42 +32,22 @@ ods_member_grade_log
 --***********************************
 --drop table if exists ods_member_grade_info;
 
-create table if not exists ods_member_grade_info(
-	id bigint comment '主键',
-	grade_id bigint comment '等级id',
-	grade_code string comment '等级代码',
-	grade_name string comment '等级名称',
-	brand_code string comment '品牌编码',
-	grade_domain string comment '等级领域，一个会员卡下面可能有多个领域可算不同等级',
-	grade_desc string comment '等级描述',
-	parent_grade_id bigint comment '父等级id',
-	priority bigint comment '优先级',
-	store_id bigint comment '商店id',
-	grade_discount double comment '等级折扣',
-	status bigint comment '当前是否有效，1=可用，0=不再使用',
-	create_time string comment '创建时间',
-	last_update_time string comment '最后更新时间',
-	create_user string comment '创建人',
-	grade_validity_months bigint comment '等级有效期,单位:月',
-	org_code string comment '销售组织编码',
-	is_vip string comment '是否VIP',
-	app_id string comment '应用ID',
-	create_user_name string comment '创建用户名（冗余）',
-	create_user_id bigint comment '创建用户编码',
-	last_update_user_name string comment '最后更新用户名（冗余）',
-	last_update_user_id bigint comment '最后更新用户编码'
-)comment'会员中心-会员等级信息' partitioned by(
-	ds string comment '时间分区');
+
+--8.interval_time_from_riginal_to_rma没值
+   这个当时没有给口径，现在口径是什么？
 
 
---修改生命周期
-ALTER TABLE ods_member_grade_info SET lifecycle 365;
 
 
---联营
---FP190630009SJ
+SELECT sum(IF(soip.promotion_base_on = 'DISCOUNT_COUPON', soip.discount_amount, 0)) promotion_discount_coupon_amount
+FROM sales_order_item soi
+	LEFT JOIN sales_order so
+		ON soi.sales_order_no = so.sales_order_no
+	LEFT JOIN sales_order_item_promotion soip
+		ON soi.sales_order_no = soip.sales_order_no AND soi.sales_order_item_no = soip.sales_order_item_no
+WHERE soip.promotion_code != 'KEEP_INTEGER' OR soip.promotion_code IS NULL;
 
-desc ods_member_grade_info;
+desc ods_item_property_value;
 
 desc ods_member_card;
 

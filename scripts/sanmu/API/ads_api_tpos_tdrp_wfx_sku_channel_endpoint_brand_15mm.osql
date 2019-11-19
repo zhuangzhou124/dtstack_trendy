@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm
 	clerk_no                                                       STRING COMMENT '导购员代码      ',
 	clerk_name                                                     STRING COMMENT '导购员名称      ',
 	sales_order_no                                                 STRING COMMENT '销售单号       ',
+	sales_order_item_no                                            STRING COMMENT '销售子单号       ',
 	ec_id                                                          STRING COMMENT 'EC单号       ',
 	outer_order_no                                                 STRING COMMENT 'OMS临时单号    ',
 	order_type                                                     STRING COMMENT '订单类型       ',
@@ -104,8 +105,13 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 	SELECT '${bizdate}' AS biz_date,
 				 so.org_code,           --品牌编码
 				 pb.brand_name,        --子品牌编码
-				 so.channel_endpoint_code AS channel_endpoint,     --门店编码
-				 rs.store_type AS channel_endpoint_type,            --门店类型
+				 so.channel_endpoint_code AS channel_endpoint,    --门店编码
+				 case when rs.offer_type = 'NORMAL_PRICE' then '正价场'
+              when rs.offer_type = 'HALF_OFF' then '半OFF场'
+              when rs.offer_type = 'LONG_TERM_SPECIAL' then '长特场'
+              when rs.offer_type = 'SHORT_TERM_SPECIAL' then '短特场'
+              when rs.offer_type = 'HALF_PRICE' then '半价场'
+              else '未知' end AS channel_endpoint_type,            --门店类型
 				 rs.region_name,
 				 rs.city_name,
 				 ace.endpoint_code AS endpoint_code,        --终端代码
@@ -113,9 +119,22 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 				 so.shopping_guider_no AS clerk_no,--导购员代码
 				 oci.clerk_name AS clerk_name,--导购员名称
 				 so.sales_order_no AS sales_order_no,   --销售单号
+				 soi.sales_order_item_no ,  --销售子订单号
 				 so.external_order_no AS ec_id,   --EC单号
 				 '' AS outer_order_no, --OMS临时单号
-				 so.order_type,      --订单类型,
+				 case when so.business_type = '10103' then '线下O2O销售单'
+							when so.business_type = '10104' then '线下销售单'
+							when so.business_type = '10105' then '货到付款单'
+							when so.business_type = '10202' then '线下O2O退款单'
+							when so.business_type = '10203' then '线下退款单'
+							when so.business_type = '10302' then '线下O2O退货单'
+							when so.business_type = '10303' then '线下退货单'
+							when so.business_type = '10403' then '线下O2O换货单'
+							when so.business_type = '10404' then '线下换货单'
+							when so.business_type = '10501' then '销售调整单'
+							when so.business_type = '10601' then '销售补发单'
+							else '未知'
+							end as order_type,      --订单类型,
 				 so.business_type,--业务单据类型
 				 '' AS oms_order_no, --OMS订单号
 				 sdo.tracking_no AS tracking_no,  --快递单号
@@ -130,16 +149,19 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 				 '',  --促销提案折扣
 				 so.point_deduction, --促销商场扣点
 				 so.original_order_no,     --源单号
-				 so.price_print_type,   --入机类型
-				 (soi.price_sales * soi.qty_product) - osoip.amt_cash_coupon_contribution AS sales_amt_deduct_coupon,--销售金额(扣券)
+				 CASE WHEN so.price_print_type = 1 THEN '原价入机'
+				      WHEN so.price_print_type = 2 THEN '折后入机'
+				      WHEN so.price_print_type = 3 THEN '混合入机'
+				      END as price_print_type_text,   --入机类型
+				 (soi.price_sales * soi.qty_product) - if(osoip.amt_cash_coupon_contribution is null,0,osoip.amt_cash_coupon_contribution) AS sales_amt_deduct_coupon,--销售金额(扣券)
 				 soi.price_sales * soi.qty_product AS sales_amt_with_coupon,    --销售金额(未扣券)
-				 (soi.price_sales * soi.qty_product) - osoip.amt_cash_coupon_contribution AS actual_amt_deduct_coupon,--实际成交额(扣券)
+				 (soi.price_sales * soi.qty_product) - if(osoip.amt_cash_coupon_contribution is null,0,osoip.amt_cash_coupon_contribution) AS actual_amt_deduct_coupon,--实际成交额(扣券)
 				 soi.price_sales * soi.qty_product AS actual_amt_with_coupon,       --实际成交额(未扣券)
 				 so.paid_time AS original_audit_date,      --原单营业日期
 				 mi.crm_info_id,      --会员id
 				 mi.member_mobile,   --会员手机号
 				 so.member_grade_code,   --会员等级
-				 so.external_member_type,      --会员类型
+				 mgi.grade_name,      --会员类型
 				 so.member_no,   --会员编号
 				 soi.sku_code,          --商品编号
 				 ais.sku_cn_name,  --商品名称
@@ -160,17 +182,21 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 				 soi.price_discount, --商品折后价
 				 osoip.amt_cash_coupon_contribution, --现金券摊分金额
 				 soi.price_retail * soi.qty_product, --零售金额(吊牌价×数量)
-				 (soi.price_discount - osoip.amt_cash_coupon_contribution) * soi.qty_product,--销售金额(小票价×数量)
+				 (soi.price_discount - if(osoip.amt_cash_coupon_contribution is null,0,osoip.amt_cash_coupon_contribution)) * soi.qty_product,--销售金额(小票价×数量)
 				 soi.discount_rate, --商品折扣率
 				 so.rma_reason, --退换货理由
 				 NULL,  --退换货订单与原订单间隔天数
 				 so.rma_contact_number, --退换客户电话
 				 ais.list_date,  --商品上市时间
-				 so.amt_discount AS discount_amt_order,    --(整单)折扣金额
-				 (so.amt_discount - sop.discount_coupon_amt) AS total_amt_without_cash,       --(整单)折后总额(已扣券)
-				 (so.amt_discount + sop.discount_coupon_amt) AS discount_amt_with_cash,      --(整单)折让总额(折扣减掉的钱+现金券的钱),
-				 '',  --退换货类型
-				 '',  --是否为赠品
+				 (soi.price_retail - soi.price_sales) AS discount_amt_order,    --(整单)折扣金额
+				 ((soi.amt_sales * soi.qty_product) - if(osoip.amt_cash_coupon_contribution is null,0,osoip.amt_cash_coupon_contribution)) AS total_amt_without_cash,       --(整单)折后总额(已扣券)
+				 osoip.amt_cash_coupon_contribution AS discount_amt_with_cash,      --(整单)折让总额(折扣减掉的钱+现金券的钱),
+				 case when so.business_type in ('10202','10203','10303','10302','10403','10404') and soi.qty_product > 0 then '换货'
+							when so.business_type in ('10202','10203','10303','10302','10403','10404') and soi.qty_product <= 0 then '退款'
+							else '未知'
+							end as rma_type,  --退换货类型
+				 case when soi.price_discount = 0 then '是'
+              else '否' end as is_donate,  --是否为赠品
 				 CASE
 				 WHEN soip.promotion_name LIKE '%抹零%' THEN '抹零'
 				 ELSE '未抹零'
@@ -183,12 +209,12 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 				 substr(so.audit_time, 1, 10), --营业日期
 				 'day' AS date_type,
 				 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) AS date_id
-	FROM ${td_ods}.ods_sales_order so
-		LEFT JOIN ${td_ods}.ods_sales_delivery_order sdo
+	FROM ods_sales_order so
+		LEFT JOIN ods_sales_delivery_order sdo
 			ON so.sales_order_no = sdo.sales_order_no AND sdo.ds = '${bizdate}'
-		LEFT JOIN ${td_ods}.ods_sales_order_coupon soc
+		LEFT JOIN ods_sales_order_coupon soc
 			ON so.sales_order_no = soc.sales_order_no AND soc.ds = '${bizdate}'
-		LEFT JOIN ${td_ods}.ods_member_info mi
+		LEFT JOIN ods_member_info mi
 			ON so.member_no = mi.member_no AND mi.ds = '${bizdate}'
 		LEFT JOIN (
 			SELECT t1.sales_order_no,
@@ -236,7 +262,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 												WHEN pay_way = 'THIRD_ONLINE' THEN amt_pay
 												END AS third_online_amt,             --第三方支付方式
 												pay_way                      --支付方式
-				FROM ${td_ods}.ods_sales_order_payment
+				FROM ods_sales_order_payment
 				WHERE ds = '${bizdate}') AS t1
 			GROUP BY t1.sales_order_no) sop
 			ON so.sales_order_no = sop.sales_order_no
@@ -248,36 +274,44 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 				SELECT DISTINCT sales_order_no,
 												promotion_code,
 												promotion_name
-				FROM ${td_ods}.ods_sales_order_item_promotion
+				FROM ods_sales_order_item_promotion
 				WHERE ds = '${bizdate}') AS a
 			GROUP BY sales_order_no) soip
 			ON so.sales_order_no = soip.sales_order_no
-		LEFT JOIN ${td_ods}.ods_promotion_info pi
+		LEFT JOIN ods_promotion_info pi
 			ON soip.promotion_code = pi.promotion_no AND pi.ds = '${bizdate}'
-		LEFT JOIN ${td_ods}.ods_api_channel_endpoint ace
+		LEFT JOIN ods_api_channel_endpoint ace
 			ON so.channel_endpoint_code = ace.channel_endpoint_code AND ace.ds = '${bizdate}'
-		LEFT JOIN ${td_ods}.ods_user_auth ua
+		LEFT JOIN ods_user_auth ua
 			ON so.member_no = ua.member_no AND ua.ds = '${bizdate}' AND ua.auth_type = 20
-		INNER JOIN ${td_ods}.ods_sales_order_item soi
+		INNER JOIN ods_sales_order_item soi
 			ON so.sales_order_no = soi.sales_order_no AND soi.ds = '${bizdate}'
-		INNER JOIN ${td_ods}.ods_sales_order_item_price osoip
-			ON osoip.sales_order_item_no = soi.sales_order_item_no AND osoip.ds = '${bizdate}'
-		LEFT JOIN ${td_ods}.ods_real_store rs
+		INNER JOIN (
+			SELECT sales_order_item_no,
+						 sum(amt_cash_coupon_contribution) AS amt_cash_coupon_contribution
+			FROM ods_sales_order_item_price
+			WHERE ds = '${bizdate}'
+			GROUP BY sales_order_item_no) osoip
+			ON osoip.sales_order_item_no = soi.sales_order_item_no
+		LEFT JOIN ods_real_store rs
 			ON so.channel_endpoint_code = rs.store_code AND rs.ds = '${bizdate}'
-		LEFT JOIN ${td_ods}.ods_api_item_sku ais
+		LEFT JOIN ods_api_item_sku ais
 			ON soi.sku_code = ais.sku_code AND ais.ds = '${bizdate}'
-		LEFT JOIN ${td_ods}.ods_product_brand pb
+		LEFT JOIN ods_product_brand pb
 			ON ais.brand_code = pb.brand_code AND pb.ds = '${bizdate}'
 		LEFT JOIN (
-			SELECT clerk_no,
-						 clerk_name
-			FROM ${td_ods}.ods_clerk_info
-			WHERE ds = '${bizdate}' AND STATUS = 7) oci
+			SELECT distinct channel_endpoint_code,
+											clerk_no,
+											clerk_name
+			FROM ods_clerk_info
+			WHERE ds = '${bizdate}') oci
 			ON so.shopping_guider_no = oci.clerk_no
+		AND so.channel_endpoint_code = oci.channel_endpoint_code
+		LEFT JOIN ods_member_grade_info mgi
+			ON so.member_grade_code = mgi.grade_code AND mgi.ds = '${bizdate}'
 	WHERE so.ds = '${bizdate}' AND so.order_status = 1 AND so.paid_time IS NOT NULL
 AND so.business_type in ('10103','10104','10202','10203','10302','10303','10403','10404')
 ;
 
 
 
---soip.promotion_code IN ('DECIMAL_00', 'DECIMAL_01', 'DECIMAL_10', 'DECIMAL_11')
