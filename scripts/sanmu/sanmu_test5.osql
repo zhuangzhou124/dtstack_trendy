@@ -1,513 +1,429 @@
---name:ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d
---author:sanmu
---create time:2019-10-11 13:42
---drop table ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d
 --***********************************
--- 表   名：ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d
--- 功能描述：日期+商品+门店粒度汇总表
--- 生命周期：30天
--- 调度周期：周期调度
--- 创建者：  三木
--- 创建日期：20191008
+-- 表   名：ads_api_tpos_ma_store_15mm
+-- 功能描述：tpos_ma门店粒度小时、天，周和月周期指标统计
+-- 生命周期：3650天
+-- 调度周期：15min调度
+-- 创建者：  yike
+-- 创建日期：20191010
 -- 修改日志：
 --***********************************
+-- drop table ads_api_tpos_ma_store_15mm;
+CREATE TABLE IF NOT EXISTS ads_api_tpos_ma_store_15mm(
+	biz_date                                     BIGINT COMMENT '统计日期',
+	date_type                                    STRING COMMENT '日期类型',
+	date_id                                      STRING COMMENT '日期id',
+	channel_endpoint_code                        STRING COMMENT '门店列表编码',
+	order_type                                   STRING COMMENT '订单类型-写死1，2，3',
+	STATUS                                       STRING COMMENT '订单状态-写死11',
+	org_code                                     STRING COMMENT '品牌编码',
+	sales_amount                                 DOUBLE COMMENT '销售总额未扣券',
+	sales_rate                                   DOUBLE COMMENT '销售总额占比（本品牌）',
+	sales_sub_coupon_amount                      DOUBLE COMMENT '扣卷销售总额-真实金额',
+	sales_sub_coupon_rate                        DOUBLE COMMENT '扣券销售总额占比（本品牌）',
+	rank                                         BIGINT COMMENT '销售金额排名',
+	order_max_amount                             DOUBLE COMMENT '最大单金额',
+	item_quantity                                BIGINT COMMENT '商品数量',
+	order_quantity                               BIGINT COMMENT '订单数量',
+	average_discount                             DOUBLE COMMENT '平均折扣',
+	retail_price_amount                          DOUBLE COMMENT '吊牌价总额',
+	per_customer_transaction                     DOUBLE COMMENT '客单价未扣券',
+	per_customer_transaction_sub_coupon          DOUBLE COMMENT '客单价扣券',
+	associated_purchase_rate                     DOUBLE COMMENT '连带率',
+	common_vip_sales_rate                        DOUBLE COMMENT '普通会员未扣券销售占比',
+	common_vip_sales_rate_sub_coupon             DOUBLE COMMENT '普通会员扣券销售占比',
+	return_sales_amount                          DOUBLE COMMENT '退货金额',
+	cash_coupon                                  DOUBLE COMMENT '现金券金额',
+	per_item_amount                              DOUBLE COMMENT '件单价未扣券',
+	per_item_amount_sub_coupon                   DOUBLE COMMENT '件单价扣券',
+	return_item_quantity                         BIGINT COMMENT '退货商品数量',
+	rma_order_quantity                           BIGINT COMMENT '退换货单数',
+	vip_per_customer_transaction                 DOUBLE COMMENT 'VIP客单价未扣券',
+	vip_per_customer_transaction_sub_coupon      DOUBLE COMMENT 'VIP客单价扣券',
+	vip_associated_purchase_rate                 DOUBLE COMMENT 'VIP连带率',
+	order_amt_vip_sub_coupon                     DOUBLE COMMENT 'VIP销售额扣券',
+	order_amt_vip                                DOUBLE COMMENT 'VIP销售额未扣券',
+	vip_sales_rate                               DOUBLE COMMENT 'VIP未扣券销售占比',
+	vip_sales_rate_sub_coupon                    DOUBLE COMMENT 'VIP扣券销售占比',
+	vip_sales_item_quantity                      BIGINT COMMENT 'VIP销售商品数量',
+	vip_per_item_amount                          DOUBLE COMMENT 'VIP件单价未扣券',
+	vip_per_item_amount_sub_coupon               DOUBLE COMMENT 'VIP件单价扣券',
+	vip_order_quantity                           BIGINT COMMENT 'VIP订单数量',
+	lasted_project_sales_amount                  DOUBLE COMMENT '最近3波段销售金额',
+	lasted_project_sales_rate                    DOUBLE COMMENT '最近3波段销售占比'
+)COMMENT '门店销售排行（含券或扣券）' PARTITIONED BY(
+	ds STRING
+);
 
-
-
-CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d(
-	biz_date                         STRING COMMENT '统计日期',
-	org_code                         STRING COMMENT '品牌         ',
-	brand_code                       STRING COMMENT '子品牌         ',
-	channel_endpoint                 STRING COMMENT '门店code',
-	channel_endpoint_name            STRING COMMENT '门店名称',
-	sku_code                         STRING COMMENT '商品编码       ',
-	product_code                     STRING COMMENT '商品款号       ',
-	product_name                     STRING COMMENT '商品款号名称       ',
-	sku_retail_price                 STRING COMMENT '商品吊牌价 ',
-	sku_year                         STRING COMMENT '商品年度         ',
-	sku_season                       STRING COMMENT '商品季节         ',
-	sku_band                         STRING COMMENT '商品波段         ',
-	sku_list_date                    STRING COMMENT '商品上市日期 ',
-	sku_main_cate                    STRING COMMENT '商品大类   ',
-	sku_main_cate_name               STRING COMMENT '商品大类名称   ',
-	sku_sub_cate                     STRING COMMENT '商品中类 ',
-	sku_sub_cate_name                STRING COMMENT '商品中类名称 ',
-	sku_leaf_cate                    STRING COMMENT '商品小类         ',
-	sku_leaf_cate_name               STRING COMMENT '商品小类名称         ',
-	sku_color_code                   STRING COMMENT '商品颜色编码         ',
-	sku_color_name                   STRING COMMENT '商品颜色名称         ',
-	sku_size_code                    STRING COMMENT '商品尺码编码         ',
-	sku_size_name                    STRING COMMENT '商品尺码名称   ',
-	sku_num_1d_qczks                 BIGINT COMMENT '期初在库数(截止到某个时间节点前，某个或者多个仓库或者某个渠道的库存数量)',
-	sku_num_1d_qczts                 BIGINT COMMENT '期初在途数(截止到某个时间节点前，某个或者多个仓库或者某个渠道的在途数量)',
-	sku_num_1d_qckcs                 BIGINT COMMENT '期初库存数=期初在库数+期初在途数',
-	sku_num_1d_bqkccss               BIGINT COMMENT '本期库存初始数(截止范围内，某个或者多个仓库或者某个渠道的库存初始化数)',
-	sku_num_1d_dbrsl                 BIGINT COMMENT '调拨入数量(日期范围内总部发给联营客户的数量)',
-	sku_num_1d_dtcsl                 BIGINT COMMENT '调退出数量(日期范围内联营客户退货给总部仓的数量(单据类型为[渠道退货]))',
-	sku_num_1d_phcsl                 BIGINT COMMENT '配货出数量(日期范围内联营客户配货给店铺的数量(单据类型为[门店配货])',
-	sku_num_1d_ptrsl                 BIGINT COMMENT '配退入数量(日期范围内联营店铺退货给联营客户的数量(单据类型为[门店退货]))',
-	sku_num_1d_phrsl                 BIGINT COMMENT '配货入数量(日期范围内联营客户配货给店铺的数量(单据类型为[配货]))',
-	sku_num_1d_ptcsl                 BIGINT COMMENT '配退出数量(日期范围内联营店铺退货给联营客户的数量(单据类型为[门店退货]))',
-	sku_num_1d_hdcsl                 BIGINT COMMENT '横调出数量(截止到某个时间节点前，某个或者多个仓库或者门店横调出货的数量)',
-	sku_num_1d_hdrsl                 BIGINT COMMENT '横调入数量(截止到某个时间节点前，某个或者多个仓库或者门店横调入货的数量)',
-	sku_num_1d_kqdhdcsl              BIGINT COMMENT '跨渠道横调出数量(截止到某个时间节点前，某个或者多个仓库或者门店跨渠道横调出货的',
-	sku_num_1d_kqdhdrsl              BIGINT COMMENT '跨渠道横调入数量(截止到某个时间节点前，某个或者多个仓库或者门店跨渠道横调入货的',
-	sku_num_1d_pdcysl                BIGINT COMMENT '盘点差异数量(截止到某个时间节点前，某个或者多个仓库或者门店盘点的差异的数量)',
-	sku_num_1d_bqxss                 BIGINT COMMENT '本期销售数(日期范围内店铺销售的数量)',
-	sku_num_1d_bqxts                 BIGINT COMMENT '本期销退数(日期范围内店铺销售退货的数量)',
-	sku_num_1d_bqzts                 BIGINT COMMENT '本期在途数(截止到某个时间节点前，某个或者多个仓库或者某个渠道的在途数量)',
-	sku_num_1d_qmzks                 BIGINT COMMENT '期末在库数(截止到某个时间节点前，某个或者多个仓库或者某个渠道的在途数量)',
-	sku_num_1d_qmzts                 BIGINT COMMENT '期末在途数(截止时间点的在途数量)=期初在途数+本期在途数',
-	sku_num_1d_qmkcs                 BIGINT COMMENT '期末库存数(截止时间点的库存数量)=期末在途数+期末在库数',
-	date_type                        STRING COMMENT '日期类型',
-	date_id                          STRING COMMENT '日期'
-)COMMENT '日期+商品+门店粒度汇总表' PARTITIONED BY(
-	ds STRING COMMENT '时间分区')
-LIFECYCLE 30;
-
-
-INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(ds = '${bizdate}')
-	SELECT '${bizdate}' AS biz_date,
-				 t7.org_code,
-				 null as brand_code,
-				 t7.channel_endpoint_code,
-				 null AS channel_endpoint_name,
-				 t7.sku_code,
-				 null,
-				 null,
-				 null,
-				 null,
-				 null,
-				 null,
-				 null,
-				 null,
-				 null,
-				 null,
-				 null,
-				 null,
-				 null,
-				 null,
-				 null,
-				 null,
-				 null,
-				 t7.qty AS sku_num_1d_qczks,
-				 t8.qty AS sku_num_1d_qczts,
-				 t7.qty + t8.qty AS sku_num_1d_qckcs,
-				 NULL AS sku_num_1d_bqkccss,
-				 cast(case when t16.sku_num_1d_dbrsl is null then 0 else t16.sku_num_1d_dbrsl end as bigint) as sku_num_1d_dbrsl,
-				 cast(case when t15.sku_num_1d_dtcsl is null then 0 else t15.sku_num_1d_dtcsl end as bigint) as sku_num_1d_dtcsl,
-				 cast(case when t15.sku_num_1d_phcsl is null then 0 else t15.sku_num_1d_phcsl end as bigint) as sku_num_1d_phcsl,
-				 cast(case when t16.sku_num_1d_ptrsl is null then 0 else t16.sku_num_1d_ptrsl end as bigint) as sku_num_1d_ptrsl,
-				 cast(case when t16.sku_num_1d_phrsl is null then 0 else t16.sku_num_1d_phrsl end as bigint) as sku_num_1d_phrsl,
-				 cast(case when t15.sku_num_1d_ptcsl is null then 0 else t15.sku_num_1d_ptcsl end as bigint) as sku_num_1d_ptcsl,
-				 cast(case when t15.sku_num_1d_hdcsl is null then 0 else t15.sku_num_1d_hdcsl end as bigint) as sku_num_1d_hdcsl,
-				 cast(case when t16.sku_num_1d_hdrsl is null then 0 else t16.sku_num_1d_hdrsl end as bigint) as sku_num_1d_hdrsl,
-				 t9.qty AS sku_num_1d_kqdhdcsl,
-				 t10.qty AS sku_num_1d_kqdhdrsl,
-				 t13.sku_num_1d_pdcysl AS sku_num_1d_pdcysl,
-				 t18.qty AS sku_num_1d_bqxss,
-				 t19.qty AS sku_num_1d_bqxts,
-				 t17.qty AS sku_num_1d_bqzts,
-				 t11.qty AS sku_num_1d_qmzks,
-				 t12.qty AS sku_num_1d_qmzts,
-				 t11.qty + t12.qty AS sku_num_1d_qmkcs,
-				 '1d' AS date_type,
-				 '${bizdate}' AS date_id
+INSERT OVERWRITE TABLE ads_api_tpos_ma_store_15mm PARTITION(ds = '${bizdate}')
+	SELECT
+	CAST('${bizdate}' AS BIGINT）,
+	coalesce(date_type, '-110'),
+	coalesce(tmpx.date_id, '-110'),
+	coalesce(channel_endpoint_code, '-110'),
+	'1,2,3',
+	'11',
+	coalesce(tmpx.org_code, -110),
+	before_coupon_amount ,--销售总额（未扣券）
+	CASE
+	WHEN before_coupon_amount_all <> 0 THEN before_coupon_amount / before_coupon_amount_all
+	ELSE 0
+	END AS before_coupon_sales_rate ,--未扣券销售占比
+	sales_amt,--扣券销售总额/真实金额,
+	CASE
+	WHEN sale_amt_all <> 0 THEN sales_amt / sale_amt_all
+	ELSE 0
+	END AS sales_rate,--扣券销售占比,
+	rank,
+	max_amount,
+	item_num,
+	order_num,
+	avg_discount,
+	retail_price,
+	before_coupon_per_customer_transaction ,--客单价未扣券,
+	per_customer_transaction ,--客单价扣券,
+	associated_purchase_rate ,--连带率,
+	CASE
+	WHEN before_coupon_amount_all <> 0 THEN before_coupon_order_amt_ptvip / before_coupon_amount_all
+	ELSE 0
+	END AS before_coupon_common_vip_sales_rate--普通会员未扣券销售占比
+	,
+	CASE
+	WHEN sale_amt_all <> 0 THEN order_amt_ptvip / sale_amt_all
+	ELSE 0
+	END AS common_vip_sales_rate--普通会员扣券销售占比
+	,
+	return_item_amount
+	,
+	cash_coupon
+	,
+	before_coupon_per_item_amount--件单价未扣券
+	,
+	per_item_amount--件单价扣券
+	,
+	return_item_qty
+	,
+	return_order_num
+	,
+	before_coupon_vip_per_customer_transaction--vip客单价(未扣券)
+	,
+	vip_per_customer_transaction--vip客单价(扣券)
+	,
+	vip_associated_purchase_rate--连带率
+	,
+	order_amt_vip--vip销售额(扣券)
+	,
+	before_coupon_order_amt_vip--vip销售额（未扣券）
+	,
+	CASE
+	WHEN before_coupon_amount_all <> 0 THEN before_coupon_order_amt_vip / before_coupon_amount_all
+	ELSE 0
+	END AS before_coupon_vip_sales_rate--vip会员未扣券销售占比
+	,
+	CASE
+	WHEN sale_amt_all <> 0 THEN order_amt_vip / sale_amt_all
+	ELSE 0
+	END AS vip_sales_rate--vip会员扣券销售占比
+	,
+	vip_sales_item_qty
+	,
+	before_coupon_vip_per_item_amount--vip件单价(未扣券)
+	,
+	vip_per_item_amount--vip件单价(扣券)
+	,
+	vip_order_num
+	,
+	lastedProjectSalesAmount--最近三波段销售额
+	,
+	'null'--最近三波段销售额占比
 	FROM (
-		SELECT t1.org_code,
-					 t1.channel_endpoint_code,
-					 t1.sku_code,
-					 sum(qty) AS qty
+		SELECT
+		date_type
+		,
+		date_id
+		,
+		org_code --品牌
+		,
+		channel_endpoint_code--门店
+		,
+		avg_discount--平均折扣
+		,
+		sales_amt--销售额(扣券)
+		,
+		before_coupon_amount--销售额(未扣券)
+		,
+		max_amount--最大单金额
+		,
+		before_coupon_max_amount--最大单金额（扣券）
+		,
+		item_num--商品件数
+		,
+		order_num--订单数量
+		,
+		retail_price--吊牌价总额
+		,
+		cash_coupon--现金券
+		,
+		CASE
+		WHEN order_num <> 0 THEN before_coupon_amount / order_num
+		ELSE 0
+		END AS before_coupon_per_customer_transaction--客单价(未扣券)
+		,
+		CASE
+		WHEN order_num <> 0 THEN sales_amt / order_num
+		ELSE 0
+		END AS per_customer_transaction--客单价(扣券)
+		,
+		CASE
+		WHEN order_num <> 0 THEN item_num / order_num
+		ELSE 0
+		END AS associated_purchase_rate--连带率
+		,
+		CASE
+		WHEN item_num <> 0 THEN before_coupon_amount / item_num
+		ELSE 0
+		END AS before_coupon_per_item_amount--件单价(未扣券)
+		,
+		CASE
+		WHEN item_num <> 0 THEN sales_amt / item_num
+		ELSE 0
+		END AS per_item_amount--件单价(扣券)
+		--退货相关
+		,
+		return_item_amount--退货金额
+		,
+		return_item_qty--退货商品数量
+		,
+		return_order_num --退换货单数
+		--普通会员系列
+		,
+		order_amt_ptvip--普通会员销售金额
+		,
+		before_coupon_order_amt_ptvip--未扣券普通会员销售金额
+		--vip会员系列
+		,
+		order_amt_vip--vip销售额(扣券)
+		,
+		before_coupon_order_amt_vip--vip销售额（未扣券）
+		,
+		vip_order_num--vip订单数
+		,
+		vip_sales_item_qty--vip销售件数
+		,
+		CASE
+		WHEN vip_order_num <> 0 THEN before_coupon_order_amt_vip / vip_order_num
+		ELSE 0
+		END AS before_coupon_vip_per_customer_transaction--vip客单价(未扣券)
+		,
+		CASE
+		WHEN vip_order_num <> 0 THEN order_amt_vip / vip_order_num
+		ELSE 0
+		END AS vip_per_customer_transaction--vip客单价(扣券)
+		,
+		CASE
+		WHEN vip_order_num <> 0 THEN vip_sales_item_qty / vip_order_num
+		ELSE 0
+		END AS vip_associated_purchase_rate--连带率
+		,
+		CASE
+		WHEN vip_sales_item_qty <> 0 THEN before_coupon_order_amt_vip / vip_sales_item_qty
+		ELSE 0
+		END AS before_coupon_vip_per_item_amount--vip件单价(未扣券)
+		,
+		CASE
+		WHEN vip_sales_item_qty <> 0 THEN order_amt_vip / vip_sales_item_qty
+		ELSE 0
+		END AS vip_per_item_amount--vip件单价(扣券)
+
+		--开窗做分母的数据字段
+		,
+		sum(sales_amt)OVER (PARTITION BY date_type, date_id, org_code) AS sale_amt_all--本品牌总销售额（供所有类型销售额占比使用）
+		,
+		sum(before_coupon_amount)OVER (PARTITION BY date_type, date_id, org_code) AS before_coupon_amount_all
+		--本品牌未扣券总销售额（供所有类型销售额占比使用）
+
+		--门店销售额排行
+		,
+		dense_rank()OVER (PARTITION BY date_type, date_id ORDER BY sales_amt DESC) AS rank
+
+
 		FROM (
-			SELECT sl.org_code,
-						 sl.channel_endpoint_code,
-						 sli.sku_code,
-						 sli.qty_actual AS qty
-			FROM ods_stock_logic_items sli
-				LEFT JOIN ods_stock_logic sl
-					ON sli.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-			WHERE sli.ds = '${bizdate}'
-			UNION ALL
-			--出库单，加回去
-			SELECT sl.org_code,
-						 sl.channel_endpoint_code,
-						 ii.sku_code,
-						 ii.qty_sended AS qty
-			FROM ods_stock_logic_order_out AS o
-				INNER JOIN ods_stock_logic_order_out_items AS ii
-					ON o.id = ii.logic_order_out_id AND ii.ds = '${bizdate}'
-				LEFT JOIN ods_stock_logic sl
-					ON o.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-			WHERE substr(regexp_replace(o.made_order_time, '-', '', 0), 1, 8) >= to_char(dateadd(to_date('${bizdate}','yyyymmdd'),-6,'dd'),'yyyymmdd')
-			AND o.ds = '${bizdate}'
-			UNION ALL
-			--入库单，库存反减回去
-			SELECT sl.org_code,
-						 sl.channel_endpoint_code,
-						 ii.sku_code,
-						 - 1 * ii.qty_received AS qty
-			FROM ods_stock_logic_order_in AS i
-				INNER JOIN ods_stock_logic_order_in_items AS ii
-					ON i.id = ii.logic_order_in_id AND ii.ds = '${bizdate}'
-				LEFT JOIN ods_stock_logic sl
-					ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-			WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) >= to_char(dateadd(to_date('${bizdate}','yyyymmdd'),-6,'dd'),'yyyymmdd')
-			AND i.ds = '${bizdate}') AS t1
-		GROUP BY t1.org_code,
-		t1.channel_endpoint_code,
-		t1.sku_code) AS t7
-		full JOIN (
-		--期初在途数
-			SELECT t1.org_code,
-						 t1.channel_endpoint_code,
-						 t1.sku_code,
-						 sum(qty) AS qty
-			FROM (
-				SELECT sl.org_code,
-							 sl.channel_endpoint_code,
-							 sli.sku_code,
-							 sli.qty_transit AS qty
-				FROM ods_stock_logic_items sli
-					LEFT JOIN ods_stock_logic sl
-						ON sli.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-				WHERE sli.ds = '${bizdate}'
-				UNION ALL
-				--根据收货通知单计算：+加上实收数，-去计划数
-				SELECT sl.org_code,
-							 sl.channel_endpoint_code,
-							 ii.sku_code,
-							 ii.qty_received - ii.qty_receive_plan AS qty
-				FROM ods_stock_logic_order_in_notify AS i
-					INNER JOIN ods_stock_logic_order_in_notify_items AS ii
-						ON i.id = ii.logic_order_in_notify_id AND ii.ds = '${bizdate}'
-					INNER JOIN ods_stock_logic sl
-						ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) >= '${bizdate}'
-				AND i.ds = '${bizdate}'
-				UNION ALL
-				--收发差异单，+差异数
+			SELECT  a.org_code
+			,
+							tmp2.date_type
+			,
+							tmp2.date_id
+			,
+							a.channel_endpoint_code
+			,
+							CASE
+							WHEN sum(b.price_retail * b.qty_product) <> 0 THEN sum(b.price_sales * b.qty_product) / sum(b.price_retail
+							* b.qty_product)
+							ELSE 0
+							END AS avg_discount --平均折扣
+			--总体销售
+			,
+							coalesce(COUNT(DISTINCT CASE
+							WHEN a.order_type = '101' OR (a.order_type = '104' AND a.amt_total > 0) THEN a.sales_order_no
+							END), 0) -
+							coalesce(COUNT(DISTINCT CASE
+							WHEN a.order_type IN ('102', '103') THEN a.sales_order_no
+							END), 0) AS order_num --订单数
+			,
+							sum(coalesce(b.price_sales * b.qty_product, 0) - coalesce(c.amt_cash_coupon_contribution, 0)) AS sales_amt
+			--销售金额（扣券）
+			,
+							sum(b.price_sales * b.qty_product) AS before_coupon_amount  --销售金额（未扣券）
+			,
+							sum(CASE
+							WHEN b.price_sales <> 0 THEN b.qty_product
+							ELSE 0
+							END) AS item_num   --销售件数
+			--最大单销售
+			,
+							max(b.price_sales * b.qty_product) AS before_coupon_max_amount--最大单金额(未扣券)
+			,
+							max(coalesce(b.price_sales * b.qty_product, 0) - coalesce(c.amt_cash_coupon_contribution, 0)) AS
+							max_amount  --最大单金额（扣券）
+			--普通会员销售
+			,
+							sum(CASE
+							WHEN d.is_vip != 1 THEN coalesce(b.price_sales * b.qty_product, 0) - coalesce(c.
+							amt_cash_coupon_contribution, 0)
+							ELSE 0
+							END) AS order_amt_ptvip --普通会员销售金额（扣券）
+			,
+							sum(CASE
+							WHEN d.is_vip != 1 THEN b.price_sales * b.qty_product
+							ELSE 0
+							END) AS before_coupon_order_amt_ptvip --普通会员销售金额（未扣券）
+			--vip销售
+			,
+							coalesce(COUNT(DISTINCT CASE
+							WHEN d.is_vip = 1 AND (a.order_type = '101' OR (a.order_type = '104' AND a.amt_total > 0)) THEN a.
+							sales_order_no
+							END), 0) -
+							coalesce(COUNT(DISTINCT CASE
+							WHEN d.is_vip = 1 AND a.order_type IN ('102', '103') THEN a.sales_order_no
+							END), 0) AS vip_order_num --vip订单数
+			,
+							sum(CASE
+							WHEN d.is_vip = 1 THEN coalesce(b.price_sales * b.qty_product, 0) - coalesce(c.
+							amt_cash_coupon_contribution, 0)
+							ELSE 0
+							END) AS order_amt_vip --vip销售金额（扣券）
+			,
+							sum(CASE
+							WHEN d.is_vip = 1 THEN b.price_sales * b.qty_product
+							ELSE 0
+							END) AS before_coupon_order_amt_vip --vip销售金额（未扣券）
+			,
+							sum(CASE
+							WHEN d.is_vip = 1 AND b.price_sales <> 0 THEN b.qty_product
+							ELSE 0
+							END) AS vip_sales_item_qty --VIP销售件数
+			--退货相关
+			,
+							sum(CASE
+							WHEN a.order_type = 103 THEN coalesce(b.price_sales * b.qty_product, 0) - coalesce(c.
+							amt_cash_coupon_contribution, 0)
+							ELSE 0
+							END) AS return_item_amount --退货金额
 
-				SELECT s.org_code,
-							 s.channel_endpoint_code,
-							 b.sku_code,
-							 b.qty_difference AS qty
-				FROM ods_stock_logic_order_difference AS a
-					INNER JOIN ods_stock_logic_order_difference_items AS b
-						ON a.id = b.logic_order_difference_id AND b.ds = '${bizdate}'
-					INNER JOIN ods_stock_logic s
-						ON a.stock_logic_in_id = s.id AND s.ds = '${bizdate}'
-				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) >= '${bizdate}'
-				AND a.ds = '${bizdate}'
-
-			) AS t1
-			GROUP BY t1.org_code,
-			t1.channel_endpoint_code,
-			t1.sku_code) AS t8
-			ON t7.org_code = t8.org_code AND t7.sku_code = t8.sku_code AND t7.channel_endpoint_code = t8.channel_endpoint_code
-		full JOIN (
-		--跨渠道横调出数量
-			SELECT o.org_code,
-						 o.channel_endpoint_code,
-						 b.sku_code,
-						 sum(b.qty_sended) AS qty
-			FROM ods_stock_logic_order_out AS a
-				INNER JOIN ods_stock_logic_order_out_items AS b
-					ON a.id = b.logic_order_out_id AND b.ds = '${bizdate}'
-				INNER JOIN ods_stock_logic AS o
-					ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
-				INNER JOIN ods_stock_logic_order_allocate AS e
-					ON a.business_order_no = e.order_no AND e.ds =
-				'${bizdate}'
-				INNER JOIN ods_stock_logic AS i
-					ON e.stock_logic_code_in_id = i.id AND o.channel_endpoint_code !=
-				i.channel_endpoint_code AND i.ds = '${bizdate}'
-			WHERE a.business_order_type = '201' AND a.business_order_business_type IN ('20102') AND a.ds = '${bizdate}'
-			AND substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) >= '${bizdate}'
-			group by o.org_code,
-			o.channel_endpoint_code,
-			b.sku_code) AS t9
-			ON t7.org_code = t9.org_code AND t7.channel_endpoint_code = t9.channel_endpoint_code AND t7.sku_code = t9.sku_code
-		full JOIN (
-		--跨渠道横调入数量
-			SELECT i.org_code,
-						 i.channel_endpoint_code,
-						 b.sku_code,
-						 sum(b.qty_received) AS qty
-			FROM ods_stock_logic_order_in AS a
-				INNER JOIN ods_stock_logic_order_in_items AS b
-					ON a.id = b.logic_order_in_id AND b.ds = '${bizdate}'
-				INNER JOIN ods_stock_logic AS i
-					ON a.stock_logic_id = i.id AND i.ds = '${bizdate}'
-				INNER JOIN ods_stock_logic_order_allocate AS e
-					ON a.business_order_no = e.order_no AND e.ds =
-				'${bizdate}'
-				INNER JOIN ods_stock_logic AS o
-					ON o.channel_endpoint_code != i.channel_endpoint_code AND e.stock_logic_code_out_id = o.id
-				AND o.ds = '${bizdate}'
-			WHERE a.business_order_type = '201' AND a.business_order_business_type IN ('20102') AND a.ds = '${bizdate}'
-			AND substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) >= '${bizdate}'
-			group by i.org_code,
-			i.channel_endpoint_code,
-			b.sku_code) AS t10
-			ON t7.org_code = t10.org_code AND t7.channel_endpoint_code = t10.channel_endpoint_code AND t7.sku_code = t10.sku_code
-		full JOIN (
-		--盘点差异数量
-			SELECT b.sku_code,
-						 c.org_code,
-						 c.channel_endpoint_code,
-						 sum(abs(qty_change)) AS sku_num_1d_pdcysl
-			FROM ods_stock_physical_order_inventory AS a
-				INNER JOIN ods_stock_physical_order_inventory_items AS b
-					ON a.id = b.physical_order_inventory_id AND b.ds = '${bizdate}'
-				INNER JOIN ods_stock_logic AS c
-					ON a.inventory_logic_id = c.id AND c.ds = '${bizdate}'
-			WHERE substr(regexp_replace(a.audit_time, '-', '', 0), 1, 8) >= '${bizdate}'
-			AND a.ds = '${bizdate}'
-			GROUP BY b.sku_code,
-			c.org_code,
-			c.channel_endpoint_code) AS t13
-			ON t7.org_code = t13.org_code AND t7.channel_endpoint_code = t13.channel_endpoint_code AND t7.sku_code = t13.sku_code
-		full JOIN (
-		----期末在库数
-			SELECT t1.org_code,
-						 t1.channel_endpoint_code,
-						 t1.sku_code,
-						 sum(qty) AS qty
-			FROM (
-				SELECT sl.org_code,
-							 sl.channel_endpoint_code,
-							 sli.sku_code,
-							 sli.qty_actual AS qty
-				FROM ods_stock_logic_items sli
-					LEFT JOIN ods_stock_logic sl
-						ON sli.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-				WHERE sli.ds = '${bizdate}'
-				UNION ALL
-				--出库单，加回去
-				SELECT sl.org_code,
-							 sl.channel_endpoint_code,
-							 ii.sku_code,
-							 ii.qty_sended AS qty
-				FROM ods_stock_logic_order_out AS o
-					INNER JOIN ods_stock_logic_order_out_items AS ii
-						ON o.id = ii.logic_order_out_id AND ii.ds = '${bizdate}'
-					LEFT JOIN ods_stock_logic sl
-						ON o.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-				WHERE substr(regexp_replace(o.made_order_time, '-', '', 0), 1, 8) > '${bizdate}' AND o.ds = '${bizdate}'
-				UNION ALL
-				--入库单，库存反减回去
-				SELECT sl.org_code,
-							 sl.channel_endpoint_code,
-							 ii.sku_code,
-							 - 1 * ii.qty_received AS qty
-				FROM ods_stock_logic_order_in AS i
-					INNER JOIN ods_stock_logic_order_in_items AS ii
-						ON i.id = ii.logic_order_in_id AND ii.ds = '${bizdate}'
-					LEFT JOIN ods_stock_logic sl
-						ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) > '${bizdate}' AND i.ds = '${bizdate}') AS t1
-			GROUP BY t1.org_code,
-			t1.channel_endpoint_code,
-			t1.sku_code) AS t11
-			ON t7.sku_code = t11.sku_code AND t7.channel_endpoint_code = t11.channel_endpoint_code AND t7.org_code = t11.org_code
-		full JOIN (
-		----期末在途数
-			SELECT t1.org_code,
-						 t1.channel_endpoint_code,
-						 t1.sku_code,
-						 sum(qty) AS qty
-			FROM (
-				SELECT sl.org_code,
-							 sl.channel_endpoint_code,
-							 sli.sku_code,
-							 sli.qty_transit AS qty
-				FROM ods_stock_logic_items sli
-					LEFT JOIN ods_stock_logic sl
-						ON sli.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-				WHERE sli.ds = '${bizdate}'
-				UNION ALL
-				--根据收货通知单计算：+加上实收数，-去计划数
-				SELECT sl.org_code,
-							 sl.channel_endpoint_code,
-							 ii.sku_code,
-							 ii.qty_received - ii.qty_receive_plan AS qty
-				FROM ods_stock_logic_order_in_notify AS i
-					INNER JOIN ods_stock_logic_order_in_notify_items AS ii
-						ON i.id = ii.logic_order_in_notify_id AND ii.ds = '${bizdate}'
-					INNER JOIN ods_stock_logic sl
-						ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) > '${bizdate}' AND i.ds = '${bizdate}'
-				UNION ALL
-				--收发差异单，+差异数
-
-				SELECT s.org_code,
-							 s.channel_endpoint_code,
-							 b.sku_code,
-							 b.qty_difference AS qty
-				FROM ods_stock_logic_order_difference AS a
-					INNER JOIN ods_stock_logic_order_difference_items AS b
-						ON a.id = b.logic_order_difference_id AND b.ds = '${bizdate}'
-					INNER JOIN ods_stock_logic s
-						ON a.stock_logic_in_id = s.id AND s.ds = '${bizdate}'
-				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) > '${bizdate}' AND a.ds = '${bizdate}'
-
-			) AS t1
-			GROUP BY t1.org_code,
-			t1.channel_endpoint_code,
-			t1.sku_code) AS t12
-			ON t7.org_code = t12.org_code AND t7.sku_code = t12.sku_code AND t7.channel_endpoint_code = t12.channel_endpoint_code
-		full JOIN (--配货出数量、配退出数量、调退出数量、横调出数量
-			select t2.org_code,
-						 t2.channel_endpoint_code,
-						 t2.sku_code,
-						 wm_concat('',case when t2.sku_num_1d_dtcsl = 0 then null else t2.sku_num_1d_dtcsl end) as sku_num_1d_dtcsl,
-						 wm_concat('',case when t2.sku_num_1d_phcsl = 0 then null else t2.sku_num_1d_phcsl end) as sku_num_1d_phcsl,
-						 wm_concat('',case when t2.sku_num_1d_ptcsl = 0 then null else t2.sku_num_1d_ptcsl end) as sku_num_1d_ptcsl,
-						 wm_concat('',case when t2.sku_num_1d_hdcsl = 0 then null else t2.sku_num_1d_hdcsl end) as sku_num_1d_hdcsl from
-			(SELECT o.org_code,
-							 o.channel_endpoint_code,
-							 b.sku_code,
-							 sum(CASE
-							 WHEN a.business_order_business_type IN ('30201', '30202') AND a.business_order_type = '302' THEN b.qty_sended
-							 ELSE 0
-							 END) AS sku_num_1d_dtcsl,
-							 sum(CASE
-							 WHEN a.business_order_business_type = '20101' AND a.business_order_type = '201' THEN b.qty_sended
-							 ELSE 0
-							 END) AS sku_num_1d_phcsl,
-							 sum(CASE
-							 WHEN a.business_order_business_type = '20104' AND a.business_order_type = '201' THEN b.qty_sended
-							 ELSE 0
-							 END) AS sku_num_1d_ptcsl,
-							 sum(CASE
-							 WHEN a.business_order_business_type = '20102' AND a.business_order_type = '201' THEN b.qty_sended
-							 ELSE 0
-							 END) AS sku_num_1d_hdcsl
-				FROM ods_stock_logic_order_out AS a
-					INNER JOIN ods_stock_logic_order_out_items AS b
-						ON a.id = b.logic_order_out_id AND b.ds = '${bizdate}'
-					INNER JOIN ods_stock_logic AS o
-						ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
-				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) >= '${bizdate}'
-				AND a.ds = '${bizdate}'
-				group by o.org_code,
-				o.channel_endpoint_code,
-				b.sku_code) as t2
-			group by t2.org_code,
-			t2.channel_endpoint_code,
-			t2.sku_code) AS t15
-			ON t7.org_code = t15.org_code AND t7.sku_code = t15.sku_code AND t7.channel_endpoint_code = t15.channel_endpoint_code
-		full JOIN (
-		--配货入数量、配退入数量、调拨入数量、横调入数量
-			select t3.org_code,
-						 t3.channel_endpoint_code,
-						 t3.sku_code,
-						 wm_concat('',case when t3.sku_num_1d_dbrsl = 0 then null else t3.sku_num_1d_dbrsl end) as sku_num_1d_dbrsl,
-						 wm_concat('',case when t3.sku_num_1d_ptrsl = 0 then null else t3.sku_num_1d_ptrsl end) as sku_num_1d_ptrsl,
-						 wm_concat('',case when t3.sku_num_1d_phrsl = 0 then null else t3.sku_num_1d_phrsl end) as sku_num_1d_phrsl,
-						 wm_concat('',case when t3.sku_num_1d_hdrsl = 0 then null else t3.sku_num_1d_hdrsl end) as sku_num_1d_hdrsl from
-			(SELECT o.org_code,
-							 o.channel_endpoint_code,
-							 b.sku_code,
-							 sum(CASE
-							 WHEN a.business_order_business_type IN ('30101',
-							 '30102') AND a.business_order_type = '301'  THEN b.qty_received
-							 ELSE 0
-							 END) AS sku_num_1d_dbrsl,
-							 sum(CASE
-							 WHEN a.business_order_business_type = '20104' AND a.business_order_type = '201' THEN b.qty_received
-							 ELSE 0
-							 END) AS sku_num_1d_ptrsl,
-							 sum(CASE
-							 WHEN a.business_order_business_type = '20101' AND a.business_order_type = '201' THEN b.qty_received
-							 ELSE 0
-							 END) AS sku_num_1d_phrsl,
-							 sum(CASE
-							 WHEN a.business_order_business_type = '20102' AND a.business_order_type = '201' THEN b.qty_received
-							 ELSE 0
-							 END) AS sku_num_1d_hdrsl
-				FROM ods_stock_logic_order_in AS a
-					INNER JOIN ods_stock_logic_order_in_items AS b
-						ON a.id = b.logic_order_in_id AND b.ds = '${bizdate}'
-					INNER JOIN ods_stock_logic AS o
-						ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
-				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) >= '${bizdate}'
-				AND a.ds = '${bizdate}'
-				group by o.org_code,
-				o.channel_endpoint_code,
-				b.sku_code) as t3
-			group by t3.org_code,
-			t3.channel_endpoint_code,
-			t3.sku_code) AS t16
-			ON t7.org_code = t16.org_code AND t7.sku_code = t16.sku_code AND t7.channel_endpoint_code = t16.channel_endpoint_code
-		left join (--本期在途数
-			SELECT t1.org_code,
-						 t1.channel_endpoint_code,
-						 t1.sku_code,
-						 sum(qty) AS qty
-			FROM (
-			--根据收货通知单计算：+加上实收数，-去计划数
-				SELECT sl.org_code,
-							 sl.channel_endpoint_code,
-							 ii.sku_code,
-							 ii.qty_received - ii.qty_receive_plan AS qty
-				FROM ods_stock_logic_order_in_notify AS i
-					INNER JOIN ods_stock_logic_order_in_notify_items AS ii
-						ON i.id = ii.logic_order_in_notify_id and ii.ds = '${bizdate}'
-					INNER JOIN ods_stock_logic sl
-						ON i.stock_logic_id = sl.id and sl.ds = '${bizdate}'
-				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) >= '${bizdate}'
-				AND i.ds = '${bizdate}'
-				UNION ALL
-				--收发差异单，+差异数
-
-				SELECT s.org_code,
-							 s.channel_endpoint_code,
-							 b.sku_code,
-							 b.qty_difference AS qty
-				FROM ods_stock_logic_order_difference AS a
-					INNER JOIN ods_stock_logic_order_difference_items AS b
-						ON a.id = b.logic_order_difference_id and b.ds = '${bizdate}'
-					INNER JOIN ods_stock_logic s
-						ON a.stock_logic_in_id = s.id and s.ds = '${bizdate}'
-				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) >= '${bizdate}'
-				AND a.ds = '${bizdate}'
-			) AS t1
-			GROUP BY t1.org_code, t1.channel_endpoint_code, t1.sku_code) as t17
-			on t7.org_code = t17.org_code and t7.channel_endpoint_code = t17.channel_endpoint_code and t7.sku_code = t17.sku_code
-		LEFT JOIN (
-		--本期销售数
-			SELECT a.org_code,
-						 a.channel_endpoint_code,
-						 b.sku_code,
-						 sum(b.qty_product) AS qty
+			,
+							COUNT(DISTINCT CASE
+							WHEN a.order_type IN ('103', '104') THEN a.sales_order_no
+							END) AS return_order_num --退换货单数
+			,
+							sum(CASE
+							WHEN a.order_type = 103 THEN b.qty_product
+							ELSE 0
+							END) AS return_item_qty --退货件数
+			--吊牌价+现金券
+			,
+							sum(b.price_retail * b.qty_product) AS retail_price  --零售价(吊牌价)
+			,
+							sum(c.amt_cash_coupon_contribution) AS cash_coupon  --现金券
 			FROM ods_sales_order a
-				JOIN ods_sales_order_item b
-					ON a.sales_order_no = b.sales_order_no
-			WHERE a.ds = '${bizdate}' AND b.ds = '${bizdate}' AND a.order_status = 1
+				INNER JOIN (
+					SELECT date_type,
+								 date_id,
+								 time_id
+					FROM td_ads_dev.dim_time
+					WHERE ds <= '${bizdate}'
+					GROUP BY date_type, date_id, time_id
+				) tmp2
+					ON to_char(CAST(a.paid_time AS DATETIME), 'yyyymmdd') = tmp2.time_id
+				INNER JOIN ods_sales_order_item b
+					ON a.sales_order_no = b.sales_order_no AND b.ds = '${bizdate}'
+				INNER JOIN ods_sales_order_item_price c
+					ON b.sales_order_item_no = c.sales_order_item_no AND c.ds = '${bizdate}'
+				LEFT JOIN ods_member_grade_info d
+					ON a.member_grade_code = d.grade_code AND d.ds = '${bizdate}'
+			WHERE a.ds = '${bizdate}' AND order_status = 1
 			AND a.business_type IN ('10103', '10104', '10202', '10203', '10302', '10303', '10403', '10404')
-      AND substr(regexp_replace(a.paid_time, '-', '', 0), 1, 8) >= '${bizdate}'
 			GROUP BY a.org_code
 			, a.channel_endpoint_code
-			, b.sku_code) AS t18
-			ON t7.org_code = t18.org_code AND t7.channel_endpoint_code = t18.channel_endpoint_code AND t7.sku_code = t18.sku_code
+			, tmp2.date_type
+			, tmp2.date_id
+		) tmp
+	) tmpx
 		LEFT JOIN (
-		--本期销退数
-			SELECT a.org_code,
-						 a.channel_endpoint_code,
-						 b.sku_code,
-						 abs(sum(b.qty_product)) AS qty
-			FROM ods_sales_order a
-				JOIN ods_sales_order_item b
-					ON a.sales_order_no = b.sales_order_no
-			WHERE a.ds = '${bizdate}' AND b.ds = '${bizdate}' AND a.order_status = 1
-			AND a.business_type IN ('10103', '10104', '10202', '10203', '10302', '10303', '10403', '10404')
-			AND a.order_type IN ('102', '103')
-      AND substr(regexp_replace(a.paid_time, '-', '', 0), 1, 8) >= '${bizdate}'
-			GROUP BY a.org_code
-			, a.channel_endpoint_code
-			, b.sku_code) AS t19
-			ON t7.org_code = t19.org_code AND t7.channel_endpoint_code = t19.channel_endpoint_code AND t7.sku_code = t19.sku_code;
+		--去最近三个波段的sku关联拿到指定订单的销售金额
+			SELECT
+			a.store_code,
+			a.org_code,
+			sum(a.amt_total) AS lastedProjectSalesAmount,--最近10个波段的销售数据
+			a.date_id
+			FROM (
+				SELECT
+				rs_r.store_code,
+				oso.org_code,
+				oso.sales_order_no,--到订单粒度
+				osoi.sku_code,
+				osoi.price_sales * osoi.qty_product AS amt_total,
+				REPLACE(substr(oso.paid_time, 1, 10), '-', '') AS date_id
+				FROM ods_sales_order oso
+					INNER JOIN ods_sales_order_item osoi
+						ON oso.sales_order_no = osoi.sales_order_no
+					JOIN ods_real_store rs_r
+						ON oso.channel_endpoint_code = rs_r.store_code AND rs_r.ds = '${bizdate}'
+				WHERE oso.ds = '${bizdate}' AND osoi.ds = '${bizdate}'
+				AND oso.business_type IN ('10103', '10104', '10202', '10203', '10302', '10303', '10403', '10404')
+			) a
+				JOIN (
+					SELECT sku_code
+					FROM (
+						SELECT store_code,
+									 org_code,
+									 CASE
+									 WHEN ranking <= 10 THEN sku_code
+									 END AS sku_code--最近三个波段销售的sku
+						FROM (
+							SELECT
+							rs_r.store_code,
+							osr.org_code,
+							osi.sku_code,
+							REPLACE(ops.list_date, '-', ''),--通过渠道库存id关联拿到商品SKU再拿到波段和上市日期
+							ops.band,--波段
+							dense_rank()OVER (PARTITION BY osr.channel_endpoint_code ORDER BY REPLACE(ops.list_date, '-', '') DESC) AS
+							ranking
+							FROM ods_stock_channel_terminal_rel osr
+								LEFT JOIN ods_stock_channel_items osi
+									ON osr.stock_channel_id = osi.stock_channel_id
+								LEFT JOIN ods_api_item_sku ops
+									ON osi.sku_code = ops.sku_code
+								JOIN ods_real_store rs_r
+									ON osr.channel_endpoint_code = rs_r.store_code AND rs_r.ds = '${bizdate}'
+							WHERE osr.ds = '${bizdate}' AND osi.ds = '${bizdate}' AND ops.ds = '${bizdate}'
+						) T0
+					) T
+					WHERE sku_code IS NOT NULL
+					GROUP BY sku_code
+				) b
+					ON a.sku_code = b.sku_code
+			GROUP BY a.store_code, a.org_code, a.date_id
+		)e
+			ON e.date_id = tmpx.date_id AND e.org_code = tmpx.org_code AND e.store_code = tmpx.channel_endpoint_code;
 
 
 
@@ -516,129 +432,10 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(d
 
 
 
-INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d PARTITION(ds = '${bizdate}')
-	SELECT t1.biz_date,
-				 t1.org_code,
-				 t4.brand_code,
-				 t1.channel_endpoint,
-				 t6.store_name AS channel_endpoint_name,
-				 t1.sku_code,
-				 t4.spu_code AS product_code,
-				 t4.sku_cn_name AS product_name,
-				 t4.cny_price AS sku_retail_price,
-				 t4.YEAR AS sku_year,
-				 t4.quarter AS sku_season,
-				 t4.band AS sku_band,
-				 t4.list_date AS sku_list_date,
-				 t4.level1_cate_code AS sku_main_cate,
-				 t4.level1_cate_name AS sku_main_cate_name,
-				 t4.level2_cate_code AS sku_sub_cate,
-				 t4.level2_cate_name AS sku_sub_cate_name,
-				 t4.level3_cate_code AS sku_leaf_cate,
-				 t4.level3_cate_name AS sku_leaf_cate_name,
-				 t4.color_id AS sku_color_code,
-				 t4.cn_color_desc AS sku_color_name,
-				 t4.size_id AS sku_size_code,
-				 t4.cn_size_desc AS sku_size_name,
-				 t1.sku_num_1d_qczks,
-				 t1.sku_num_1d_qczts,
-				 t1.sku_num_1d_qckcs,
-				 t1.sku_num_1d_bqkccss,
-				 t1.sku_num_1d_dbrsl,
-				 t1.sku_num_1d_dtcsl,
-				 t1.sku_num_1d_phcsl,
-				 t1.sku_num_1d_ptrsl,
-				 t1.sku_num_1d_phrsl,
-				 t1.sku_num_1d_ptcsl,
-				 t1.sku_num_1d_hdcsl,
-				 t1.sku_num_1d_hdrsl,
-				 t1.sku_num_1d_kqdhdcsl,
-				 t1.sku_num_1d_kqdhdrsl,
-				 t1.sku_num_1d_pdcysl,
-				 t1.sku_num_1d_bqxss,
-				 t1.sku_num_1d_bqxts,
-				 t1.sku_num_1d_bqzts,
-				 t1.sku_num_1d_qmzks,
-				 t1.sku_num_1d_qmzts,
-				 t1.sku_num_1d_qmkcs,
-				 t1.date_type,
-				 t1.date_id
-	FROM (
-		SELECT biz_date,
-					 org_code,
-					 brand_code,
-					 channel_endpoint,
-					 channel_endpoint_name,
-					 sku_code,
-					 product_code,
-					 product_name,
-					 sku_retail_price,
-					 sku_year,
-					 sku_season,
-					 sku_band,
-					 sku_list_date,
-					 sku_main_cate,
-					 sku_main_cate_name,
-					 sku_sub_cate,
-					 sku_sub_cate_name,
-					 sku_leaf_cate,
-					 sku_leaf_cate_name,
-					 sku_color_code,
-					 sku_color_name,
-					 sku_size_code,
-					 sku_size_name,
-					 sku_num_1d_qczks,
-					 sku_num_1d_qczts,
-					 sku_num_1d_qckcs,
-					 sku_num_1d_bqkccss,
-					 sku_num_1d_kqdhdcsl,
-					 sku_num_1d_kqdhdrsl,
-					 sku_num_1d_dbrsl,
-					 sku_num_1d_dtcsl,
-					 sku_num_1d_phcsl,
-					 sku_num_1d_ptrsl,
-					 sku_num_1d_phrsl,
-					 sku_num_1d_ptcsl,
-					 sku_num_1d_hdcsl,
-					 sku_num_1d_hdrsl,
-					 sku_num_1d_pdcysl,
-					 sku_num_1d_bqxss,
-					 sku_num_1d_bqxts,
-					 sku_num_1d_bqzts,
-					 sku_num_1d_qmzks,
-					 sku_num_1d_qmzts,
-					 sku_num_1d_qmkcs,
-					 date_type,
-					 date_id
-		FROM ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d
-		WHERE ds = '${bizdate}' AND org_code IS NOT NULL AND channel_endpoint IS NOT NULL AND sku_code IS NOT NULL) AS t1
-		LEFT JOIN (
-			SELECT sku_code,
-						 sku_cn_name,
-						 brand_code,
-						 spu_code,
-						 cny_price,
-						 YEAR,
-						 quarter,
-						 band,
-						 list_date,
-						 level1_cate_name,
-						 level1_cate_code,
-						 level2_cate_name,
-						 level2_cate_code,
-						 level3_cate_name,
-						 level3_cate_code,
-						 color_id,
-						 cn_color_desc,
-						 size_id,
-						 cn_size_desc
-			FROM ods_api_item_sku
-			WHERE ds = '${bizdate}') AS t4
-			ON t1.sku_code = t4.sku_code
-		LEFT OUTER JOIN (
-			SELECT store_code,
-						 store_name
-			FROM ods_real_store
-			WHERE ds = '${bizdate}') AS t6
-			ON t1.channel_endpoint = t6.store_code;
+
+
+
+
+
+
 

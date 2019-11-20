@@ -32,35 +32,9 @@ ods_member_grade_log
 --***********************************
 --drop table if exists ods_member_grade_info;
 
+((soi.retail_price - soi.amt_sales) * soi.qty_product)
++ if(osoip.amt_cash_coupon_contribution is null,0,osoip.amt_cash_coupon_contribution)
 
---8.interval_time_from_riginal_to_rma没值
-   这个当时没有给口径，现在口径是什么？
-
-SELECT sales_order_item_no,
-			 IF(vsoip.discount_points = 0, NULL, vsoip.discount_points) discount_rate
-FROM sales_order_item soi
-	LEFT JOIN sales_order so
-		ON soi.sales_order_no = so.sales_order_no
-	LEFT JOIN sales_order_item_promotion soip
-		ON soi.sales_order_no = soip.sales_order_no
-	LEFT JOIN ods_promotion_store_info vsoip
-		ON soip.promotion_code = vsoip.promotion_no
-
-
-SELECT sales_order_item_no
-,wm_concat(',',estimated_discount_rate) AS promotion_discount
-FROM A
-GROUP BY sales_order_item_no
-
-
-
-SELECT sum(IF(soip.promotion_base_on = 'DISCOUNT_COUPON', soip.discount_amount, 0)) promotion_discount_coupon_amount
-FROM sales_order_item soi
-	LEFT JOIN sales_order so
-		ON soi.sales_order_no = so.sales_order_no
-	LEFT JOIN sales_order_item_promotion soip
-		ON soi.sales_order_no = soip.sales_order_no AND soi.sales_order_item_no = soip.sales_order_item_no
-WHERE soip.promotion_code != 'KEEP_INTEGER' OR soip.promotion_code IS NULL;
 
 desc ods_item_property_value;
 

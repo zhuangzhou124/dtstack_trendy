@@ -111,7 +111,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
               when rs.offer_type = 'LONG_TERM_SPECIAL' then '长特场'
               when rs.offer_type = 'SHORT_TERM_SPECIAL' then '短特场'
               when rs.offer_type = 'HALF_PRICE' then '半价场'
-              else '未知' end AS channel_endpoint_type,            --门店类型
+              else null end AS channel_endpoint_type,            --门店类型
 				 rs.region_name,
 				 rs.city_name,
 				 ace.endpoint_code AS endpoint_code,        --终端代码
@@ -133,7 +133,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 							when so.business_type = '10404' then '线下换货单'
 							when so.business_type = '10501' then '销售调整单'
 							when so.business_type = '10601' then '销售补发单'
-							else '未知'
+							else null
 							end as order_type,      --订单类型,
 				 so.business_type,--业务单据类型
 				 '' AS oms_order_no, --OMS订单号
@@ -141,7 +141,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 				 soc.coupon_type,       --优惠券类别
 				 soc.coupon_no,  --优惠券编码
 				 soc.coupon_name,  --优惠券名称
-				 so.amt_total AS totla_amt_order,        --订单总金额
+				 (soi.amt_sales * soi.qty_product) AS totla_amt_order,        --订单总金额
 				 sop.stored_value_card_pay_amt,--储值卡支付金额
 				 soip.promotion_code,        --促销方案编码
 				 soip.promotion_name,         --促销名称
@@ -190,10 +190,11 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 				 ais.list_date,  --商品上市时间
 				 (soi.price_retail - soi.price_sales) AS discount_amt_order,    --(整单)折扣金额
 				 ((soi.amt_sales * soi.qty_product) - if(osoip.amt_cash_coupon_contribution is null,0,osoip.amt_cash_coupon_contribution)) AS total_amt_without_cash,       --(整单)折后总额(已扣券)
-				 osoip.amt_cash_coupon_contribution AS discount_amt_with_cash,      --(整单)折让总额(折扣减掉的钱+现金券的钱),
+				 ((soi.price_retail - soi.amt_sales) * soi.qty_product)
+				 + if(osoip.amt_cash_coupon_contribution is null,0,osoip.amt_cash_coupon_contribution) AS discount_amt_with_cash,      --(整单)折让总额(折扣减掉的钱+现金券的钱),
 				 case when so.business_type in ('10202','10203','10303','10302','10403','10404') and soi.qty_product > 0 then '换货'
 							when so.business_type in ('10202','10203','10303','10302','10403','10404') and soi.qty_product <= 0 then '退款'
-							else '未知'
+							else null
 							end as rma_type,  --退换货类型
 				 case when soi.price_discount = 0 then '是'
               else '否' end as is_donate,  --是否为赠品
@@ -278,7 +279,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 								promotion_code,
 								promotion_name
 				FROM ods_sales_order_item_promotion
-				WHERE ds = '${bizdate}' and sales_order_no = 'RFP191111001UH'
+				WHERE ds = '${bizdate}'
 				group by sales_order_no,
 				promotion_code,
 				promotion_name) AS a
