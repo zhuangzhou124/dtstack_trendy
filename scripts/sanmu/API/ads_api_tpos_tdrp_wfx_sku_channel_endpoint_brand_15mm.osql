@@ -146,7 +146,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 				 soip.promotion_code,        --促销方案编码
 				 soip.promotion_name,         --促销名称
 				 pi.promotion_type,        --促销类型
-				 '',  --促销提案折扣
+				 soip.promotion_discount,  --促销提案折扣
 				 so.point_deduction, --促销商场扣点
 				 so.original_order_no,     --源单号
 				 CASE WHEN so.price_print_type = 1 THEN '原价入机'
@@ -185,7 +185,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 				 (soi.price_discount - if(osoip.amt_cash_coupon_contribution is null,0,osoip.amt_cash_coupon_contribution)) * soi.qty_product,--销售金额(小票价×数量)
 				 soi.discount_rate, --商品折扣率
 				 so.rma_reason, --退换货理由
-				 NULL,  --退换货订单与原订单间隔天数
+				 datediff(to_date(so.paid_time,'yyyy-mm-dd hh:mi:ss'),to_date(oso.paid_time,'yyyy-mm-dd hh:mi:ss'),'dd'),  --退换货订单与原订单间隔天数
 				 so.rma_contact_number, --退换客户电话
 				 ais.list_date,  --商品上市时间
 				 (soi.price_retail - soi.price_sales) AS discount_amt_order,    --(整单)折扣金额
@@ -210,6 +210,8 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 				 'day' AS date_type,
 				 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) AS date_id
 	FROM ods_sales_order so
+		LEFT JOIN ods_sales_order oso
+			ON so.original_order_no = oso.sales_order_no AND oso.ds = '${bizdate}'
 		LEFT JOIN ods_sales_delivery_order sdo
 			ON so.sales_order_no = sdo.sales_order_no AND sdo.ds = '${bizdate}'
 		LEFT JOIN ods_sales_order_coupon soc
@@ -268,14 +270,24 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 			ON so.sales_order_no = sop.sales_order_no
 		LEFT JOIN (
 			SELECT a.sales_order_no,
+						 wm_concat(',',IF(vsoip.discount_points = 0, NULL, vsoip.discount_points)) as promotion_discount,
 						 wm_concat(',', a.promotion_code) AS promotion_code,
 						 wm_concat(',', a.promotion_name) AS promotion_name
 			FROM (
-				SELECT DISTINCT sales_order_no,
-												promotion_code,
-												promotion_name
+				SELECT  sales_order_no,
+								promotion_code,
+								promotion_name
 				FROM ods_sales_order_item_promotion
-				WHERE ds = '${bizdate}') AS a
+				WHERE ds = '${bizdate}' and sales_order_no = 'RFP191111001UH'
+				group by sales_order_no,
+				promotion_code,
+				promotion_name) AS a
+				LEFT JOIN (
+					SELECT promotion_no,discount_points
+					--  IF(discount_points = 0, NULL, discount_points) AS promotion_discount
+					FROM ods_promotion_store_info
+					WHERE ds = '${bizdate}' group by promotion_no,discount_points) vsoip
+					ON a.promotion_code = vsoip.promotion_no
 			GROUP BY sales_order_no) soip
 			ON so.sales_order_no = soip.sales_order_no
 		LEFT JOIN ods_promotion_info pi

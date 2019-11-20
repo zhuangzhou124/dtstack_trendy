@@ -36,6 +36,21 @@ ods_member_grade_log
 --8.interval_time_from_riginal_to_rma没值
    这个当时没有给口径，现在口径是什么？
 
+SELECT sales_order_item_no,
+			 IF(vsoip.discount_points = 0, NULL, vsoip.discount_points) discount_rate
+FROM sales_order_item soi
+	LEFT JOIN sales_order so
+		ON soi.sales_order_no = so.sales_order_no
+	LEFT JOIN sales_order_item_promotion soip
+		ON soi.sales_order_no = soip.sales_order_no
+	LEFT JOIN ods_promotion_store_info vsoip
+		ON soip.promotion_code = vsoip.promotion_no
+
+
+SELECT sales_order_item_no
+,wm_concat(',',estimated_discount_rate) AS promotion_discount
+FROM A
+GROUP BY sales_order_item_no
 
 
 
