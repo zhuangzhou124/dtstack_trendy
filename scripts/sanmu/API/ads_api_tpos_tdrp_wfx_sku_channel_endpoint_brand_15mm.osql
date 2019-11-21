@@ -141,7 +141,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 				 soc.coupon_type,       --优惠券类别
 				 soc.coupon_no,  --优惠券编码
 				 soc.coupon_name,  --优惠券名称
-				 (soi.amt_sales * soi.qty_product) AS totla_amt_order,        --订单总金额
+				 so.amt_total  AS totla_amt_order,        --订单总金额
 				 sop.stored_value_card_pay_amt,--储值卡支付金额
 				 soip.promotion_code,        --促销方案编码
 				 soip.promotion_name,         --促销名称
@@ -189,9 +189,8 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 				 so.rma_contact_number, --退换客户电话
 				 ais.list_date,  --商品上市时间
 				 (soi.price_retail - soi.price_sales) AS discount_amt_order,    --(整单)折扣金额
-				 ((soi.amt_sales * soi.qty_product) - if(osoip.amt_cash_coupon_contribution is null,0,osoip.amt_cash_coupon_contribution)) AS total_amt_without_cash,       --(整单)折后总额(已扣券)
-				 ((soi.price_retail - soi.amt_sales) * soi.qty_product)
-				 + if(osoip.amt_cash_coupon_contribution is null,0,osoip.amt_cash_coupon_contribution) AS discount_amt_with_cash,      --(整单)折让总额(折扣减掉的钱+现金券的钱),
+				 so.amt_total - osop.amt_coupon_paid AS total_amt_without_cash,       --(整单)折后总额(已扣券)
+				 so.price_amt_retail - so.amt_total + osop.amt_coupon_paid AS discount_amt_with_cash,      --(整单)折让总额(折扣减掉的钱+现金券的钱),
 				 case when so.business_type in ('10202','10203','10303','10302','10403','10404') and soi.qty_product > 0 then '换货'
 							when so.business_type in ('10202','10203','10303','10302','10403','10404') and soi.qty_product <= 0 then '退款'
 							else null
@@ -213,6 +212,8 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PAR
 	FROM ods_sales_order so
 		LEFT JOIN ods_sales_order oso
 			ON so.original_order_no = oso.sales_order_no AND oso.ds = '${bizdate}'
+	  left join ods_sales_order_price osop
+	on so.sales_order_no = osop.sales_order_no AND osop.ds = '${bizdate}'
 		LEFT JOIN ods_sales_delivery_order sdo
 			ON so.sales_order_no = sdo.sales_order_no AND sdo.ds = '${bizdate}'
 		LEFT JOIN ods_sales_order_coupon soc

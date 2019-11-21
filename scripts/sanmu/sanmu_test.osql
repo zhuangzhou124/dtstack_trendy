@@ -32,11 +32,18 @@ ods_member_grade_log
 --***********************************
 --drop table if exists ods_member_grade_info;
 
-((soi.retail_price - soi.amt_sales) * soi.qty_product)
-+ if(osoip.amt_cash_coupon_contribution is null,0,osoip.amt_cash_coupon_contribution)
+SELECT a.org_code,
+			 a.member_manage_channel_endpoint_code,
+			 COUNT(DISTINCT a.member_no) AS total_vip
+FROM ods_member_card a
+	JOIN ods_member_grade_log b
+		ON a.org_code = b.org_code AND a.member_no = b.member_no
+WHERE a.ds = 20191109 AND b.ds = 20191109 AND a.STATUS > -1 AND date(b.grade_change_time) <= '2019-10-31'
+AND b.before_grade_id < b.after_grade_id
+GROUP BY a.org_code
+, a.member_manage_channel_endpoint_code;
 
-
-desc ods_item_property_value;
+desc ods_sales_order_price;
 
 desc ods_member_card;
 

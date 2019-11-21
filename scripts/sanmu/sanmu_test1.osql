@@ -1,188 +1,198 @@
---name:ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d
---author:sanmu
---create time:2019-10-09 13:53
---drop table ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d
---***********************************
--- 表   名：ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d
--- 功能描述：日期+品牌+门店粒度汇总表
--- 生命周期：30天
--- 调度周期：周期调度
--- 创建者：  三木
--- 创建日期：20191008
--- 修改日志：
---***********************************
-
-
-CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d(
-	biz_date                                                    STRING COMMENT '统计日期',
-	gmt_sale                                                    STRING COMMENT '销售日期',
-	org_code                                                    STRING COMMENT '品牌code',
-	channel_endpoint                                            STRING COMMENT '门店code',
-	endpoint_name                                               STRING COMMENT '终端名称',
-	customer_num_1d_brand_channel_endpoint                      BIGINT COMMENT '客流统计         ',
-	sales_num_1d_brand_channel_endpoint                         BIGINT COMMENT '销售件数   ',
-	sales_amt_1d_brand_channel_endpoint                         DOUBLE COMMENT '销售金额   ',
-	return_num_1d_brand_channel_endpoint                        BIGINT COMMENT '退货件数         ',
-	return_amt_1d_brand_channel_endpoint                        DOUBLE COMMENT '退货金额         ',
-	net_sales_num_1d_brand_channel_endpoint                     BIGINT COMMENT '净销售量         ',
-	net_sales_amt_1d_brand_store_coupon                         DOUBLE COMMENT '净销售额（含现金券）   ',
-	net_sales_amt_1d_brand_store_without_coupon                 DOUBLE COMMENT '净销售额（不含现金券）  ',
-	cash_coupon_amt_1d_brand_channel_endpoint                   DOUBLE COMMENT '现金券金额          ',
-	retail_price_amt_1d_brand_channel_endpoint                  DOUBLE COMMENT '吊牌金额         ',
-	deal_num_1d_brand_channel_endpoint                          BIGINT COMMENT '成交笔数（不减去退货笔数）',
-	rma_num_1d_brand_channel_endpoint                           BIGINT COMMENT '退换笔数         ',
-	sales_num_1d_brand_sotre_vip                                BIGINT COMMENT 'vip销售件数      ',
-	sales_amt_1d_brand_store_vip                                DOUBLE COMMENT 'vip销售金额      ',
-	deal_rate_1d_brand_channel_endpoint                         DOUBLE COMMENT '成交率(成交笔数 /客流统计)          ',
-	avg_discount_1d_brand_channel_endpoint                      DOUBLE COMMENT '平均折扣(销售金额/吊牌金额)         ',
-	sales_per_1d_brand_channel_endpoint                         DOUBLE COMMENT '客单价:实际销售金额(销售金额-现金券金额)/销售单数 (成交笔数)        ',
-	joint_rate_1d_brand_channel_endpoint                        DOUBLE COMMENT '连带率:销售件数/销售单数(成交笔数)         ',
-	sales_ratio_1d_brand_store_vip                              DOUBLE COMMENT 'vip销售占比：vip销售金额/销售金额      ',
-	date_type                                                   STRING COMMENT '日期类型',
-	date_id                                                     STRING COMMENT '日期'
-
-)COMMENT '日期+品牌+门店粒度汇总表' PARTITIONED BY(
-	ds STRING COMMENT '时间分区')
-LIFECYCLE 30;
-
-
-INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION(ds = '${bizdate}')
-	SELECT '${bizdate}' AS biz_date,
-				 t1.order_time AS gmt_sale,
-				 t1.org_code,
-				 t1.channel_endpoint_code AS store_code,
-				 t5.endpoint_name AS endpoint_name,
-				 t10.customer_num_1d_brand_store,
-				 t1.sales_num_1d_brand_channel_endpoint,
-				 t1.sales_amt_1d_brand_channel_endpoint,
-				 t1.return_num_1d_brand_channel_endpoint,
-				 t1.return_amt_1d_brand_channel_endpoint,
-				 t1.net_sales_num_1d_brand_channel_endpoint,
-				 t1.net_sales_amt_1d_brand_store_coupon,
-				 t1.net_sales_amt_1d_brand_store_without_coupon,
-				 t1.cash_coupon_amt_1d_brand_channel_endpoint,
-				 t1.retail_price_amt_1d_brand_channel_endpoint,
-				 t1.deal_num_1d_brand_channel_endpoint,
-				 t1.rma_num_1d_brand_channel_endpoint,
-				 t1.sales_num_1d_brand_store_vip,
-				 t1.sales_amt_1d_brand_store_vip,
-				 CASE
-				 WHEN t10.customer_num_1d_brand_store IS NULL OR t10.customer_num_1d_brand_store = 0 THEN 0.0
-				 ELSE (t1.deal_num_1d_brand_channel_endpoint / t10.customer_num_1d_brand_store)
-				 END AS deal_rate_1d_brand_channel_endpoint,
-				 CASE
-				 WHEN t1.retail_price_amt_1d_brand_channel_endpoint IS NULL OR t1.retail_price_amt_1d_brand_channel_endpoint = 0
-				 OR t1.sales_amt_1d_brand_channel_endpoint <= 0 THEN 0.0
-				 ELSE (t1.sales_amt_1d_brand_channel_endpoint / t1.retail_price_amt_1d_brand_channel_endpoint)
-				 END AS avg_discount_1d_brand_channel_endpoint,
-				 CASE
-				 WHEN t1.deal_num_1d_brand_channel_endpoint IS NULL OR t1.deal_num_1d_brand_channel_endpoint = 0
-				 THEN 0.0
-				 ELSE (t1.sales_amt_1d_brand_channel_endpoint / t1.deal_num_1d_brand_channel_endpoint)
-				 END AS sales_per_1d_brand_channel_endpoint,
-				 CASE
-				 WHEN t1.deal_num_1d_brand_channel_endpoint IS NULL OR t1.deal_num_1d_brand_channel_endpoint = 0 THEN 0.0
-				 ELSE (t1.sales_num_1d_brand_channel_endpoint / t1.deal_num_1d_brand_channel_endpoint)
-				 END AS joint_rate_1d_brand_channel_endpoint,
-				 CASE
-				 WHEN t1.sales_amt_1d_brand_channel_endpoint IS NULL OR t1.sales_amt_1d_brand_channel_endpoint = 0 OR t1.
-				 sales_amt_1d_brand_store_vip <= 0 THEN 0.0
-				 ELSE (t1.sales_amt_1d_brand_store_vip / t1.sales_amt_1d_brand_channel_endpoint)
-				 END AS sales_ratio_1d_brand_store_vip,
-				 'day' AS date_type,
-				 t1.order_time AS date_id
-	FROM (
-
-		SELECT so.org_code,
-					 so.channel_endpoint_code,
-					 sum(CASE
-										WHEN soi.price_sales <> 0 THEN soi.qty_product
-										ELSE 0
-										END) AS sales_num_1d_brand_channel_endpoint, --销售件数
-					 sum(soi.price_sales * soi.qty_product) AS sales_amt_1d_brand_channel_endpoint, --销售金额
-					 sum(CASE
-										WHEN so.order_type = 103 THEN soi.qty_product
-										ELSE 0
-										END) AS return_num_1d_brand_channel_endpoint, --退货件数
-					 sum(CASE
-										WHEN so.order_type = 103 THEN soi.qty_product * soi.price_sales - soip.amt_cash_coupon_contribution
-										ELSE 0
-										END) AS return_amt_1d_brand_channel_endpoint, --退货金额
-					 sum(case when (soi.price_sales*soi.qty_product)>0 then soi.qty_product else 0 end ) AS net_sales_num_1d_brand_channel_endpoint, --净销售量
-					 sum(case when (soi.price_sales*soi.qty_product)>0 then soi.price_sales* soi.qty_product else 0 end) AS net_sales_amt_1d_brand_store_coupon, --净销售额（含现金券）
-					 sum(soi.price_sales * soi.qty_product - soip.amt_cash_coupon_contribution) AS
-					 net_sales_amt_1d_brand_store_without_coupon,  --净销售额（不含现金券
-					 sum(soip.amt_cash_coupon_contribution) AS cash_coupon_amt_1d_brand_channel_endpoint,  --现金券金额
-					 sum(soi.price_retail * soi.qty_product) AS retail_price_amt_1d_brand_channel_endpoint, --吊牌金额
-					 coalesce(COUNT ( DISTINCT CASE WHEN so.order_type = '101' OR(so.order_type = '104' AND so.amt_total > 0)
-					 THEN so.sales_order_no END), 0) -
-					 coalesce( COUNT ( DISTINCT CASE WHEN so.order_type IN('102', '103')THEN so.sales_order_no END), 0) AS deal_num_1d_brand_channel_endpoint,    --成交笔数（)
-					 COUNT(DISTINCT CASE
-										WHEN so.order_type IN ('103', '104') THEN so.sales_order_no
-										END) AS rma_num_1d_brand_channel_endpoint, --退换笔数
-					 sum(CASE
-										WHEN mgi.is_vip = 1 AND soi.price_sales <> 0 THEN soi.qty_product
-										ELSE 0
-										END) AS sales_num_1d_brand_store_vip,--VIP销售件数
-					 sum(CASE
-										WHEN mgi.is_vip = 1 THEN soi.price_sales * soi.qty_product
-										ELSE 0
-										END) AS sales_amt_1d_brand_store_vip, --vip销售金额（未扣券）
-					 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) AS order_time
-		FROM ods_sales_order so
-			INNER JOIN ods_sales_order_item soi
-				ON soi.sales_order_no = so.sales_order_no AND soi.ds = '${bizdate}'
-			INNER JOIN ods_sales_order_item_price soip
-				ON soi.sales_order_item_no = soip.sales_order_item_no AND soip.ds = '${bizdate}'
-			LEFT OUTER JOIN ods_member_grade_info mgi
-				ON so.member_grade_code = mgi.grade_code AND mgi.ds = '${bizdate}'
-		WHERE so.order_status = 1 AND so.ds = '${bizdate}'
-		AND so.business_type in ('10103','10104','10202','10203','10302','10303','10403','10404')
-		GROUP BY so.org_code,
-		so.channel_endpoint_code,
-		substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8)) AS t1
-		LEFT OUTER JOIN (
-
-		-------客流统计
-			SELECT
-						 store_code,
-						 substr(regexp_replace(create_time, '-', '', 0), 1, 8) AS order_time,
-						 sum(in_count) AS customer_num_1d_brand_store
-			FROM ods_store_passenger_flow
-			WHERE ds = '${bizdate}'
-			GROUP BY store_code, substr(regexp_replace(create_time, '-', '', 0), 1, 8)) AS t10
-			ON t1.channel_endpoint_code = t10.store_code AND t1.order_time = t10.order_time
-		LEFT OUTER JOIN (
-
-		-------endpoint_name
-			SELECT org_code,
-						 channel_endpoint_code,
-						 endpoint_name
-			FROM ods_api_channel_endpoint
-			WHERE ds = '${bizdate}') AS t5
-			ON t1.channel_endpoint_code = t5.channel_endpoint_code AND t1.org_code = t5.org_code;
-
-
-INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION(ds)
-	SELECT *
-	FROM ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d
-	WHERE ds = '${bizdate}' AND org_code IS NOT NULL AND channel_endpoint IS NOT NULL AND date_id IS NOT NULL;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+select t1.orderCreateTime,
+			 t1.orderCreateDate,
+			 t1.date_type,
+			 t1.date_id,
+			 t1.payTime,
+			 t1.salesOrderNo,
+			 t1.ecId,
+			 t1.outerOrderNo,
+			 t1.orderTypeText,
+			 t1.omsOrderNo,
+			 t1.trackingNo,
+			 t1.territory,
+			 t1.cityName,
+			 t1.terminalStoreCode,
+			 t1.terminalStoreName,
+			 t1.storeCate,
+			 t1.clerkNo,
+			 t1.clerkName,
+			 t1.productCode,
+			 t1.skuCode,
+			 t1.skuName,
+			 t1.colorCode,
+			 t1.colorName,
+			 t1.sizeCode,
+			 t1.sizeName,
+			 t1.retailPrice,
+			 t1.year,
+			 t1.season,
+			 t1.project,
+			 t1.mainCateText,
+			 t1.subCateType,
+			 t1.leafCate,
+			 t1.series,
+			 t1.quantity,
+			 t1.discountPrice,
+			 t1.retailAmount,
+			 t1.salesAmount,
+			 t1.discountRate,
+			 t1.promotionCodes,
+			 t1.promotionNames,
+			 t1.promotionType,
+			 t1.promotionDiscount,
+			 t1.originalOrderNo,
+			 t1.rmaReason,
+			 t1.intervalTimeFromRiginalToRma,
+			 t1.rmaContactNumber,
+			 t1.brand,
+			 t1.listDate,
+			 t1.pricePrintTypeText,
+			 t1.discountAmount,
+			 t2.totalAmountWithoutCash,
+			 t2.discountAmountWithCash,
+			 t1.rmaTypeText,
+			 t1.customerLevelText,
+			 t1.vipNo,
+			 t1.cashCouponContributionAmount,
+			 t1.salesAmountDeductCoupon,
+			 t1.salesAmountWithCoupon,
+			 t1.actualAmountDeductCoupon,
+			 t1.actualAmountWithCoupon,
+			 t1.originalAuditDate,
+			 t2.totalAmount,
+			 t1.salesOrderItemNo,
+			 t1.couponNo,
+			 t1.couponName,
+			 t1.couponType,
+			 t1.isDonate,
+			 t1.vipId,
+			 t1.memberPhone,
+			 t1.isWipeZero,
+			 t1.subBrandName,
+			 t1.promotionDiscountPoints,
+			 t1.memberUnionId,
+			 t1.storedValueCardPayAmount
+from
+(SELECT order_create_time AS orderCreateTime,
+				order_create_date AS orderCreateDate,
+				pay_time AS date_type,
+				audit_time AS date_id,
+				audit_date AS payTime,
+				sales_order_no AS salesOrderNo,
+				ec_id AS ecId,
+				outer_order_no AS outerOrderNo,
+				order_type AS orderTypeText,
+				oms_order_no AS omsOrderNo,
+				tracking_no AS trackingNo,
+				region_name AS territory,
+				city_name AS cityName,
+				channel_endpoint AS terminalStoreCode,
+				endpoint_name AS terminalStoreName,
+				channel_endpoint_type AS storeCate,
+				clerk_no AS clerkNo,
+				clerk_name AS clerkName,
+				sku_product_code AS productCode,
+				sku_code AS skuCode,
+				sku_name AS skuName,
+				sku_color_code AS colorCode,
+				sku_color_name AS colorName,
+				sku_size_code AS sizeCode,
+				sku_size_name AS sizeName,
+				sku_retail_price AS retailPrice,
+				sku_year AS YEAR,
+				sku_season AS season,
+				sku_band AS PROJECT,
+				sku_main_cate AS mainCateText,
+				sku_sub_cate AS subCateType,
+				sku_leaf_cate AS leafCate,
+				sku_series AS series,
+				sku_num AS quantity,
+				sku_discount_price AS discountPrice,
+				sku_retail_amt AS retailAmount,
+				sku_sales_amt AS salesAmount,
+				sku_discount_rate AS discountRate,
+				promotion_codes AS promotionCodes,
+				promotion_names AS promotionNames,
+				promotion_type AS promotionType,
+				promotion_discount AS promotionDiscount,
+				original_order_no AS originalOrderNo,
+				rma_reason AS rmaReason,
+				interval_time_from_riginal_to_rma AS intervalTimeFromRiginalToRma,
+				rma_contact_number AS rmaContactNumber,
+				org_code AS brand,
+				sku_list_date AS listDate,
+				price_print_type_text AS pricePrintTypeText,
+				discount_amt_order AS discountAmount,
+				rma_type AS rmaTypeText,
+				member_grade_code AS customerLevelText,
+				member_no AS vipNo,
+				sku_cash_contribution_amt AS cashCouponContributionAmount,
+				sales_amt_deduct_coupon AS salesAmountDeductCoupon,
+				sales_amt_with_coupon AS salesAmountWithCoupon,
+				actual_amt_deduct_coupon AS actualAmountDeductCoupon,
+				actual_amt_with_coupon AS actualAmountWithCoupon,
+				original_audit_date AS originalAuditDate,
+				sales_order_item_no AS salesOrderItemNo,
+				coupon_no AS couponNo,
+				coupon_name AS couponName,
+				coupon_type AS couponType,
+				is_donate AS isDonate,
+				member_id AS vipId,
+				member_phone AS memberPhone,
+				is_wipe_zero AS isWipeZero,
+				brand_name AS subBrandName,
+				promotion_discount_points AS promotionDiscountPoints,
+				member_union_id AS memberUnionId,
+				stored_value_card_pay_amt AS storedValueCardPayAmount
+ FROM ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm
+ WHERE date_type = ${date_type}
+AND date_id = ${date_id}
+AND sku_product_code = ${productCode}
+AND member_no = ${vipNo}
+AND sku_year = ${YEAR}
+AND member_grade_code IN ${customerLevelText}
+AND member_type IN ${customerTypeList}
+AND sku_code IN ${skuCodeList}
+AND sku_band IN ${PROJECTS}
+AND org_code = ${org_code}
+AND sku_season = ${season}
+AND channel_endpoint IN ${storeCodeList}
+AND sku_sub_cate = ${subCate}
+AND clerk_no = ${clerkNo}
+AND sales_order_no = ${salesOrderNo}
+AND original_order_no = ${originalOrderNo}
+AND business_type IN ${orderTypeList}
+AND sales_amt_deduct_coupon >= ${totalAmountFrom}
+AND sales_amt_deduct_coupon <= ${totalAmountTo}
+AND price_print_type_text IN ${pricePrintTypeTextList} ) as t1
+	join
+	(select sales_order_no,
+					sum(totla_amt_order) as totalAmount,
+					sum(total_amt_without_cash) as totalAmountWithoutCash,
+					sum(discount_amt_with_cash) as discountAmountWithCash
+	 from ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm
+	 where date_type = ${date_type}
+	AND date_id = ${date_id}
+	AND sku_product_code = ${productCode}
+	AND member_no = ${vipNo}
+	AND sku_year = ${YEAR}
+	AND member_grade_code IN ${customerLevelText}
+	AND member_type IN ${customerTypeList}
+	AND sku_code IN ${skuCodeList}
+	AND sku_band IN ${PROJECTS}
+	AND org_code = ${org_code}
+	AND sku_season = ${season}
+	AND channel_endpoint IN ${storeCodeList}
+	AND sku_sub_cate = ${subCate}
+	AND clerk_no = ${clerkNo}
+	AND sales_order_no = ${salesOrderNo}
+	AND original_order_no = ${originalOrderNo}
+	AND business_type IN ${orderTypeList}
+	AND sales_amt_deduct_coupon >= ${totalAmountFrom}
+	AND sales_amt_deduct_coupon <= ${totalAmountTo}
+	AND price_print_type_text IN ${pricePrintTypeTextList}
+	group by sales_order_no) as t2
+		on t1.salesOrderNo = t2.sales_order_no
