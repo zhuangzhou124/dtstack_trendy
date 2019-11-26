@@ -1,126 +1,28 @@
-
---***********************************
--- 表   名：ads_tpos_tdrp_wfx_spu_inventory_1d
--- 功能描述：盘点单导出（spu粒度）
--- 生命周期：
--- 调度周期：T+1调度
--- 创建者：  庄周
--- 创建日期：20191016
--- 修改日志：杜诺 19-11-06 添加生效状态和单据业务状态
---***********************************
-
-
-CREATE TABLE IF NOT EXISTS ads_tpos_tdrp_wfx_spu_inventory_1d(
-	cyctime                     STRING COMMENT '统计日期'
-, org_code                    STRING COMMENT '品牌编号'
-, channel_endpoint_code       STRING COMMENT '店铺编码'
-, store_name                  STRING COMMENT '店铺名称'
-, order_no                    STRING COMMENT '盘点单号'
-, made_order_time             DATETIME COMMENT '盘点时间'
-, spu_code                    STRING COMMENT '款号'
-, spu_name                    STRING COMMENT '商品名称'
-, qty_store                   BIGINT COMMENT '账面数'
-, qty_reality                 BIGINT COMMENT '实盘数'
-, qty_change                  BIGINT COMMENT '盈亏数'
-, cny_price                   DOUBLE COMMENT '吊牌价'
-, compensation_rate           DOUBLE COMMENT '赔付折扣'
-, compensation_price          DOUBLE COMMENT '盈亏单价'
-, change_price                DOUBLE COMMENT '盈亏金额'
-, order_status                BIGINT COMMENT '状态'
-, business_type               BIGINT COMMENT '盘点类型'
-, change_type                 BIGINT COMMENT '差异类型'
-, is_sku_store_reality_change STRING COMMENT 'sku明细项存在实盘与账面有差异'
-, is_spu_store_reality_change STRING COMMENT '款号实盘与账面有差异'
-, is_spu_scan_reality_change  STRING COMMENT '款号实盘与扫码有差异'
-, is_spu_change               STRING COMMENT '是否有差异,实盘数与扫码数有差异,或实盘数与系统数有差异'
-)COMMENT '盘点单导出' PARTITIONED BY(
-	ds STRING COMMENT '时间分区'
-);
+CREATE TABLE IF NOT EXISTS ods_yichang_purchase(
+	region_id                                      varchar(100) COMMENT '大区id     ',
+	order_level1_id                                varchar(100) COMMENT '编号（1级）    ',
+	order_level2_id                                varchar(100) COMMENT '编号（2级）',
+	order_level3_id                                varchar(100) COMMENT '编号（3级）  ',
+	order_requirement_type                         varchar(100) COMMENT '需求类型   ',
+	order_requirement_no                           varchar(100) COMMENT '需求编号     ',
+	order_requirement_weight                       varchar(100) COMMENT '需求重量(KG)   ',
+	order_requirement_send_date                    varchar(100) COMMENT '需求下发日期  ',
+	order_requirement_delivery_date                varchar(100) COMMENT '需求交货期    ',
+	order_market_requirement_delivery_date         varchar(100) COMMENT '市场要求交货期  ',
+	order_create_date                              varchar(100) COMMENT '订单创建日期   ',
+	order_delivery_date                            varchar(100) COMMENT '订单交货日期  ',
+	order_finish_date                              varchar(100) COMMENT '完成时间    ',
+	order_finish_weight                            decimal(10,2) COMMENT '完成重量（KG)）  ',
+	order_actual_take_date                         varchar(100) COMMENT '实际提货日期    ',
+	order_actual_take_weight                       decimal(10,2) COMMENT '提货重量（KG',
+	order_stock_in_date                            varchar(100) COMMENT '物资入库日期 ',
+	order_stock_in_weight                          decimal(10,2) COMMENT '入库重量（KG）',
+	order_payment_date                             varchar(100) COMMENT '开票日期 ',
+	order_account_date                             varchar(100) COMMENT '到账日期  ',
+	gmt_create datetime DEFAULT CURRENT_TIMESTAMP,
+	gmt_modified datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)COMMENT '采购数据表';
 
 
---alter table td_ads.ads_tpos_tdrp_wfx_spu_inventory_1d add columns(effect_status  string comment '生效状态',order_business_status string comment '单据业务状态')
-
-
-
-INSERT OVERWRITE TABLE ads_tpos_tdrp_wfx_spu_inventory_1d PARTITION(ds = '${bizdate}')
-	SELECT '${cyctime}'
-	, t1.org_code
-	, t1.channel_endpoint_code
-	, t1.store_name
-	, t1.order_no
-	, t1.made_order_time
-	, t1.spu_code
-	, t1.spu_name
-	, t1.qty_store
-	, t1.qty_reality
-	, t1.qty_change
-	, t1.cny_price
-	, t1.compensation_rate
-	, t1.compensation_price
-	, t1.change_price
-	, t1.order_status
-	, t1.business_type
-	, CASE WHEN t1.qty_change = 0 THEN 4
-				 WHEN t1.qty_change > 0 THEN 2
-				 WHEN t1.qty_change < 0 THEN 3
-				 ELSE 1 END AS change_type
-	, CASE WHEN instr(t1.is_sku_store_reality_change,'Y')>0 THEN 'true' ELSE 'false' END AS is_sku_store_reality_change
-	, CASE WHEN t1.qty_store - t1.qty_reality <> 0 THEN 'true' ELSE 'false' END AS is_spu_store_reality_change
-	, CASE WHEN t1.qty_scanning - t1.qty_reality <> 0 THEN 'true' ELSE 'false' END AS is_spu_scan_reality_change
-	, CASE WHEN (t1.qty_scanning - t1.qty_reality <> 0) OR (t1.qty_store - t1.qty_reality <> 0) THEN 'true' ELSE 'false' END AS is_spu_change
-	, effect_status
-	, order_business_status
-	FROM (
-		SELECT ospoi.org_code                                                         --品牌编码
-		, osl.channel_endpoint_code                                               --门店编码
-		, coalesce(ors.store_name,ow.warehouse_name) AS store_name                --门店名称
-		, ospoi.order_no                                                          --盘点单号
-		, sku.spu_code                                                            --款号
-		,spu.cn_name AS spu_name                                               --商品名称
-		, sum(sku.cny_price) AS cny_price                                         --吊牌价
-		, wm_concat(',', CASE WHEN coalesce(ospoii.qty_store, 0) - coalesce(ospoii.qty_reality, 0) <> 0 THEN 'Y' ELSE 'N' END)
-					 AS is_sku_store_reality_change   --sku明细项存在实盘与账面有差异
-		, sum(coalesce(ospoii.qty_store, 0)) AS qty_store                         --账面数
-		, sum(coalesce(ospoii.qty_reality, 0)) AS qty_reality                      --实盘数
-		, sum(coalesce(ospoii.qty_scanning, 0)) AS qty_scanning                    --扫码数
-		, sum(coalesce(ospoii.qty_change, 0)) AS qty_change                       --盈亏数
-		, max(coalesce(ospoii.compensation_price,0)) AS compensation_price          --盈亏单价
-		, sum(coalesce(sku.cny_price * ospoii.qty_change,0)) AS change_price        --盈亏金额
-		, min(coalesce(ospoii.compensation_rate,0)) AS compensation_rate            --赔付折扣
-		, ospoi.order_status                                                      --状态
-		, ospoi.business_type                                                     --盘点类型
-		, ospoi.made_order_time                                                   --盘点日期
-		, ospoi.effect_status                                                       --生效状态
-		, ospoi.order_business_status                                               --单据业务状态
-		FROM ${td_ods}.ods_stock_physical_order_inventory_items ospoii
-		LEFT JOIN ${td_ods}.ods_stock_physical_order_inventory ospoi
-			ON ospoii.physical_order_inventory_id = ospoi.id AND ospoi.ds = '${bizdate}'
-		LEFT JOIN ${td_ods}.ods_api_item_sku sku
-			ON ospoii.sku_code = sku.sku_code AND sku.ds = '${bizdate}'
-		LEFT JOIN ${td_ods}.ods_item_spu spu
-			ON sku.spu_code = spu.spu_code
-		AND spu.ds = '${bizdate}'
-		LEFT JOIN ${td_ods}.ods_stock_logic osl
-			ON ospoi.stock_physical_id = osl.stock_physical_id AND osl.ds = '${bizdate}'
-		LEFT JOIN ${td_ods}.ods_real_store ors
-			ON osl.channel_endpoint_code = ors.store_code AND ors.ds = '${bizdate}'
-		LEFT JOIN ${td_ods}.ods_warehouse ow
-			ON ow.warehouse_code = osl.channel_endpoint_code
-		AND ow.ds = '${bizdate}'
-	WHERE ospoii.ds = '${bizdate}'
-	GROUP BY ospoi.org_code
-	, osl.channel_endpoint_code
-	, ors.store_name
-	, ospoi.order_no
-	, sku.spu_code
-	, ospoi.order_status
-	, ospoi.business_type
-	, ospoi.made_order_time
-	, spu.cn_name
-	, ow.warehouse_name
-	, ospoi.effect_status
-	, ospoi.order_business_status
-	) t1
-;
 
 
