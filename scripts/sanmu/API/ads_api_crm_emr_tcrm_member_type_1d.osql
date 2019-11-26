@@ -1,0 +1,415 @@
+--name:ads_api_crm_emr_tcrm_member_type_1d
+--author:sanmu
+--create time:2019-10-11 14:44
+--drop table ads_api_crm_emr_tcrm_member_type_1d
+--***********************************
+-- 表   名：ads_api_crm_emr_tcrm_member_type_1d
+-- 功能描述：日期+会员类型汇总表
+-- 生命周期：30天
+-- 调度周期：周期调度
+-- 创建者：  三木
+-- 创建日期：20191008
+-- 修改日志：
+--***********************************
+
+
+CREATE TABLE IF NOT EXISTS ads_api_crm_emr_tcrm_member_type_1d(
+	biz_date                                                 STRING COMMENT '统计日期',
+	company_name                                             STRING COMMENT '上级公司名              ',
+	region                                                   STRING COMMENT '区域                 ',
+	city                                                     STRING COMMENT '城市                 ',
+	org_code                                                 STRING COMMENT '品牌         ',
+	channel_endpoint                                         STRING COMMENT '门店                 ',
+	operation_name                                           STRING COMMENT '门店经营方式                 ',
+	member_type                                              STRING COMMENT '会员类型               ',
+	sales_amt_1d_member_type                                 DOUBLE COMMENT '销售金额               ',
+	retail_price_amt_1d_member_type                          DOUBLE COMMENT '吊牌金额         ',
+	sales_amt_ratio_1d_member_type                           DOUBLE COMMENT '销售金额占比             ',
+	sales_amt_ratio_total_1d_member_type                     DOUBLE COMMENT '销售金额占比汇总           ',
+	sales_amt_1d_member_type_last_year                       DOUBLE COMMENT '去年同期销售金额           ',
+	sales_num_1d_member_type                                 BIGINT COMMENT '销售件数               ',
+	discount_rate_1d_member_type                             DOUBLE COMMENT '折扣率（销售金额/吊牌金额）                 ',
+	sales_mbr_num_1d_member_type                             BIGINT COMMENT '消费会员人数               ',
+	sales_mbr_num_1d_member_type_last_month                  BIGINT COMMENT '上月存量(消费会员人数)',
+	second_trade_rate                                        DOUBLE COMMENT '回头率（上月存量消费会员人数/本月消费会员人数） ',
+	svip_num_1d_member_type_new                              BIGINT COMMENT '会员招募-(SVIP会员， 金卡会员)',
+	vip_num_1d_member_type_new                               BIGINT COMMENT '会员招募-(VIP会员， 银卡会员) ',
+	normal_num_1d_member_type_new                            BIGINT COMMENT '会员招募-普通会员          ',
+	upgraded_num_1d_member_type                              BIGINT COMMENT '会员升级人数               ',
+	store_num_1d_member_type                                 BIGINT COMMENT '店铺数                ',
+	store_mbr_num_1d_member_type_avg                         DOUBLE COMMENT '店均消费会员数             ',
+	sales_mbr_amt_1d_member_type_avg                         DOUBLE COMMENT '人均销售金额             ',
+	sales_mbr_num_1d_member_type_avg                         DOUBLE COMMENT '人均销售件数             ',
+	su_mbr_num_1d_member_type_avg                            DOUBLE COMMENT '人均SU（连带率 销售件数/销售单数 ）               ',
+	order_mbr_num_1d_member_type_avg                         DOUBLE COMMENT '人均次  (销售单数/消费会员人数)              ',
+	date_type                                                STRING COMMENT '日期类型',
+	date_id                                                  STRING COMMENT '日期'
+)COMMENT '日期+会员类型粒度汇总表' PARTITIONED BY(
+	ds STRING COMMENT '时间分区')
+LIFECYCLE 30;
+
+
+INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_type_1d PARTITION(ds = '${bizdate}')
+----------------老会员
+	SELECT '${bizdate}' AS biz_date,
+				 t4.company_name,
+				 t2.region_name,
+				 t2.city_name,
+				 t1.org_code,
+				 t1.channel_endpoint_code,
+				 t3.operation_name,
+				 CASE
+				 WHEN t1.member_grade_code LIKE '%GENERAL%' THEN '普通会员'
+				 WHEN t1.member_grade_code LIKE '%SILVER%' OR t1.member_grade_code = 'FIV_VIP' THEN 'VIP会员'
+				 WHEN t1.member_grade_code LIKE '%GOLD%' OR t1.member_grade_code = 'FIV_SVIP' THEN 'SVIP会员'
+				 ELSE '不是会员'
+				 END AS member_type,
+				 sum(t5.price_sales * t5.qty_product) AS sales_amt_1d_member_type,
+				 sum(t5.price_retail * t5.qty_product) AS retail_price_amt_1d_member_type,
+				 '' AS sales_amt_ratio_1d_member_type,
+				 '' AS sales_amt_ratio_total_1d_member_type,
+				 '' AS sales_amt_1d_member_type_last_year,
+				 sum(CASE
+				 WHEN (t5.price_sales <> 0) THEN t5.qty_product
+				 END) AS sales_num_1d_member_type,
+				 '' AS discount_rate_1d_member_type,
+				 COUNT(DISTINCT CASE
+				 WHEN t6.is_vip = '1' THEN t1.member_no
+				 END) AS sales_mbr_num_1d_member_type,
+				 NULL AS sales_mbr_num_1d_member_type_last_month,
+				 '' AS second_trade_rate,
+				 0 AS svip_num_1d_member_type_new,
+				 0 AS vip_num_1d_member_type_new,
+				 0 AS normal_num_1d_member_type_new,
+				 COUNT(DISTINCT CASE
+				 WHEN t7.grade_change = '1' THEN t1.member_no
+				 END) AS upgraded_num_1d_member_type,
+				 sum(CASE
+				 WHEN t1.channel_endpoint_code IN ('1101', '1102', '1104') THEN 1
+				 END) AS store_num_1d_member_type,
+				 '' AS store_mbr_num_1d_member_type_avg,
+				 '' AS sales_mbr_amt_1d_member_type_avg,
+				 '' AS sales_mbr_num_1d_member_type_avg,
+				 coalesce(COUNT(DISTINCT CASE
+				 WHEN t1.order_type = '101' OR (t1.order_type = '104' AND t1.amt_total > 0) THEN t1.sales_order_no
+				 END), 0) -
+				 coalesce(COUNT(DISTINCT CASE
+				 WHEN t1.order_type IN ('102', '103') THEN t1.sales_order_no
+				 END), 0) AS su_mbr_num_1d_member_type_avg,      --(订单数)
+				 '' AS order_mbr_num_1d_member_type_avg,
+				 'day' AS date_type,
+				 t1.order_time AS date_id
+	FROM (
+		SELECT a.org_code,
+					 a.channel_endpoint_code,
+					 a.member_no,
+					 substr(regexp_replace(a.paid_time, '-', '', 0), 1, 8) AS order_time,
+					 a.sales_order_no,
+					 a.member_grade_code,
+					 a.price_amt_retail,
+					 a.order_type,
+					 a.amt_total
+		FROM (
+			SELECT org_code,
+						 channel_endpoint_code,
+						 member_no,
+						 sales_order_no,
+						 member_grade_code,
+						 price_amt_retail,
+						 order_type,
+						 amt_total,
+						 paid_time,
+						 min(create_time)OVER (PARTITION BY org_code,channel_endpoint_code, member_no) AS first_order_time
+			FROM ods_sales_order
+			WHERE substr(regexp_replace(create_time, '-', '', 0), 1, 8) <= '${bizdate}' and ds = '${bizdate}'
+			AND price_amt_discount > 0
+			AND member_no != -1
+		) a
+			LEFT JOIN (
+				SELECT org_code,
+							 channel_endpoint_code,
+							 member_no,
+							 sum(price_amt_discount) AS order_fact_amount
+				FROM ods_sales_order
+				WHERE substr(regexp_replace(create_time, '-', '', 0), 1, 8) = '${bizdate}' and ds = '${bizdate}'
+				AND member_no != -1
+				GROUP BY org_code,
+				channel_endpoint_code,
+				member_no
+			) b
+				ON a.org_code = b.org_code AND a.channel_endpoint_code = b.channel_endpoint_code AND a.member_no = b.member_no
+		WHERE substr(regexp_replace(a.first_order_time, '-', '', 0), 1, 8) < '${bizdate}'
+		AND b.order_fact_amount > 0) AS t1
+		JOIN (
+			SELECT sales_order_no,
+						 price_sales,
+						 price_discount,
+						 price_retail,
+						 qty_product
+			FROM ods_sales_order_item
+			WHERE ds = '${bizdate}') AS t5
+			ON t1.sales_order_no = t5.sales_order_no
+		LEFT JOIN (
+			SELECT store_code,
+						 company_code,
+						 region_name,
+						 city_name
+			FROM ods_real_store
+			WHERE ds = '${bizdate}') AS t2
+			ON t1.channel_endpoint_code = t2.store_code
+		LEFT JOIN (
+			SELECT channel_endpoint_code,
+						 operation_name
+			FROM ods_channel_endpoint
+			WHERE ds = '${bizdate}') AS t3
+			ON t1.channel_endpoint_code = t3.channel_endpoint_code
+		LEFT JOIN (
+			SELECT company_code,
+						 company_name
+			FROM ods_company
+			WHERE ds = '${bizdate}') AS t4
+			ON t2.company_code = t4.company_code
+		LEFT JOIN (
+			SELECT grade_code,
+						 is_vip
+			FROM ods_member_grade_info
+			WHERE ds = '${bizdate}') AS t6
+			ON t1.member_grade_code = t6.grade_code
+		LEFT JOIN (
+			SELECT member_no,
+						 '1' AS grade_change
+			FROM ods_member_grade_log
+			WHERE grade_change_time = '${bizdate}' AND ds = '${bizdate}' AND before_grade_id < after_grade_id AND STATUS > 0)
+		AS t7
+			ON t1.member_no = t7.member_no
+	GROUP BY t4.company_name,
+	t2.region_name,
+	t2.city_name,
+	t1.org_code,
+	t1.channel_endpoint_code,
+	t3.operation_name, CASE
+				 WHEN t1.member_grade_code LIKE '%GENERAL%' THEN '普通会员'
+				 WHEN t1.member_grade_code LIKE '%SILVER%' OR t1.member_grade_code = 'FIV_VIP' THEN 'VIP会员'
+				 WHEN t1.member_grade_code LIKE '%GOLD%' OR t1.member_grade_code = 'FIV_SVIP' THEN 'SVIP会员'
+				 ELSE '不是会员'
+				 END, t1.order_time
+
+	UNION ALL
+	----------------新会员
+	SELECT '${bizdate}' AS biz_date,
+				 t4.company_name,
+				 t2.region_name,
+				 t2.city_name,
+				 t1.org_code,
+				 t1.channel_endpoint_code,
+				 t3.operation_name,
+				 '新会员' AS member_type,
+				 sum(t5.price_sales * t5.qty_product) AS sales_amt_1d_member_type,
+				 sum(t5.price_retail * t5.qty_product) AS retail_price_amt_1d_member_type,
+				 '' AS sales_amt_ratio_1d_member_type,
+				 '' AS sales_amt_ratio_total_1d_member_type,
+				 '' AS sales_amt_1d_member_type_last_year,
+				 sum(CASE
+				 WHEN t5.price_sales <> 0 THEN t5.qty_product
+				 END) AS sales_num_1d_member_type,
+				 '' AS discount_rate_1d_member_type,
+				 COUNT(DISTINCT CASE
+				 WHEN t6.is_vip = '1' THEN t1.member_no
+				 END) AS sales_mbr_num_1d_member_type,
+				 NULL AS sales_mbr_num_1d_member_type_last_month,
+				 '' AS second_trade_rate,
+				 COUNT(DISTINCT CASE
+				 WHEN t1.member_grade_code LIKE '%GOLD%' OR t1.member_grade_code = 'FIV_SVIP' THEN t1.member_no
+				 END) AS svip_num_1d_member_type_new,
+				 COUNT(DISTINCT CASE
+				 WHEN t1.member_grade_code LIKE '%SILVER%' OR t1.member_grade_code = 'FIV_VIP' THEN t1.member_no
+				 END) AS vip_num_1d_member_type_new,
+				 COUNT(DISTINCT CASE
+				 WHEN t1.member_grade_code LIKE '%GENERAL%' THEN t1.member_no
+				 END) AS normal_num_1d_member_type_new,
+				 COUNT(DISTINCT CASE
+				 WHEN t7.grade_change = '1' THEN t1.member_no
+				 END) AS upgraded_num_1d_member_type,
+				 sum(CASE
+				 WHEN t1.channel_endpoint_code IN ('1101', '1102', '1104') THEN 1
+				 END) AS store_num_1d_member_type,
+				 '' AS store_mbr_num_1d_member_type_avg,
+				 '' AS sales_mbr_amt_1d_member_type_avg,
+				 '' AS sales_mbr_num_1d_member_type_avg,
+				 sum(CASE
+				 WHEN t1.order_type = '101' THEN 1
+				 WHEN t1.order_type IN ('102', '103') THEN -1
+				 WHEN t1.order_type = '104' AND t1.amt_total > 0 THEN 1
+				 WHEN t1.order_type = '104' AND t1.amt_total = 0 THEN 0
+				 END) AS su_mbr_num_1d_member_type_avg,      --(订单数)
+				 '' AS order_mbr_num_1d_member_type_avg,
+				 'day' AS date_type,
+				 t1.order_time AS date_id
+	FROM (
+		SELECT a.org_code,
+					 a.channel_endpoint_code,
+					 a.member_no,
+					 substr(regexp_replace(a.paid_time, '-', '', 0), 1, 8) AS order_time,
+					 a.sales_order_no,
+					 a.member_grade_code,
+					 a.price_amt_retail,
+					 a.order_type,
+					 a.amt_total
+		FROM (
+			SELECT org_code,
+						 channel_endpoint_code,
+						 member_no,
+						 sales_order_no,
+						 member_grade_code,
+						 price_amt_retail,
+						 order_type,
+						 amt_total,
+						 paid_time,
+						 min(create_time)OVER (PARTITION BY org_code, channel_endpoint_code, member_no) AS first_order_time
+			FROM ods_sales_order
+			WHERE substr(regexp_replace(create_time, '-', '', 0), 1, 8) <= '${bizdate}' and ds = '${bizdate}'
+			AND price_amt_discount > 0 AND member_no != -1
+		) a
+			LEFT JOIN (
+				SELECT org_code,
+							 channel_endpoint_code,
+							 member_no,
+							 sum(price_amt_discount) AS order_fact_amount
+				FROM ods_sales_order
+				WHERE substr(regexp_replace(create_time, '-', '', 0), 1, 8) = '${bizdate}'  and ds = '${bizdate}'
+				AND member_no != -1
+				GROUP BY org_code, channel_endpoint_code, member_no
+			) b
+				ON a.org_code = b.org_code AND a.channel_endpoint_code = b.channel_endpoint_code AND a.member_no = b.member_no
+		WHERE substr(regexp_replace(a.first_order_time, '-', '', 0), 1, 8) = '${bizdate}' AND b.order_fact_amount > 0) AS t1
+		JOIN (
+			SELECT sales_order_no,
+						 price_sales,
+						 price_discount,
+						 price_retail,
+						 qty_product
+			FROM ods_sales_order_item
+			WHERE ds = '${bizdate}') AS t5
+			ON t1.sales_order_no = t5.sales_order_no
+		LEFT JOIN (
+			SELECT store_code,
+						 company_code,
+						 region_name,
+						 city_name
+			FROM ods_real_store
+			WHERE ds = '${bizdate}') AS t2
+			ON t1.channel_endpoint_code = t2.store_code
+		LEFT JOIN (
+			SELECT channel_endpoint_code,
+						 operation_name
+			FROM ods_channel_endpoint
+			WHERE ds = '${bizdate}') AS t3
+			ON t1.channel_endpoint_code = t3.channel_endpoint_code
+		LEFT JOIN (
+			SELECT company_code,
+						 company_name
+			FROM ods_company
+			WHERE ds = '${bizdate}') AS t4
+			ON t2.company_code = t4.company_code
+		LEFT JOIN (
+			SELECT grade_code,
+						 is_vip
+			FROM ods_member_grade_info
+			WHERE ds = '${bizdate}') AS t6
+			ON t1.member_grade_code = t6.grade_code
+		LEFT JOIN (
+			SELECT member_no,
+						 '1' AS grade_change
+			FROM ods_member_grade_log
+			WHERE substr(regexp_replace(grade_change_time, '-', '', 0), 1, 8) = '${bizdate}' AND ds = '${bizdate}'
+			AND before_grade_id < after_grade_id AND STATUS > 0) AS t7
+			ON t1.member_no = t7.member_no
+	GROUP BY t4.company_name,
+	t2.region_name,
+	t2.city_name,
+	t1.org_code,
+	t1.channel_endpoint_code,
+	t3.operation_name, t1.order_time;
+
+
+INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_type_1d PARTITION(ds = '${bizdate}')
+	SELECT biz_date,
+				 t1.company_name,
+				 t1.region,
+				 t1.city,
+				 t1.org_code,
+				 t1.channel_endpoint,
+				 t1.operation_name,
+				 t1.member_type,
+				 t1.sales_amt_1d_member_type,
+				 t1.retail_price_amt_1d_member_type,
+				 CASE
+				 WHEN t2.total_amt IS NULL OR t2.total_amt = 0 THEN 0.0
+				 ELSE t1.sales_amt_1d_member_type / t2.total_amt
+				 END AS sales_amt_ratio_1d_member_type,
+				 sum(CASE
+				 WHEN t2.total_amt IS NULL OR t2.total_amt = 0 THEN 0.0
+				 ELSE t1.sales_amt_1d_member_type / t2.total_amt
+				 END)OVER (PARTITION BY t1.company_name, t1.region, t1.city, t1.org_code, t1.channel_endpoint) AS
+				 sales_amt_ratio_total_1d_member_type,
+				 t1.sales_amt_1d_member_type_last_year,
+				 t1.sales_num_1d_member_type,
+				 CASE
+				 WHEN t1.retail_price_amt_1d_member_type IS NULL OR t1.retail_price_amt_1d_member_type = 0 THEN 0.0
+				 ELSE t1.sales_amt_1d_member_type / t1.retail_price_amt_1d_member_type
+				 END AS discount_rate_1d_member_type,
+				 t1.sales_mbr_num_1d_member_type,
+				 t1.sales_mbr_num_1d_member_type_last_month,
+				 t1.second_trade_rate,
+				 t1.svip_num_1d_member_type_new,
+				 t1.vip_num_1d_member_type_new,
+				 t1.normal_num_1d_member_type_new,
+				 t1.upgraded_num_1d_member_type,
+				 t1.store_num_1d_member_type,
+				 CASE
+				 WHEN t1.store_num_1d_member_type IS NULL OR t1.store_num_1d_member_type = 0 THEN 0.0
+				 ELSE t1.sales_mbr_num_1d_member_type / t1.store_num_1d_member_type
+				 END AS store_mbr_num_1d_member_type_avg,
+				 CASE
+				 WHEN t1.sales_mbr_num_1d_member_type IS NULL OR t1.sales_mbr_num_1d_member_type = 0 THEN 0.0
+				 ELSE t1.sales_amt_1d_member_type / t1.sales_mbr_num_1d_member_type
+				 END AS sales_mbr_amt_1d_member_type_avg,
+				 CASE
+				 WHEN t1.sales_mbr_num_1d_member_type IS NULL OR t1.sales_mbr_num_1d_member_type = 0 THEN 0.0
+				 ELSE t1.sales_num_1d_member_type / t1.sales_mbr_num_1d_member_type
+				 END AS sales_mbr_num_1d_member_type_avg,
+				 CASE
+				 WHEN t1.su_mbr_num_1d_member_type_avg IS NULL OR t1.su_mbr_num_1d_member_type_avg = 0 THEN 0.0
+				 ELSE t1.sales_num_1d_member_type / t1.su_mbr_num_1d_member_type_avg
+				 END AS su_mbr_num_1d_member_type_avg,
+				 CASE
+				 WHEN t1.sales_mbr_num_1d_member_type IS NULL OR t1.sales_mbr_num_1d_member_type = 0 THEN 0.0
+				 ELSE t1.su_mbr_num_1d_member_type_avg / t1.sales_mbr_num_1d_member_type
+				 END AS order_mbr_num_1d_member_type_avg,
+				 t1.date_type,
+				 t1.date_id
+	FROM (
+		SELECT *
+		FROM ads_api_crm_emr_tcrm_member_type_1d
+		WHERE ds = '${bizdate}' and date_id is not null) AS t1
+		LEFT JOIN (
+			SELECT company_name,
+						 region,
+						 city,
+						 org_code,
+						 channel_endpoint,
+						 operation_name,
+						 date_id,
+						 sum(sales_amt_1d_member_type) AS total_amt
+			FROM ads_api_crm_emr_tcrm_member_type_1d
+			WHERE ds = '${bizdate}'
+			GROUP BY company_name,
+			region,
+			city,
+			org_code,
+			channel_endpoint,
+			operation_name, date_id) AS t2
+			ON t1.org_code = t2.org_code AND t1.channel_endpoint = t2.channel_endpoint AND t1.company_name = t2.company_name
+		AND t1.region = t2.region AND t1.city = t2.city AND t1.date_id = t2.date_id;
+
+

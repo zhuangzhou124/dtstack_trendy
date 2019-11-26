@@ -22,6 +22,7 @@ create table if not exists ods_member_log_detail_1d_2(
   ds string comment '时间分区');
 
 
+
 select user_id
 ,      lastOrderTime
 ,      lastOrderStore

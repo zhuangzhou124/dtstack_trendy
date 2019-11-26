@@ -1,0 +1,96 @@
+--***********************************
+-- 所属系统：会员中心
+-- 功能描述：物理库区表DDL
+-- 生命周期：365天
+-- 调度周期：手动调度
+-- 创建者：   sanmu
+-- 创建日期：20191030
+-- 修改日志：
+--***********************************
+--drop table if exists ods_member_grade_state;
+
+CREATE TABLE IF NOT EXISTS ods_member_grade_state(
+	id                    BIGINT COMMENT '主键',
+	member_card_id        BIGINT COMMENT '会员卡ID',
+	member_card_no        STRING COMMENT '会员卡编码',
+	grade_begin           STRING COMMENT '等级开始时间',
+	grade_expiration      STRING COMMENT '等级过期时间',
+	grade_log_id          BIGINT COMMENT '等级日志ID',
+	grade_domain          STRING COMMENT '等级领域',
+	grade_id              BIGINT COMMENT '等级ID',
+	grade_code            STRING COMMENT '等级编码',
+	change_reason         BIGINT COMMENT '变更原因',
+	create_time           STRING COMMENT '创建时间',
+	last_update_time      STRING COMMENT '最后更新时间',
+	change_reason_desc    STRING COMMENT '变化原因描述',
+	last_upgrade_time     STRING COMMENT '最近升级时间',
+	last_degrade_time     STRING COMMENT '最近降级时间',
+	member_no             STRING COMMENT '会员编号',
+	brand_code            STRING COMMENT '品牌编号',
+	org_code              STRING COMMENT '销售组织编码',
+	version               BIGINT COMMENT '版本',
+	app_id                STRING COMMENT '应用ID',
+	create_user_name      STRING COMMENT '创建用户名（冗余）',
+	create_user_id        BIGINT COMMENT '创建用户编码',
+	last_update_user_name STRING COMMENT '最后更新用户名（冗余）',
+	last_update_user_id   BIGINT COMMENT '最后更新用户编码'
+)COMMENT '会员中心-会员等级' PARTITIONED BY(
+	ds STRING COMMENT '时间分区');
+
+INSERT OVERWRITE TABLE ods_member_grade_state PARTITION(ds = '${today}')
+	SELECT id,
+				 member_card_id,
+				 member_card_no,
+				 grade_begin,
+				 grade_expiration,
+				 grade_log_id,
+				 grade_domain,
+				 grade_id,
+				 grade_code,
+				 change_reason,
+				 create_time,
+				 last_update_time,
+				 change_reason_desc,
+				 last_upgrade_time,
+				 last_degrade_time,
+				 member_no,
+				 brand_code,
+				 org_code,
+				 version,
+				 app_id,
+				 create_user_name,
+				 create_user_id,
+				 last_update_user_name,
+				 last_update_user_id
+	FROM ods_member_grade_state
+	WHERE ds = '${today}' UNION ALL
+	SELECT id,
+				 member_card_id,
+				 member_card_no,
+				 grade_begin,
+				 grade_expiration,
+				 grade_log_id,
+				 grade_domain,
+				 grade_id,
+				 grade_code,
+				 change_reason,
+				 create_time,
+				 last_update_time,
+				 change_reason_desc,
+				 last_upgrade_time,
+				 last_degrade_time,
+				 member_no,
+				 brand_code,
+				 org_code,
+				 version,
+				 app_id,
+				 create_user_name,
+				 create_user_id,
+				 last_update_user_name,
+				 last_update_user_id
+	FROM ods_member_grade_state
+	WHERE ds = '${bizdate}' AND member_no NOT IN (
+		SELECT member_no
+		FROM ods_member_grade_state AS t1
+		WHERE ds = '${today}'
+	);

@@ -1,0 +1,219 @@
+--name:ads_api_crm_emr_tcrm_member_1d
+--author:sanmu
+--create time:2019-10-10 14:59
+--drop table ads_api_crm_emr_tcrm_member_1d
+--***********************************
+-- 表   名：ads_api_crm_emr_tcrm_member_1d
+-- 功能描述：日期+会员+品牌粒度汇总表
+-- 生命周期：30天
+-- 调度周期：周期调度
+-- 创建者：  三木
+-- 创建日期：20191008
+-- 修改日志：
+--***********************************
+
+
+
+CREATE TABLE IF NOT EXISTS ads_api_crm_emr_tcrm_member_1d(
+	biz_date                                                 STRING COMMENT '统计日期',
+	org_code                                                 STRING COMMENT '品牌         ',
+	member_no                                                STRING COMMENT '会员编号  ',
+	member_mobile                                            STRING COMMENT '会员手机号 ',
+	gmt_member_first_order                                   STRING COMMENT '首单时间  ',
+	member_register_channel_endpoint                         STRING COMMENT '注册门店  ',
+	member_manage_channel_endpoint                           STRING COMMENT '管理门店  ',
+	operation_name                                           STRING COMMENT '管理门店的经营方式',
+	manage_region                                            STRING COMMENT '管理门店大区    ',
+	manage_province                                          STRING COMMENT '管理门店省     ',
+	manage_city                                              STRING COMMENT '管理门店城市    ',
+	outer_order_no                                           STRING COMMENT '外部单号  ',
+	trade_source                                             STRING COMMENT '交易来源  ',
+	member_grade_no                                          STRING COMMENT '订单对应会员等级  ',
+	order_fact_amt_with_coupon                               STRING COMMENT '订单扣券金额',
+	totla_amt_order                                          STRING COMMENT '订单金额  ',
+	member_consumed_channel_endpoint                         STRING COMMENT '会员消费的门店      ',
+	member_consumed_region                                   STRING COMMENT '会员消费的大区      ',
+	before_grade_id                                          BIGINT COMMENT '上一等级id',
+	after_grade_id                                           BIGINT COMMENT '下一等级id',
+	gmt_grade_change                                         STRING COMMENT '等级变更时间',
+	change_reason_desc                                       STRING COMMENT '变更原因  ',
+	create_user                                              STRING COMMENT '创建人   ',
+	gmt_pay                                                  STRING COMMENT '支付时间  ',
+	gmt_create                                               STRING COMMENT '订单创建时间'
+
+)COMMENT '日期+会员+品牌粒度汇总表' PARTITIONED BY(
+	ds STRING COMMENT '时间分区')
+LIFECYCLE 30;
+
+
+INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_1d PARTITION(ds = '${bizdate}')
+	SELECT '${bizdate}' AS biz_date,
+				 t1.org_code AS org_code,
+				 t1.member_no AS member_no,
+				 t2.member_mobile AS member_mobile,
+				 t0.first_order_time AS gmt_member_first_order,
+				 t3.member_register_channel_endpoint_code AS member_register_channel_endpoint,
+				 t3.member_manage_channel_endpoint_code AS member_manage_channel_endpoint,
+				 t4.operation_name AS operation_name,
+				 t5.region_name AS manage_region,
+				 t5.province_name AS manage_province,
+				 t5.city_name AS manage_city,
+				 t1.outer_order_no AS outer_order_no,
+				 t6.app_id AS trade_source,
+				 t6.member_grade_code AS member_grade_no,
+				 t6.sub_coupon_amount AS order_fact_amt_with_coupon,
+				 t6.order_fact_amount AS totla_amt_order,
+				 t6.channel_endpoint_code AS member_consumed_channel_endpoint,
+				 t7.region_name AS member_consumed_region,
+				 t1.before_grade_id AS before_grade_id,
+				 t1.after_grade_id AS after_grade_id,
+				 t1.grade_change_time AS gmt_grade_change,
+				 t1.change_reason_desc AS change_reason_desc,
+				 t1.create_user AS create_user,
+				 t6.paid_time AS gmt_pay,
+				 t1.create_time AS gmt_create
+	FROM ods_member_grade_log t1
+		LEFT JOIN ods_member_card t3
+			ON t1.org_code = t3.org_code AND t1.member_no = t3.member_no AND t3.ds = '${bizdate}'
+		LEFT JOIN ods_real_store t5
+			ON t3.member_manage_channel_endpoint_code = t5.store_code AND t5.ds = '${bizdate}'
+		LEFT JOIN ods_channel_endpoint t4
+			ON t3.member_manage_channel_endpoint_code = t4.channel_endpoint_code AND t4.ds = '${bizdate}'
+		LEFT JOIN ods_member_info t2
+			ON t1.member_no = t2.member_no AND t2.ds = '${bizdate}'
+		LEFT JOIN (
+			SELECT org_code,
+						 member_no,
+						 min(paid_time) AS first_order_time
+			FROM ods_sales_order
+			WHERE ds = '${bizdate}' AND order_status = 1 AND member_no > 0
+			GROUP BY org_code
+			, member_no
+		) t0
+			ON t1.org_code = t0.org_code AND t1.member_no = t0.member_no
+		LEFT JOIN (
+			SELECT a.sales_order_no,
+						 channel_endpoint_code,
+						 a.paid_time,
+						 a.app_id,
+						 a.member_no,
+						 a.member_grade_code,
+						 sum(b.price_sales * b.qty_product) AS order_fact_amount,
+						 sum(b.price_sales * b.qty_product - coalesce(c.amt_cash_coupon_contribution, 0)) AS sub_coupon_amount
+			FROM ods_sales_order a
+				LEFT JOIN ods_sales_order_item b
+					ON a.sales_order_no = b.sales_order_no AND b.ds = '${bizdate}'
+				LEFT JOIN ods_sales_order_item_price c
+					ON b.sales_order_item_no = c.sales_order_item_no AND c.ds = '${bizdate}'
+			WHERE a.ds = '${bizdate}'
+			GROUP BY a.sales_order_no
+			, channel_endpoint_code
+			, a.paid_time
+			, a.app_id
+			, a.member_no
+			, a.member_grade_code
+		) t6
+			ON t1.outer_order_no = t6.sales_order_no
+		LEFT JOIN ods_real_store t7
+			ON t6.channel_endpoint_code = t7.store_code AND t7.ds = '${bizdate}'
+	WHERE t1.ds = '${bizdate}' AND t3.STATUS > -1;
+
+
+INSERT OVERWRITE TABLE ads_api_crm_emr_tcrm_member_1d PARTITION(ds)
+	SELECT *
+	FROM ads_api_crm_emr_tcrm_member_1d
+	WHERE ds = '${bizdate}' AND gmt_grade_change IS NOT NULL;
+
+
+
+
+
+--	SELECT  '${bizdate}' AS biz_date,
+--				 t1.org_code,
+--				 t1.member_no,
+--				 t1.member_mobile,
+--				 min(t1.paid_time) over (partition by t1.org_code,t1.member_no) AS gmt_member_first_order,
+--				 t3.member_register_channel_endpoint_code,
+--				 t3.member_manage_channel_endpoint_code,
+--				 t4.operation_name,
+--				 t5.region_name,
+--				 t5.province_name,
+--				 t5.city_name,
+--				 t1.external_order_no,
+--				 t1.sales_app_code AS trade_source,
+--				 t1.member_grade_code,
+--				  t2.amt_pay AS order_fact_amt_with_coupon,
+--				 t1.amt_total AS totla_amt_order,
+--				 t1.channel_endpoint_code,
+--				 t6.consumer_region_name,
+--				 t7.before_grade_id,
+--				 t7.after_grade_id,
+--				 t7.grade_change_time,
+--				 t7.change_reason,
+--				 t7.create_user,
+--				 t1.paid_time,
+--				 t1.create_time
+--	FROM (
+--		SELECT member_no,
+--					 member_mobile,
+--					 external_order_no,
+--					 member_grade_code,
+--					 amt_total,
+--					 sales_order_no,
+--					 channel_endpoint_code,
+--					 org_code,
+--					 sales_app_code,
+--					 paid_time,
+--					 create_time
+--		FROM ods_sales_order
+--		WHERE ds = '${bizdate}' and member_no not in ('-1','1') and order_status = 1) AS t1
+--		LEFT OUTER JOIN (
+--			SELECT sales_order_no,
+--						 pay_way,
+--						 amt_pay
+--			FROM ods_sales_order_payment
+--			WHERE ds = '${bizdate}' and pay_way = 'COUPON') AS t2
+--			ON t1.sales_order_no = t2.sales_order_no
+--		LEFT OUTER JOIN (
+--			SELECT member_no,
+--						 member_register_channel_endpoint_code,
+--						 member_manage_channel_endpoint_code
+--			FROM ods_member_card
+--			WHERE ds = '${bizdate}' AND STATUS > -1) AS t3
+--			ON t1.member_no = t3.member_no
+--		LEFT OUTER JOIN (
+--			SELECT channel_endpoint_code,
+--						 operation_name
+--			FROM ods_channel_endpoint
+--			WHERE ds = '${bizdate}') AS t4
+--			ON t3.member_manage_channel_endpoint_code = t4.channel_endpoint_code
+--		LEFT OUTER JOIN (
+--			SELECT store_code,
+--						 region_name,
+--						 province_name,
+--						 city_name
+--			FROM ods_real_store
+--			WHERE ds = '${bizdate}') AS t5
+--			ON t3.member_manage_channel_endpoint_code = t5.store_code
+--		LEFT OUTER JOIN (
+--			SELECT store_code,
+--						 region_name as consumer_region_name
+--			FROM ods_real_store
+--			WHERE ds = '${bizdate}') AS t6
+--			ON t1.channel_endpoint_code = t6.store_code
+--		LEFT OUTER JOIN (
+--			SELECT trigger_order_no,
+--						 before_grade_id,
+--						 after_grade_id,
+--						 grade_change_time,
+--						 change_reason,
+--						 create_user
+--			FROM ods_member_grade_log
+--			WHERE ds = '${bizdate}') AS t7
+--			ON t1.sales_order_no = t7.trigger_order_no;
+
+
+
+
+
+

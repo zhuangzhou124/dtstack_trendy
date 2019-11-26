@@ -1,0 +1,338 @@
+--name:ads_api_TPOS_MA_storecoupon_15mm
+--author:yike
+--create time:2019-10-10 19:10
+create table if not exists ads_api_TPOS_MA_storecoupon_15mm(
+  date_type                     string comment '日期类型',
+  date_id                       string comment '日期id',
+  storeCode                     string comment '门店编码',
+  orderType                     string comment '订单类型-写死1，2，3',
+  status                        string comment '订单状态-写死11',
+  orgCode                       string comment '品牌编码',
+--  canSubCoupon                  boolean comment '是否扣券',
+  productAmount                 double comment '销售额最高的前10款的销售总金额',
+  productSubCouponAmount        double comment '销售额最高的前10款的销售总金额（扣券）',
+  top10_producAmountRate	      double comment '销售TOP10占比（销售额最高的前10款的销售之和除以总销售额）',
+  top10_producSubCouponAmountRate  double comment '销售TOP10占比（销售额最高的前10款的销售之和除以总销售额）（扣券）',
+  retailAmount                  double comment '正价销售金额',
+  retailSubCouponAmount         double comment '正价销售金额（扣券）',
+  retailAmountRate              double comment '正价销售金额占比（销售折扣在8.8折以上的销售额占全部销售额的百分比）',
+  retailSubCouponAmountRate     double comment '正价销售金额占比（销售折扣在8.8折以上的销售额占全部销售额的百分比）（扣券）',
+  towItemQuantity               double comment '一单两件以上开单数：指销售单中一单里有2件及以上的商品（不含赠品，赠品价格为0）的开单数',
+  towItemQuantityRate           double comment '一单两件以上开单数占比	',
+  inventoryTurnOverWeekNum      double comment '库存周转周数（店铺现时库存金额÷店铺近一周销售价金额（例：今天周四，看店铺的库存周转周数就是用今天的库存牌价额除以上周四-到这周三的销售牌价额））',
+  orderMaxAmount                double comment '最大单金额	',
+  orderSubCouponMaxAmount       double comment '最大单金额(扣券)'
+) comment '销售分析-雷达图' partitioned by (
+  ds string
+);
+INSERT OVERWRITE TABLE ads_api_TPOS_MA_storecoupon_15mm PARTITION(ds)
+select
+  'day' as date_type,
+  '20191014' as date_id,
+  a.storeCode as storeCode,
+  '1,2,3' as orderType,
+  '11' as status,
+  a.orgCode as orgCode,
+  a.productAmount,
+  a.productSubCouponAmount,
+  a.top10_producAmountRate,
+  a.top10_producSubCouponAmountRate,
+  b.retailAmount,
+  b.retailSubCouponAmount,
+  b.retailAmountRate,
+  b.retailSubCouponAmountRate,
+  c.towItemQuantity,
+  c.towItemQuantityRate,
+  null as inventoryTurnOverWeekNum,
+  d.orderMaxAmount,
+  d.orderMaxAmountSubCoupon,
+  a.ds
+from (
+--销售款号金额和占比
+  select
+  storeCode,
+  orgCode,
+  ds,
+  productAmount,--款号销售前10总额
+  productSubCouponAmount,--款号销售前10总额（扣券）
+  case when productAmountAll is not null and productAmountAll <> 0 then productAmount/productAmountAll end as top10_producAmountRate,
+  case when productSubCouponAmountAll is not null and productSubCouponAmountAll <> 0 then productSubCouponAmount/productSubCouponAmountAll end as top10_producSubCouponAmountRate
+  from (
+    select
+    storeCode,--门店编码
+    orgCode,--品牌编码
+    spu_code,--款号
+    salesAmount,--销售额
+    salesSubCouponAmount,--销售额扣券后
+    ranks,--销售额排行
+    ranksSubCoupon,--销售额（扣券）排行
+    ds,
+    sum( case when ranks <= 10 then salesAmount end) over (partition by storeCode) as productAmount,--门店下排名前10的款号销售总金额
+    sum( case when ranks >= 1 then salesAmount end) over (partition by storeCode) as productAmountAll,--门店下款号销售总金额
+    sum( case when ranksSubCoupon <= 10 then salesSubCouponAmount end) over (partition by storeCode)as productSubCouponAmount, --门店下排名前10的款号销售总金额(扣券)
+    sum( case when ranksSubCoupon >= 1 then salesSubCouponAmount end) over (partition by storeCode)as productSubCouponAmountAll --门店下款号销售总金额(扣券)
+    from (
+      select
+      a.real_store_code as storeCode,
+      a.org_code as orgCode,
+      a.salesAmount,
+      (coalesce(a.salesAmount,0) - coalesce(b.amt_pay,0)) as salesSubCouponAmount,
+      a.spu_code as spu_code,
+      row_number() over (partition by a.real_store_code order by a.salesAmount desc) as ranks,
+      row_number() over (partition by a.real_store_code order by (coalesce(a.salesAmount,0) - coalesce(b.amt_pay,0)) desc) as ranksSubCoupon,
+      a.pro_cnt,
+      a.ds
+      from (
+        select rs_r.store_code as real_store_code
+        ,      soi.spu_code--款号
+        ,      sum(soi.qty_product) as pro_cnt--销售件数
+        ,      sum(so.amt_total) as salesAmount--销售金额
+        ,      so.org_code
+        ,      so.create_time
+        ,      soi.ds
+        from (
+          select channel_endpoint_code, sales_order_no, org_code, amt_total,create_time
+          from ods_sales_order
+          where ds = '20191014'
+        ) so
+          left join (
+            select qty_product, sales_order_no, price_discount,discount_rate,os.spu_code,oi.ds,oi.org_code
+            from ods_sales_order_item oi left join ods_api_item_sku os on oi.sku_code = os.sku_code
+            where oi.ds = '20191014' and os.ds = '20191014'
+          ) soi on soi.sales_order_no = so.sales_order_no and soi.org_code = so.org_code
+          join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20191014'
+        where soi.price_discount > 0 and soi.qty_product > 0
+        group by
+        rs_r.store_code,
+        soi.spu_code,
+        so.org_code,
+        so.create_time,
+        soi.ds
+      )a left join (
+        SELECT
+        rs_r.store_code,
+        sop.org_code,
+        soi.spu_code,
+        sop.create_time,
+        sum( sop.amt_pay ) AS amt_pay,
+        sop.ds
+        FROM
+        (
+            SELECT
+                   amt_pay,
+                   sales_order_no,
+                   pay_way,
+                   org_code,
+                   create_time,
+                   ds
+            FROM ods_sales_order_payment
+            WHERE ds = '20191014'
+            and pay_way = 'COUPON'
+        ) sop LEFT JOIN (
+          SELECT
+                 org_code,
+                 channel_endpoint_code,
+                 sales_order_no
+          FROM ods_sales_order
+          WHERE ds = '20191014'
+        ) so ON sop.sales_order_no = so.sales_order_no and sop.org_code = so.org_code
+          left join (
+          select qty_product, sales_order_no, price_discount,os.spu_code,oi.ds,oi.org_code
+          from ods_sales_order_item oi left join ods_api_item_sku os on oi.sku_code = os.sku_code
+          where oi.ds = '20191014' and os.ds = '20191014'
+          ) soi on soi.sales_order_no = so.sales_order_no and soi.org_code = so.org_code
+          join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20191014'
+        GROUP BY
+        rs_r.store_code,
+        sop.org_code,
+        soi.spu_code,
+        sop.create_time,
+        sop.ds
+      )b on a.org_code = b.org_code and a.spu_code = b.spu_code and a.real_store_code = b.store_code and a.create_time = b.create_time
+    )T
+  ) T group by storeCode,orgCode,productAmount,productAmountAll,productSubCouponAmount,productSubCouponAmountAll,ds
+)a left join (
+--正价金额和占比
+  select
+  storeCode,
+  orgCode,
+  ds,
+  retailAmount,--正价销售金额
+  retailSubCouponAmount,--正价销售金额（扣券）
+  retailAmountRate,--正价销售金额占比
+  retailSubCouponAmountRate--正价销售金额占比（扣券）
+  from (
+    select
+    a.real_store_code as storeCode,
+    a.org_code as orgCode,
+    a.salesAmount retailAmount,--正价销售金额
+    (coalesce(a.salesAmount,0) - coalesce(b.amt_pay,0)) as retailSubCouponAmount,--正价销售金额（扣券）
+    a.salesAmountAll retailAmountAll,--总销售金额
+    (coalesce(a.salesAmountAll,0) - coalesce(b.amt_payAll,0)) as retailSubCouponAmountAll,--总销售金额（扣券）
+    case when a.salesAmountAll is not null and a.salesAmountAll <> 0 then a.salesAmount/a.salesAmountAll end as retailAmountRate,--正价销售金额占比
+    case when (coalesce(a.salesAmountAll,0) - coalesce(b.amt_payAll,0)) is not null
+    and (coalesce(a.salesAmountAll,0) - coalesce(b.amt_payAll,0)) <> 0
+    then (coalesce(a.salesAmount,0) - coalesce(b.amt_pay,0))/(coalesce(a.salesAmountAll,0) - coalesce(b.amt_payAll,0)) end
+    as retailSubCouponAmountRate,--正价销售金额占比（扣券）
+    a.ds
+    from (
+      select
+      real_store_code,salesAmountAll,salesAmount,org_code,ds
+      from (
+        select rs_r.store_code as real_store_code
+        ,      sum(so.amt_total) over (partition by rs_r.store_code,so.org_code) as salesAmountAll--销售金额
+        ,      sum(case when soi.discount_rate >= 0.88 then so.amt_total end ) over (partition by rs_r.store_code,so.org_code) as salesAmount--正价销售金额
+        ,      so.org_code
+        ,      soi.ds
+        from (
+          select channel_endpoint_code, sales_order_no, org_code, amt_total, create_time
+          from ods_sales_order
+          where ds = '20191014'
+        ) so
+          left join (
+            select qty_product, sales_order_no, price_discount,oi.ds,oi.org_code,discount_rate
+            from ods_sales_order_item oi
+            where oi.ds = '20191014'
+          ) soi on soi.sales_order_no = so.sales_order_no and soi.org_code = so.org_code
+          join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20191014'
+        where soi.price_discount > 0 and soi.qty_product > 0
+      ) T group by real_store_code,salesAmountAll,salesAmount,org_code,ds
+    )a left join (
+      select
+      store_code,org_code,amt_payAll,amt_pay,ds
+      from (
+        SELECT
+        rs_r.store_code,
+        sop.org_code,
+        sum(sop.amt_pay) over (partition by rs_r.store_code,sop.org_code) AS amt_payAll,
+        sum(case when soi.discount_rate >= 0.88 then sop.amt_pay end) over (partition by rs_r.store_code,sop.org_code) AS amt_pay,
+        sop.ds
+        FROM
+        (
+            SELECT
+                   amt_pay,
+                   sales_order_no,
+                   pay_way,
+                   org_code,
+                   create_time,
+                   ds
+            FROM ods_sales_order_payment
+            WHERE ds = '20191014' and pay_way = 'COUPON'
+        ) sop LEFT JOIN (
+          SELECT
+                 org_code,
+                 channel_endpoint_code,
+                 sales_order_no
+          FROM ods_sales_order
+          WHERE ds = '20191014'
+        ) so ON sop.sales_order_no = so.sales_order_no and sop.org_code = so.org_code
+          left join (
+          select qty_product, sales_order_no, price_discount,oi.ds,oi.org_code,discount_rate
+          from ods_sales_order_item oi
+          where oi.ds = '20191014'
+          ) soi on soi.sales_order_no = so.sales_order_no and soi.org_code = so.org_code
+          join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20191014'
+      ) T group by store_code,org_code,amt_payAll,amt_pay,ds
+    )b on a.org_code = b.org_code and a.real_store_code = b.store_code
+  ) T group by
+  storeCode,
+  orgCode,
+  retailAmount,
+  retailSubCouponAmount,
+  retailAmountRate,
+  retailSubCouponAmountRate,ds
+)b on a.orgCode = b.orgCode and a.storeCode = b.storeCode and a.ds = b.ds
+left join (
+--一单两件以上开单数
+  select
+  real_store_code,
+  org_code,
+  ord_cnt_2 towItemQuantity,
+  ds,
+  case when ord_cnt is not null and ord_cnt <> 0 then ord_cnt_2/ord_cnt end as towItemQuantityRate
+  from (
+    select rs_r.store_code as real_store_code --门店code
+    ,      count(so.sales_order_no) as ord_cnt--销售总单数
+    ,      count(case when soi.qty_product >= 2 then so.sales_order_no end) as ord_cnt_2--销售订单中销售件数>=2的订单数
+    ,      so.org_code
+    ,      soi.ds
+    from (
+      select channel_endpoint_code, sales_order_no, org_code
+      from ods_sales_order
+      where ds = '20191014'
+    ) so
+      left join (
+        select qty_product, sales_order_no, price_discount,oi.ds,oi.org_code
+        from ods_sales_order_item oi
+        where oi.ds = '20191014'
+      ) soi on soi.sales_order_no = so.sales_order_no and soi.org_code = so.org_code
+      join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20191014'
+    where soi.price_discount > 0 and soi.qty_product > 0
+    group by
+    rs_r.store_code,
+    so.org_code,
+    soi.ds
+  )T
+)c on a.storeCode = c.real_store_code and a.orgCode = c.org_code and a.ds = c.ds
+left join (
+--最大单金额及扣券
+  SELECT
+  a.store_code as storeCode,
+  a.org_code as orgCode,
+  sum(case when sale_amt_ranking = 1 then a.amt_total end) as orderMaxAmount,--最大单销售金额
+  sum(case when sale_amt_ranking = 1 then a.amt_total - coalesce(b.amt_pay,0) end) as orderMaxAmountSubCoupon,--最大单销售金额(扣券)
+  a.ds
+  FROM (
+    SELECT
+    rs_r.store_code,
+    so.ds,
+    so.org_code,
+    so.sales_order_no,
+    so.amt_total,
+    row_number() over (partition by rs_r.store_code,so.org_code,so.ds order by so.amt_total desc) AS sale_amt_ranking --订单金额排名
+    FROM
+    (
+      SELECT
+      sales_order_no,
+      amt_total,
+      channel_endpoint_code,
+      org_code,
+      ds
+      FROM
+      ods_sales_order
+      WHERE
+      ds = '20191014'
+    ) so join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20191014'
+  ) a
+    LEFT JOIN (
+      SELECT
+      rs_r.store_code,
+      sop.org_code,
+      sop.sales_order_no,
+      sop.amt_pay
+      FROM
+      (
+        SELECT
+        amt_pay,
+        sales_order_no,
+        pay_way,
+        org_code
+        FROM ods_sales_order_payment
+        WHERE ds = '20191014'
+        and pay_way = 'COUPON'
+      ) sop LEFT JOIN (
+        SELECT
+        org_code,
+        channel_endpoint_code,
+        sales_order_no
+        FROM ods_sales_order
+        WHERE ds = '20191014'
+      ) so ON sop.sales_order_no = so.sales_order_no
+        join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20191014'
+    ) b ON a.store_code = b.store_code and a.org_code = b.org_code and a.sales_order_no = b.sales_order_no
+  group by a.org_code,a.store_code,a.ds
+) d on a.orgCode = d.orgCode and a.storeCode = d.storeCode and a.ds = d.ds
+;
+
+
+

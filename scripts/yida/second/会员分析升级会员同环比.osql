@@ -1,0 +1,86 @@
+--name:会员分析升级会员同环比
+--author:zhangjunda
+--create time:2019-10-11 17:17
+
+--drop table ads_api_crm_ma_clerk_15mm_2;
+CREATE TABLE IF NOT EXISTS ads_api_crm_ma_clerk_15mm_2(
+  date_type                                     STRING COMMENT '统计周期类型',
+  date_id                                       STRING COMMENT '统计周期',
+  org_code                                      STRING COMMENT '品牌编号',
+  channel_endpoint_code                         STRING COMMENT '门店编号',
+  clerk_no                                      STRING COMMENT '店员编号',
+  member_count                                  bigint COMMENT '升级会员总数',
+  biz_date                                      STRING COMMENT '统计日期'
+)COMMENT '会员分析升级会员同环比 ' PARTITIONED BY(
+  ds  STRING);
+
+
+
+
+
+
+
+
+INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_15mm_2 PARTITION(ds = '${bizdate}')
+  SELECT date_type
+  ,      date_id
+  ,      org_code
+  ,      store_no as channel_endpoint_code
+  ,      clerk_no
+  ,      COUNT(DISTINCT member_no) AS member_cnt
+  ,      cast('${bizdate}' as bigint)
+  FROM (
+    SELECT date_type
+    ,      date_id
+    ,      tmp.org_code
+    ,      tmp.store_no
+    ,      tmp.clerk_no
+    ,      tmp.grade_change_time
+    ,      tmp.create_time
+    ,      tmp.member_no
+    ,      row_number()OVER (PARTITION BY date_type, date_id, org_code, member_no
+    ORDER BY grade_change_time DESC
+    , create_time DESC) AS rank
+    FROM (
+      SELECT date_type
+      ,      date_id
+      ,      trim(a1.org_code) as org_code
+      ,      trim(a1.store_no) as store_no
+      ,      trim(a1.clerk_no) as clerk_no
+      ,      substr(REPLACE(a1.grade_change_time, '-', ''), 1, 8) AS grade_change_time
+      ,      after_grade_id  -- 会员升级后等级  可能会用上
+      ,      create_time
+      ,      a1.member_no
+      FROM ods_member_grade_log a1
+        JOIN (
+          SELECT ds1,date_type,date_id,time_id
+          FROM td_ads_dev.dim_time       ---------------------
+          WHERE ds = '${bizdate}'
+        ) time ON substr(REPLACE(grade_change_time, '-', ''), 1, 8) = time.time_id
+      WHERE a1.ds = '${bizdate}' AND a1.grade_change_time IS NOT NULL
+    ) tmp
+  ) a
+  WHERE rank = 1
+  GROUP BY date_type
+  , date_id
+  , org_code
+  , store_no
+  , clerk_no;
+
+
+
+--SELECT *
+--FROM ${td_ods}.ods_member_grade_log
+--WHERE store_no = '4206' AND clerk_no = '2000027895' AND ds > 1
+
+
+--select a ,b , row_number()OVER ( ORDER BY a desc,b desc) AS rank from (
+--select 1 as a ,1 as b
+--union all
+--select 1 as a ,2 as b
+--union all
+--select 2 as a ,1 as b
+--union all
+--select 2 as a ,2 as b
+--) t
+--;

@@ -1,0 +1,68 @@
+--name:查询门店流失预警
+--author:zhangjunda
+--create time:2019-10-09 16:59
+
+
+
+CREATE TABLE IF NOT EXISTS ads_api_crm_ma_clerk_d(
+  org_code                                STRING COMMENT '品牌编号',
+  channel_endpoint_code                   STRING COMMENT '门店编号',
+  clerk_no                                STRING COMMENT '店员编号',
+  member_count                            bigint COMMENT '会员总数',
+  active_member_count                     bigint COMMENT '活跃会员数量',
+  silence_member_count                    bigint COMMENT '沉默会员数量',
+  sleep_member_count                      bigint COMMENT '沉睡会员数量',
+  loss_member_count                       bigint COMMENT '预流失会员数量',
+  biz_date                                bigint COMMENT '统计日期'
+)COMMENT '查询门店流失预警' PARTITIONED BY(
+  ds  STRING);
+
+
+--${td_ods}.ods_
+
+INSERT OVERWRITE TABLE ads_api_crm_ma_clerk_d PARTITION(ds = '${bizdate}')
+
+  SELECT coalesce(b.org_code, '-110')
+  ,      coalesce(b.member_manage_channel_endpoint_code, '-110')
+  ,      coalesce(b.member_manage_clerk, '-110')
+  ,      COUNT(DISTINCT t.member_no) AS member_qty
+  ,
+         COUNT(DISTINCT CASE WHEN datediff(to_date('${bizdate}', 'yyyymmdd'), to_date(last_order_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 0 AND 90 THEN t.member_no END)
+         AS member_qty1
+  ,
+         COUNT(DISTINCT CASE WHEN datediff(to_date('${bizdate}', 'yyyymmdd'), to_date(last_order_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 91 AND 180 THEN t.member_no END)
+         AS member_qty2
+  ,
+         COUNT(DISTINCT CASE WHEN datediff(to_date('${bizdate}', 'yyyymmdd'), to_date(last_order_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 181 AND 270 THEN t.member_no END)
+         AS member_qty3
+  ,
+         COUNT(DISTINCT CASE WHEN datediff(to_date('${bizdate}', 'yyyymmdd'), to_date(last_order_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 271 AND 365 THEN t.member_no END)
+         AS member_qty4
+  ,      cast('${bizdate}' as bigint) AS biz_date
+
+  FROM (
+    SELECT org_code
+    ,      member_no
+    ,      max(create_time) AS last_order_time
+    FROM ods_sales_order
+    WHERE ds = '${bizdate}' AND price_amt_discount > 0 AND amt_total > 0 AND CAST(member_no AS BIGINT) > 1 AND
+    datediff(to_date('${bizdate}', 'yyyymmdd'), to_date(paid_time, 'yyyy-mm-dd hh:mi:ss'), 'dd') BETWEEN 0 AND 365
+    GROUP BY org_code
+    , member_no
+  ) t
+    LEFT JOIN (
+      SELECT org_code
+      ,      member_no
+      ,      member_manage_channel_endpoint_code
+      ,      member_manage_clerk
+      FROM ods_member_card
+      WHERE ds = '${bizdate}'
+    ) b ON b.org_code = t.org_code AND b.member_no = t.member_no
+  WHERE b.org_code IS NOT NULL
+  GROUP BY coalesce(b.org_code, '-110'), coalesce(b.member_manage_channel_endpoint_code, '-110'), coalesce(b.member_manage_clerk, '-110');
+
+
+
+
+
+

@@ -1,0 +1,107 @@
+--***********************************
+-- 所属系统：会员中心
+-- 功能描述：物理库区表DDL
+-- 生命周期：365天
+-- 调度周期：手动调度
+-- 创建者：   sanmu
+-- 创建日期：20191030
+--***********************************
+--drop table if exists ods_member_card;
+
+CREATE TABLE IF NOT EXISTS ods_member_card(
+	id                                    BIGINT COMMENT '主键',
+	member_card_no                        STRING COMMENT '会员卡号',
+	brand_code                            STRING COMMENT '品牌编号',
+	member_info_id                        BIGINT COMMENT '会员信息id，品牌会员注册时才有信息',
+	member_no                             STRING COMMENT 'member_no，品牌会员注册时才有信息',
+	store_id                              BIGINT COMMENT 'store_id',
+	brand_id                              STRING COMMENT 'brand_id',
+	ec_status                             BIGINT COMMENT 'ec状态',
+	STATUS                                BIGINT COMMENT '状态，绑定／失效／停止',
+	member_register_time                  STRING COMMENT '注册时间',
+	member_register_channel_endpoint_code STRING COMMENT '会员注册渠道终端',
+	member_register_clerk                 STRING COMMENT '会员注册店员',
+	member_manage_channel_endpoint_code   STRING COMMENT '会员管理渠道终端',
+	member_manage_clerk                   STRING COMMENT '会员管理店员',
+	recommend_member_no                   STRING COMMENT '推荐会员memberNo',
+	memo                                  STRING COMMENT '备注',
+	create_time                           STRING COMMENT '创建时间',
+	last_update_time                      STRING COMMENT '最后更新时间',
+	member_from                           BIGINT COMMENT '客户来源',
+	reg_source                            STRING COMMENT '注册来源',
+	reg_activity_source                   STRING COMMENT '注册活动',
+	org_code                              STRING COMMENT '销售组织编码',
+	app_id                                STRING COMMENT '应用ID',
+	create_user_name                      STRING COMMENT '创建用户名（冗余）',
+	create_user_id                        BIGINT COMMENT '创建用户编码',
+	last_update_user_name                 STRING COMMENT '最后更新用户名（冗余）',
+	last_update_user_id                   BIGINT COMMENT '最后更新用户编码'
+)COMMENT '品牌会员卡／泛会员' PARTITIONED BY(
+	ds STRING COMMENT '时间分区');
+
+
+INSERT OVERWRITE TABLE ods_member_card PARTITION(ds = '${today}')
+	SELECT id,
+				 member_card_no,
+				 brand_code,
+				 member_info_id,
+				 member_no,
+				 store_id,
+				 brand_id,
+				 ec_status,
+				 STATUS,
+				 member_register_time,
+				 member_register_channel_endpoint_code,
+				 member_register_clerk,
+				 member_manage_channel_endpoint_code,
+				 member_manage_clerk,
+				 recommend_member_no,
+				 memo,
+				 create_time,
+				 last_update_time,
+				 member_from,
+				 reg_source,
+				 reg_activity_source,
+				 org_code,
+				 app_id,
+				 create_user_name,
+				 create_user_id,
+				 last_update_user_name,
+				 last_update_user_id
+	FROM ods_member_card
+	WHERE ds = '${today}' UNION ALL
+	SELECT id,
+				 member_card_no,
+				 brand_code,
+				 member_info_id,
+				 member_no,
+				 store_id,
+				 brand_id,
+				 ec_status,
+				 STATUS,
+				 member_register_time,
+				 member_register_channel_endpoint_code,
+				 member_register_clerk,
+				 member_manage_channel_endpoint_code,
+				 member_manage_clerk,
+				 recommend_member_no,
+				 memo,
+				 create_time,
+				 last_update_time,
+				 member_from,
+				 reg_source,
+				 reg_activity_source,
+				 org_code,
+				 app_id,
+				 create_user_name,
+				 create_user_id,
+				 last_update_user_name,
+				 last_update_user_id
+	FROM ods_member_card
+	WHERE ds = '${bizdate}' AND member_no NOT IN (
+		SELECT member_no
+		FROM ods_member_card as t1
+		WHERE ds = '${today}'
+	);
+
+

@@ -1,0 +1,106 @@
+--***********************************
+-- 表   ads_api_tpos_ma_store_class_15min
+-- 功能描述：tpos_ma门店粒度小时、天，周和月周期指标统计
+-- 生命周期：3650天
+-- 调度周期：15min调度
+-- 创建者：  yike
+-- 创建日期：20191017
+-- 修改日志：
+--***********************************
+-- drop table ads_api_tpos_ma_store_class_15min;
+CREATE TABLE IF NOT EXISTS ads_api_tpos_ma_store_class_15min(
+	biz_date                      BIGINT COMMENT '统计日期',
+	date_type                     STRING COMMENT '日期类型',
+	date_id                       STRING COMMENT '日期id',
+	channel_endpoint_code         STRING COMMENT '门店列表编码',
+	order_type                    STRING COMMENT '订单类型-写死1，2，3',
+	org_code                      STRING COMMENT '品牌编码',
+	cate_amount_sub_coupon        DOUBLE COMMENT '销售TOP3品类销售金额（扣券）',
+	cate_amount_rate_sub_coupon   DOUBLE COMMENT '销售TOP3品类销售金额占比（扣券）',
+	cate_amount                   DOUBLE COMMENT '销售TOP3品类销售金额（扣券）',
+	cate_amount_rate              DOUBLE COMMENT '销售TOP3品类销售金额占比（扣券）'
+)COMMENT '比较门店top3品类销售' PARTITIONED BY(
+	ds STRING
+);
+INSERT OVERWRITE TABLE ads_api_tpos_ma_store_class_15min PARTITION(ds = '${bizdate}')
+	SELECT CAST('${bizdate}' AS BIGINT) AS bizdate,
+				 date_type,
+				 date_id,
+				 coalesce(channel_endpoint_code, -110),
+				 '1,2,3',
+				 coalesce(org_code, -110),
+				 rank_sale_sub_coupon,
+				 CASE
+				 WHEN spu_sale_amt_sub_coupon IS NOT NULL AND spu_sale_amt_sub_coupon <> 0 THEN rank_sale_sub_coupon /
+				 spu_sale_amt_sub_coupon
+				 END,
+				 rank_sale,
+				 CASE
+				 WHEN spu_sale_amt IS NOT NULL AND spu_sale_amt <> 0 THEN rank_sale / spu_sale_amt
+				 END
+	FROM (
+		SELECT
+		org_code,
+		date_type,
+		date_id,
+		channel_endpoint_code,
+		sum(CASE
+		WHEN sub_coupon_rank <= 3 THEN sale_amt_sub_coupon
+		END) AS rank_sale_sub_coupon,--销售TOP3品类销售金额(扣券)
+		sum(CASE
+		WHEN rank <= 3 THEN sale_amt
+		END) AS rank_sale,--销售TOP3品类销售金额（未扣券）
+		sum(sale_amt_sub_coupon) AS spu_sale_amt_sub_coupon,--门店粒度扣券总额
+		sum(sale_amt) AS spu_sale_amt--门店粒度未扣券总额
+		FROM (
+			SELECT
+			org_code,
+			date_type,
+			date_id,
+			channel_endpoint_code,
+			level2_cate_name,
+			sales_amt AS sale_amt_sub_coupon,--扣券金额
+			before_coupon_amount AS sale_amt,--未扣券金额
+			dense_rank()OVER (PARTITION BY org_code, date_type, date_id, channel_endpoint_code ORDER BY sales_amt DESC) AS
+			sub_coupon_rank,--扣券排名
+			dense_rank()OVER (PARTITION BY org_code, date_type, date_id, channel_endpoint_code ORDER BY before_coupon_amount
+			DESC) AS rank--未扣券排名
+			FROM (
+				SELECT  a.org_code,
+								tmp2.date_type,
+								tmp2.date_id,
+								a.channel_endpoint_code,
+								d.level2_cate_name,
+								sum(coalesce(b.price_sales * b.qty_product, 0) - coalesce(c.amt_cash_coupon_contribution, 0)) AS
+								sales_amt,  --销售金额（扣券）,
+								sum(b.price_sales * b.qty_product) AS before_coupon_amount  --销售金额（未扣券）
+				FROM ods_sales_order a
+					INNER JOIN (
+						SELECT date_type,
+									 date_id,
+									 time_id
+						FROM td_ads_dev.dim_time
+						WHERE ds <= '${bizdate}'
+						GROUP BY date_type, date_id, time_id
+					) tmp2
+						ON to_char(CAST(a.paid_time AS DATETIME), 'yyyymmdd') = tmp2.time_id
+					INNER JOIN ods_sales_order_item b
+						ON a.sales_order_no = b.sales_order_no AND b.ds = '${bizdate}'
+					INNER JOIN ods_sales_order_item_price c
+						ON b.sales_order_item_no = c.sales_order_item_no AND c.ds = '${bizdate}'
+					LEFT JOIN ods_api_item_sku d
+						ON d.sku_code = b.sku_code AND d.ds = '${bizdate}'
+				WHERE a.ds = '${bizdate}' AND order_status = 1
+				AND a.business_type IN ('10103', '10104', '10202', '10203', '10302', '10303', '10403', '10404')
+				GROUP BY a.org_code
+				, a.channel_endpoint_code
+				, tmp2.date_type
+				, tmp2.date_id
+				, d.level2_cate_name
+			) a
+		) b
+		GROUP BY org_code,
+		date_type,
+		date_id,
+		channel_endpoint_code
+	) t;

@@ -1,0 +1,15 @@
+{
+  key: 'NONZERO',
+  value: '非零'
+};
+{
+  key: 'ZERO',
+  value: '零'
+};
+{
+  key: 'POSITIVE',
+  value: '正'
+}
+{
+  key: 'NEGATIVE',
+  value: '负(超卖)'

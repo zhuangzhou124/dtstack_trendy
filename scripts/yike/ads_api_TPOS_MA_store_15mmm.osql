@@ -1,0 +1,284 @@
+--name:ads_api_TPOS_MA_store_15mm
+--author:yike
+--create time:2019-10-09 19:07
+create table if not exists ads_api_TPOS_MA_store_15mm(
+  date_type                     string comment '日期类型',
+  date_id                       string comment '日期id',
+  auditTime                     string comment '过账时间',
+  storeCode                     string comment '门店列表编码',
+  orderType                     string comment '订单类型-写死1，2，3',
+  status                        string comment '订单状态-写死11',
+  orgCode                       string comment '品牌编码',
+  salesAmount                   double comment '销售总额',
+  salesSubCouponAmount          double comment '扣卷销售总额-真实金额',
+  rank                          bigint comment '销售金额排名',
+  orderMaxAmount                double comment '最大单金额',
+  itemQuantity                  bigint comment '商品数量',
+  orderQuantity                 bigint comment '订单数量',
+  averageDiscount               double comment '平均折扣',
+  retailPriceAmount             double comment '吊牌价总额',
+  perCustomerTransaction        double comment '客单价',
+  associatedPurchaseRate        double comment '连带率',
+  commonVipSalesRate            double comment '普通会员销售占比',
+  returnSalesAmount             double comment '退货金额',
+  cashCoupon                    double comment '现金券金额',
+  perItemAmount                 double comment '件单价',
+  returnItemQuantity            bigint comment '退货商品数量',
+  rmaOrderQuantity              bigint comment '退换货单数',
+  vipPerCustomerTransaction     double comment 'VIP客单价',
+  vipAssociatedPurchaseRate     double comment 'VIP连带率',
+  vipSalesAmount                double comment 'VIP销售额',
+  vipSalesRate                  double comment 'VIP销售占比',
+  vipSalesItemQuantity          bigint comment 'VIP销售商品数量',
+  vipPerItemAmount              double comment 'VIP件单价',
+  vipOrderQuantity              bigint comment 'VIP订单数量',
+  lastedProjectSalesAmount      double comment '最近3波段销售金额'
+) comment '门店销售排行（含券或扣券）' partitioned by (
+  ds string
+);
+
+INSERT OVERWRITE TABLE ads_api_TPOS_MA_store_15mm PARTITION(ds)
+  SELECT
+  'day' as date_type,
+  '20190920' as date_id,
+  'null' as auditTime,
+  a.store_code as storeCode,
+  '1,2,3' as orderType,
+  '11' as status,
+  a.org_code as orgCode,
+  sale_amt as salesAmount,--销售金额
+  sale_amt - coalesce(amt_pay,0) AS salesSubCouponAmount, --销售金额（扣券）
+  rank() over (partition by a.org_code,a.store_code order by sale_amt desc) as rank,
+  c.orderMaxAmount,
+  a.itemQuantity,
+  a.orderQuantity,
+  a.averageDiscount,
+  a.retailPriceAmount,
+  a.perCustomerTransaction,
+  a.associatedPurchaseRate,
+  case when a.sale_amt is not null and a.sale_amt <> 0 then d.ptvipSalesAmount/a.sale_amt end as commonVipSalesRate,
+  a.returnSalesAmount,
+  b.amt_pay as cashCoupon,
+  case when a.itemQuantity is not null and a.itemQuantity <> 0 then sale_amt/a.itemQuantity end as perItemAmount,
+  a.returnItemQuantity,
+  a.rmaOrderQuantity,
+  d.vipPerCustomerTransaction,
+  d.vipAssociatedPurchaseRate,
+  d.vipsalesamount,
+  case when a.sale_amt is not null and a.sale_amt <> 0 then d.vipSalesAmount/a.sale_amt end as vipSalesRate,
+  d.vipSalesItemQuantity,
+  d.vipPerItemAmount,
+  d.vipOrderQuantity,
+  e.lastedProjectSalesAmount,
+  a.ds
+  FROM (
+    select distinct
+    store_code,
+    ds,
+    org_code,
+    itemQuantity,
+    orderQuantity,
+    averageDiscount,
+    perCustomerTransaction,
+    associatedPurchaseRate,
+    sale_amt,
+    retailPriceAmount,
+    returnSalesAmount,
+    returnItemQuantity,
+    rmaOrderQuantity
+    from (
+      SELECT
+      rs_r.store_code,
+      so.ds,
+      so.org_code,
+      so.itemQuantity,--商品数量
+      so.orderQuantity,--订单数量
+      so.averageDiscount,--平均折扣
+      case when so.orderQuantity is not null and so.orderQuantity <> 0 then (sum( so.amt_total ) over (partition by so.org_code,rs_r.store_code))/so.orderQuantity end  as perCustomerTransaction,--客单价
+      case when so.orderQuantity is not null and so.orderQuantity <> 0 then so.itemQuantity/so.orderQuantity end  as associatedPurchaseRate,--连带率，平均每张订单商品数
+      sum( so.amt_total ) over (partition by so.org_code,rs_r.store_code) AS sale_amt, --销售金额
+      sum(so.price_amt_retail) over (partition by so.org_code,rs_r.store_code) AS retailPriceAmount,--吊牌价总额
+      sum(so.amt_return_item) over (partition by so.org_code,rs_r.store_code) AS returnSalesAmount,--退货金额
+      sum(so.qty_return_item) over (partition by so.org_code,rs_r.store_code) AS returnItemQuantity,--退货商品件数
+      count(case when so.order_type in ('103','104') then so.sales_order_no end) over (partition by so.org_code,rs_r.store_code) AS rmaOrderQuantity--退换货单数
+      FROM
+      (
+        SELECT
+        amt_total,
+        oso.price_amt_retail,--每单吊牌价总额
+        oso.sales_order_no,
+        oso.order_type,
+        case when order_type in (103) then oso.amt_return_item end as amt_return_item,--退货单金额
+        case when order_type in (103) then oso.qty_return_item end as qty_return_item,--退货单件数
+        channel_endpoint_code,
+        oso.org_code,
+        sum(osoi.qty_product) over (partition by channel_endpoint_code,oso.org_code) as itemQuantity,--门店订单粒度下商品数量
+        count(case when oso.order_type in ('101','103') or
+        (oso.order_type = '104' and (oso.amt_total != 0 OR (oso.amt_total = 0 AND oso.qty_order_item !=0)))
+        then oso.sales_order_no end) over (partition by channel_endpoint_code,oso.org_code) as orderQuantity,--订单数
+        avg(osoi.discount_rate) over (partition by channel_endpoint_code,oso.org_code) as averageDiscount,--平均折扣
+        oso.ds
+        FROM
+        ods_sales_order oso left join ods_sales_order_item osoi on oso.sales_order_no = osoi.sales_order_no
+        WHERE oso.ds = '20190920' and osoi.ds = '20190920'
+        AND REPLACE ( substr( oso.create_time, 1, 10 ), '-', '' ) = '20190920'
+      ) so join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
+    ) T
+  ) a
+    LEFT JOIN (
+      SELECT
+      rs_r.store_code,
+      sop.org_code,
+      sum( sop.amt_pay ) AS amt_pay,--现金券金额
+      so.ds
+      FROM
+      (
+        SELECT
+        amt_pay,
+        sales_order_no,
+        pay_way,
+        org_code
+        FROM ods_sales_order_payment
+        WHERE ds = '20190920' AND REPLACE ( substr( create_time, 1, 10 ), '-', '' ) = '20190920'
+        and pay_way = 'COUPON'
+      ) sop LEFT JOIN (
+        SELECT
+        member_no,
+        member_grade_code,
+        org_code,
+        channel_endpoint_code,
+        sales_order_no,
+        ds
+        FROM ods_sales_order
+        WHERE ds = '20190920'
+      ) so ON sop.sales_order_no = so.sales_order_no
+        join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
+      GROUP BY
+      rs_r.store_code,
+      sop.org_code,
+      rs_r.id,
+      so.ds
+    ) b ON a.store_code = b.store_code and a.org_code = b.org_code and a.ds = b.ds
+    left join (
+    --最大单销售金额
+      SELECT
+      a.store_code as storeCode,
+      a.org_code as orgCode,
+      sum(case when sale_amt_ranking = 1 then a.amt_total end) as orderMaxAmount,--最大单销售金额
+      a.ds
+      FROM (
+        SELECT
+        rs_r.store_code,
+        so.ds,
+        so.org_code,
+        so.sales_order_no,
+        so.amt_total,
+        row_number() over (partition by rs_r.store_code,so.org_code,so.ds order by so.amt_total desc) AS sale_amt_ranking --订单金额排名
+        FROM
+        (
+          SELECT
+          sales_order_no,
+          amt_total,
+          channel_endpoint_code,
+          org_code,
+          ds
+          FROM
+          ods_sales_order
+          WHERE
+          ds = '20190920'
+          AND REPLACE ( substr( create_time, 1, 10 ), '-', '' ) between '20190901' and '20190930'
+        ) so join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
+      ) a group by a.store_code,a.org_code,a.ds
+    )c ON a.store_code = c.storeCode and a.org_code = c.orgCode and a.ds = c.ds
+    left join (
+    --vip相关计算
+      select
+      store_code,
+      org_code,
+      ds,
+      case when vip_order_cnt is not null and vip_order_cnt <> 0 then vipSalesAmount/vip_order_cnt end as vipPerCustomerTransaction,
+      case when vip_order_cnt is not null and vip_order_cnt <> 0 then vipSalesItemQuantity/vip_order_cnt end as vipAssociatedPurchaseRate,
+      vipSalesAmount,
+      ptvipSalesAmount,
+      vipSalesItemQuantity,
+      case when vipSalesItemQuantity is not null and vipSalesItemQuantity <> 0 then vipSalesAmount/vipSalesItemQuantity end as vipPerItemAmount,
+      vip_order_cnt as vipOrderQuantity
+      from (
+        select
+        so.ds,
+        so.org_code,
+        rs_r.store_code,
+        sum(case when mgi.is_vip = '1' then so.amt_total end) as vipSalesAmount,--vip销售额
+        sum(case when mgi.is_vip != '1' then so.amt_total end) as ptvipSalesAmount,--ptvip销售额
+        sum(case when oi.price_discount>0 and oi.qty_product>0 then oi.qty_product end) as vipSalesItemQuantity,--vip商品数
+        count(case when so.order_type in ('101','103') or (so.order_type = '104' and (so.amt_total != 0 OR (so.amt_total = 0 AND so.qty_order_item !=0)))
+        then oi.sales_order_no end) as vip_order_cnt--vip销售订单数
+        from ods_sales_order so left join ods_sales_order_item oi on so.sales_order_no = oi.sales_order_no
+          left join ods_member_grade_info mgi on so.member_grade_code = mgi.grade_code
+          join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
+        where so.ds = '20190920' and mgi.ds = '20190920' and oi.ds = '20190920'
+        group by  so.org_code,rs_r.store_code,so.ds
+      )T
+    )d on a.store_code = d.store_code and a.org_code = d.org_code and a.ds = d.ds
+    left join (
+    --去最近三个波段的sku关联拿到指定订单的销售金额
+      select
+      a.store_code,
+      a.org_code,
+      sum(a.amt_total) as lastedProjectSalesAmount,--最近10个波段的销售数据
+      a.ds
+      from(
+        select
+        rs_r.store_code,
+        oso.org_code,
+        oso.sales_order_no,--到订单粒度
+        osoi.sku_code,
+        oso.amt_total,
+        oso.ds
+        from ods_sales_order oso
+          left join ods_sales_order_item osoi on oso.sales_order_no = osoi.sales_order_no
+          join ods_real_store rs_r on oso.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
+        where oso.ds = '20190920' and osoi.ds = '20190920'
+      )a join (
+        select
+        sku_code
+        from (
+          select
+          store_code,
+          org_code,
+          case when ranking<= 10 then sku_code end as sku_code--最近三个波段销售的sku
+          from (
+            select
+            rs_r.store_code,
+            osr.org_code,
+            osi.sku_code,
+            replace(ops.list_date,'-',''),--通过渠道库存id关联拿到商品SKU再拿到波段和上市日期
+            ops.band,--波段
+            dense_rank() over (partition by osr.channel_endpoint_code order by replace(ops.list_date,'-','') desc) as ranking
+            from ods_stock_channel_terminal_rel osr
+              left join ods_stock_channel_items osi on osr.stock_channel_id = osi.stock_channel_id
+              left join ods_api_item_sku ops on osi.sku_code = ops.sku_code
+              join ods_real_store rs_r on osr.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20190920'
+            where osr.ds = '20190920' and osi.ds = '20190905' and ops.ds = '20190920'
+          )T0
+        )T where sku_code is not null
+        group by sku_code
+      )b on a.sku_code = b.sku_code
+      group by a.store_code, a.org_code, a.ds
+    )e on e.ds = a.ds and e.org_code = a.org_code and e.store_code = a.store_code
+;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

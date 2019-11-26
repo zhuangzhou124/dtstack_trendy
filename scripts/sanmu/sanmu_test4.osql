@@ -1,0 +1,28 @@
+CREATE TABLE IF NOT EXISTS ods_yichang_purchase(
+	region_id                                      varchar(100) COMMENT '大区id     ',
+	order_level1_id                                varchar(100) COMMENT '编号（1级）    ',
+	order_level2_id                                varchar(100) COMMENT '编号（2级）',
+	order_level3_id                                varchar(100) COMMENT '编号（3级）  ',
+	order_requirement_type                         varchar(100) COMMENT '需求类型   ',
+	order_requirement_no                           varchar(100) COMMENT '需求编号     ',
+	order_requirement_weight                       varchar(100) COMMENT '需求重量(KG)   ',
+	order_requirement_send_date                    varchar(100) COMMENT '需求下发日期  ',
+	order_requirement_delivery_date                varchar(100) COMMENT '需求交货期    ',
+	order_market_requirement_delivery_date         varchar(100) COMMENT '市场要求交货期  ',
+	order_create_date                              varchar(100) COMMENT '订单创建日期   ',
+	order_delivery_date                            varchar(100) COMMENT '订单交货日期  ',
+	order_finish_date                              varchar(100) COMMENT '完成时间    ',
+	order_finish_weight                            decimal(10,2) COMMENT '完成重量（KG)）  ',
+	order_actual_take_date                         varchar(100) COMMENT '实际提货日期    ',
+	order_actual_take_weight                       decimal(10,2) COMMENT '提货重量（KG',
+	order_stock_in_date                            varchar(100) COMMENT '物资入库日期 ',
+	order_stock_in_weight                          decimal(10,2) COMMENT '入库重量（KG）',
+	order_payment_date                             varchar(100) COMMENT '开票日期 ',
+	order_account_date                             varchar(100) COMMENT '到账日期  ',
+	gmt_create datetime DEFAULT CURRENT_TIMESTAMP,
+	gmt_modified datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)COMMENT '采购数据表';
+
+
+
+

@@ -1,0 +1,203 @@
+--name:ads_api_crm_ma_clerk_15mm
+--author:zhangjunda
+--create time:2019-10-16 14:52
+
+
+CREATE TABLE IF NOT EXISTS ads_api_crm_ma_clerk_15mm(
+  date_type                                             STRING COMMENT '统计周期类型',
+  date_id                                               STRING COMMENT '统计周期',
+  org_code                                              STRING COMMENT '品牌编号',
+  channel_endpoint_code                                 STRING COMMENT '门店编号',
+  clerk_no                                              STRING COMMENT '店员编号',
+  member_count                                          bigint COMMENT '注册会员总数（管理门店）',
+  order_member_count                                    bigint COMMENT '注册有消费会员总数（管理门店）',
+  upgrade_member_count                                  bigint COMMENT '升级会员总数（管理门店）',
+  consumer_member_count                                 bigint COMMENT '消费会员总数（消费门店）',
+  biz_date                                              bigint COMMENT '统计日期'
+)COMMENT '会员分析注册会员消费统计 会员分析注册会员同环比 ' PARTITIONED BY(
+  ds  STRING);
+
+
+
+INSERT OVERWRITE TABLE td_ads.ads_api_crm_ma_clerk_15mm PARTITION(ds = '20190101')
+  SELECT coalesce(t1.date_type, t2.date_type) AS date_type
+  ,      coalesce(t1.date_id, t2.date_id) AS date_id
+  ,      coalesce(t1.org_code, t2.org_code) AS org_code
+  ,      coalesce(t1.channel_endpoint_code, t2.channel_endpoint_code, '-110') AS channel_endpoint_code
+  ,      coalesce(t1.clerk_no, t2.clerk_no, '-110') AS clerk_no
+  ,      coalesce(t1.member_count, 0) AS member_count
+  ,      coalesce(t1.order_member_count, 0) AS order_member_count
+  ,      coalesce(t1.upgrade_member_count, 0) AS upgrade_member_count
+  ,      coalesce(t2.consumer_member_count, 0) AS consumer_member_count
+  ,      CAST('${bizdate}' AS BIGINT)
+  FROM (
+    SELECT coalesce(t1.date_type, t2.date_type) AS date_type
+    ,      coalesce(t1.date_id, t2.date_id) AS date_id
+    ,      coalesce(t1.org_code, t2.org_code) AS org_code
+    ,      coalesce(t1.channel_endpoint_code, t2.channel_endpoint_code) AS channel_endpoint_code
+    ,      coalesce(t1.clerk_no, t2.clerk_no) AS clerk_no
+    ,      coalesce(t1.member_qty, 0) AS member_count
+    ,      coalesce(t1.member_actived_qty, 0) AS order_member_count
+    ,      coalesce(t2.member_cnt, 0) AS upgrade_member_count
+    FROM (
+      SELECT t.date_type
+      ,      t.date_id
+      ,      t.org_code
+      ,      t.member_manage_channel_endpoint_code AS channel_endpoint_code
+      ,      t.member_manage_clerk AS clerk_no
+      ,      COUNT(DISTINCT (t.member_no)) AS member_qty
+      ,      COUNT(DISTINCT (CASE WHEN order_fact_amount > 0 THEN t.member_no ELSE NULL END)) AS member_actived_qty
+      FROM (
+        SELECT date_type
+        ,      date_id
+        ,      a1.org_code
+        ,      a1.member_no
+        ,      a1.member_manage_channel_endpoint_code
+        ,      a1.member_manage_clerk
+        ,      to_char(to_date(a1.member_register_time, 'yyyy-mm-dd'), 'yyyymmdd') AS member_register_time
+        FROM td_ods.ods_member_card a1
+          JOIN (
+            SELECT max(ds1), date_type, date_id, time_id
+            FROM td_ads_dev.dim_time
+            WHERE ds >= '${start}' AND ds <= '${end}'
+            GROUP BY date_type, date_id, time_id
+          ) time ON to_char(to_date(member_register_time, 'yyyy-mm-dd'), 'yyyymmdd') = time.time_id
+        WHERE a1.ds = '${bizdate}' AND a1.STATUS > 0 AND CAST(a1.member_no AS BIGINT) > 1 AND a1.member_register_time IS
+        NOT NULL
+      ) t
+        LEFT OUTER JOIN (
+          SELECT date_type
+          ,      date_id
+          ,      org_code
+          ,      member_no
+          ,      sum(price_amt_discount) AS order_fact_amount
+          FROM td_ods.ods_sales_order a1
+            JOIN (
+              SELECT max(ds1), date_type, date_id, time_id
+              FROM td_ads_dev.dim_time
+              WHERE ds >= '${start}' AND ds <= '${end}'
+              GROUP BY date_type, date_id, time_id
+            ) time ON to_char(to_date(paid_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd') = time.time_id
+          -- 改为过账时间to_char(to_date(paid_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd')
+          WHERE a1.ds = '${bizdate}' AND CAST(a1.member_no AS BIGINT) > 1
+          GROUP BY date_type
+          , date_id
+          , org_code
+          , member_no
+        ) b ON b.org_code = t.org_code AND b.member_no = t.member_no AND b.date_type = t.date_type AND b.date_id = t.
+        date_id
+      WHERE t.org_code IS NOT NULL AND t.member_manage_channel_endpoint_code IS NOT NULL
+      GROUP BY t.date_type
+      , t.date_id
+      , t.org_code
+      , t.member_manage_channel_endpoint_code
+      , t.member_manage_clerk
+    ) t1
+      FULL OUTER JOIN (
+        SELECT date_type
+        ,      date_id
+        ,      org_code
+        ,      store_no AS channel_endpoint_code
+        ,      clerk_no
+        ,      COUNT(DISTINCT member_no) AS member_cnt
+        FROM (
+          SELECT date_type
+          ,      date_id
+          ,      tmp.org_code
+          ,      tmp.store_no
+          ,      tmp.clerk_no
+          ,      tmp.grade_change_time
+          ,      tmp.create_time
+          ,      tmp.member_no
+          ,      row_number()OVER (PARTITION BY date_type, date_id, org_code, member_no
+          ORDER BY grade_change_time DESC
+          , create_time DESC) AS rank
+          FROM (
+            SELECT date_type
+            ,      date_id
+            ,      trim(a1.org_code) AS org_code
+            ,      trim(a1.store_no) AS store_no
+            ,      trim(a1.clerk_no) AS clerk_no
+            ,      substr(REPLACE(a1.grade_change_time, '-', ''), 1, 8) AS grade_change_time
+            ,      after_grade_id  -- 会员升级后等级  可能会用上
+            ,      create_time
+            ,      a1.member_no
+            FROM td_ods.ods_member_grade_log a1
+              JOIN (
+                SELECT max(ds1), date_type, date_id, time_id
+                FROM td_ads_dev.dim_time
+                WHERE ds >= '${start}' AND ds <= '${end}'
+                GROUP BY date_type, date_id, time_id
+              ) time ON substr(REPLACE(grade_change_time, '-', ''), 1, 8) = time.time_id
+            WHERE a1.ds = '${bizdate}' AND a1.grade_change_time IS NOT NULL
+          ) tmp
+        ) a
+        WHERE rank = 1
+        GROUP BY date_type
+        , date_id
+        , org_code
+        , store_no
+        , clerk_no
+      ) t2 ON t1.date_type = t2.date_type AND t1.date_id = t2.date_id AND coalesce(t1.org_code, '') =
+      coalesce(t2.org_code, '') AND coalesce(t1.clerk_no, '') = coalesce(t2.clerk_no, '') AND
+      coalesce(t1.channel_endpoint_code, '') = coalesce(t2.channel_endpoint_code, '')
+  ) t1
+    FULL OUTER JOIN (
+      SELECT t.date_type
+      ,      t.date_id
+      ,      t.org_code
+      ,      t.channel_endpoint_code
+      ,      t.shopping_guider_no AS clerk_no
+      ,      COUNT(DISTINCT (CASE WHEN order_fact_amount > 0 THEN t.member_no ELSE NULL END)) AS consumer_member_count
+      FROM (
+        SELECT date_type
+        ,      date_id
+        ,      org_code
+        ,      member_no
+        ,      channel_endpoint_code
+        ,      shopping_guider_no
+        ,      sum(price_amt_discount) AS order_fact_amount
+        FROM td_ods.ods_sales_order a1
+          JOIN (
+            SELECT max(ds1), date_type, date_id, time_id
+            FROM td_ads_dev.dim_time
+            WHERE ds >= '${start}' AND ds <= '${end}'
+            GROUP BY date_type, date_id, time_id
+          ) time ON to_char(to_date(paid_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd') = time.time_id
+        -- 改为过账时间to_char(to_date(audit_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd')
+        WHERE a1.ds = '${bizdate}' AND CAST(a1.member_no AS BIGINT) > 1
+        GROUP BY date_type
+        , date_id
+        , org_code
+        , member_no
+        , channel_endpoint_code
+        , shopping_guider_no
+      ) t
+        JOIN (
+          SELECT date_type
+          ,      date_id
+          ,      a1.org_code
+          ,      a1.member_no
+          ,      to_char(to_date(a1.member_register_time, 'yyyy-mm-dd'), 'yyyymmdd') AS member_register_time
+          FROM td_ods.ods_member_card a1
+            JOIN (
+              SELECT max(ds1), date_type, date_id, time_id
+              FROM td_ads_dev.dim_time
+              WHERE ds >= '${start}' AND ds <= '${end}'
+              GROUP BY date_type, date_id, time_id
+            ) time ON to_char(to_date(member_register_time, 'yyyy-mm-dd'), 'yyyymmdd') = time.time_id
+          WHERE a1.ds = '${bizdate}' AND a1.STATUS > 0 AND CAST(a1.member_no AS BIGINT) > 1 AND a1.member_register_time IS
+          NOT NULL
+        ) b ON b.org_code = t.org_code AND b.member_no = t.member_no AND b.date_type = t.date_type AND b.date_id = t.
+        date_id
+      WHERE t.org_code IS NOT NULL AND t.shopping_guider_no IS NOT NULL
+      GROUP BY t.date_type
+      , t.date_id
+      , t.org_code
+      , t.channel_endpoint_code
+      , t.shopping_guider_no
+    ) t2 ON t1.date_type = t2.date_type AND t1.date_id = t2.date_id AND coalesce(t1.org_code, '') =
+    coalesce(t2.org_code, '') AND coalesce(t1.clerk_no, '') = coalesce(t2.clerk_no, '') AND
+    coalesce(t1.channel_endpoint_code, '') = coalesce(t2.channel_endpoint_code, '');
+
+

@@ -4,89 +4,624 @@
 --drop table sanmu_test
 
 
-show partitions ods_stock_logic_order_in_notify;
 
---qczks
-SELECT
-			 sl.channel_endpint_code,
-			 sli.sku_code,
-			 sum(sli.qty_actual)
-FROM ods_stock_logic_items where ds = '${bizdate}' sli
-	LEFT JOIN ods_stock_logic sl
-		ON sli.stock_logic_id = sl.id
-GROUP BY sl.channel_endpint_code, sli.sku_code;
+--business_type in ('10103','10104','10202','10203','10302','10303','10403','10404')
 
---qczts
-SELECT sl.org_code,
-			 sl.channel_endpint_code,
-			 sli.sku_code,
-			 sum(sli.qty_transit)
-FROM ods_stock_logic_items sli
-	LEFT JOIN ods_stock_logic sl
-		ON sli.stock_logic_id = sl.id
-GROUP BY sl.org_code, sl.channel_endpint_code, sli.sku_code;
+ods_member_grade_log
 
---ptrsl
-SELECT sum(oini.qty_received)
-FROM ods_stock_logic_order_in_notify_items oini
-	LEFT JOIN ods_stock_logic_order_in_notify oin
-		ON oini.logic_order_in_notify_id = oin.id
-WHERE oin.business_order_type IN ()
-AND oin.business_order_business_type IN ();
+--三木：3个接口的其他周期为计算
 
+--***********************************
+-- 所属系统：会员中心
+-- 功能描述：物理库区表DDL
+-- 生命周期：365天
+-- 调度周期：手动调度
+-- 创建者：   行周
+-- 创建日期：20190902
+-- 修改日志：20190927,客户修改了表结构
+--***********************************
+--drop table if exists ods_member_card;
+--***********************************
+-- 所属系统：会员中心
+-- 功能描述：物理库区表DDL
+-- 生命周期：365天
+-- 调度周期：手动调度
+-- 创建者：   行周
+-- 创建日期：20190902
+-- 修改日志：
+--***********************************
+--drop table if exists ods_member_grade_info;
 
-select business_order_business_type from ods_stock_logic_order_in_notify where ds = '20190911';
+actual_amt_deduct_coupon  实际成交额(扣券)
+actual_amt_with_coupon    实际成交额(未扣券)
 
+sales_order_item.price_sales * sales_order_item.qty_product
+sales_order_item.price_sales * sales_order_item.qty_product - sales_order_item_price.amt_cash_coupon_contribution
 
---ptcsl
-SELECT sum(ooni.qty_sended)
-FROM ods_stock_logic_order_out_notify_items ooni
-	LEFT JOIN ods_stock_logic_order_out_notify oon
-		ON ooni.logic_order_out_notify_id = oon.id
-WHERE oon.business_order_type IN ()
-AND oon.business_order_business_type IN ();
+sku_sales_amt 销售金额(小票价×数量)
+
+(sales_order_item.price_discount * sales_order_item.qty_product)
+- if(sales_order_item_price.amt_cash_coupon_contribution is null,0,sales_order_item_price.amt_cash_coupon_contribution)
 
 
+desc ods_sales_order_price;
 
---pdcysl
-SELECT sum(abs(qty_change))
-FROM ods_stock_physical_order_inventory_items;
-
+desc ods_member_card;
 
 
---qmzks
-SELECT sl.org_code,
-			 sl.channel_endpint_code,
-			 sli.sku_code,
-			 sum(sli.qty_actual)
-FROM ods_stock_logic_items sli
-	LEFT JOIN ods_stock_logic sl
-		ON sli.stock_log_id = sl.id
-GROUP BY sl.org_code, sl.channel_endpint_code, sli.sku_code;
+--2019-10-12 15:30:01
+INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_payway_15min
+PARTITION(ds)
+select distinct * from ads_api_crm_emr_tcrm_member_1d where ds = '${bizdate}' and member_no not in ('-1','1');
 
+select * from ads_api_crm_emr_tcrm_member_1d where ds = '${bizdate}' and store_num_1d_member_type is not null
+and channel_endpoint = '34R05J' and date_id = '20190821';
 
---qmzts
-SELECT sl.org_code,
-			 sl.channel_endpint_code,
-			 sli.sku_code,
-			 sum(sli.qty_transit)
-FROM ods_stock_logic_items sli
-	LEFT JOIN ods_stock_logic sl
-		ON sli.stock_log_id = sl.id
-GROUP BY sl.org_code, sl.channel_endpint_code, sli.sku_code;
+select * from ods_sales_order where ds = '20191014' and channel_endpoint_code IN ('1101', '1102', '1104');
+
+INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm PARTITION(ds)
+select * from td_ods_dev.ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm where ds = '20190920';
+
+select count(*) from td_ods_dev.ads_api_tpos_tdrp_wfx_sku_channel_endpoint_brand_15mm where ds = '20190920';
 
 
 
+--新会员
+SELECT bb.org_code,
+			 bb.channel_endpoint_code,
+			 bb.sales_order_no,
+			 bb.member_grade_code,
+			 bb.order_time,
+			 bb.price_amt_retail,
+			 bb.amt_total,
+			 bb.order_type,
+			 bb.member_no
+FROM ods_member_info aa
+	JOIN ods_member_card cc
+		ON cc.member_no = aa.member_no and cc.ds = '${bizdate}'
+	RIGHT JOIN (
+		SELECT a.org_code,
+					 a.member_no,
+					 a.sales_order_no,
+					 a.member_grade_code,
+					 a.price_amt_retail,
+					 a.order_type,
+					 a.amt_total,
+					 substr(regexp_replace(a.paid_time, '-', '', 0), 1, 8) AS order_time,
+					 a.channel_endpoint_code,
+					 min(a.create_time)OVER (PARTITION BY a.org_code, a.member_no) AS first_order_time
+		FROM ods_sales_order a
+		WHERE substr(regexp_replace(a.audit_time, '-', '', 0), 1, 8) <= '${bizdate}' AND a.amt_total > 0
+		AND a.order_status = 1 AND a.price_amt_discount > 0
+		AND (a.member_grade_code IS NOT NULL OR a.member_grade_code NOT LIKE '%ANONYMOUS%')
+		and a.ds = '${bizdate}'
+		AND a.member_no NOT IN ('-1', '1')
+	) bb
+		ON bb.org_code = cc.org_code AND bb.member_no = cc.member_no
+WHERE substr(regexp_replace(cc.member_register_time, '-', '', 0), 1, 8) <= '${bizdate}' AND aa.STATUS > 0
+AND cc.member_no NOT IN ('-1', '1') and aa.ds = '${bizdate}'
+--AND substr(regexp_replace(bb.first_order_time, '-', '', 0), 1, 8) = '${bizdate}';
+AND substr(regexp_replace(bb.first_order_time, '-', '', 0), 1, 8) = '20191012';
+
+
+
+--substr(regexp_replace(a.audit_time, '-', '', 0), 1, 8)
+
+--会员升级
+SELECT member_no,'1' as grade_change
+FROM ods_member_grade_log
+WHERE grade_change_time = '${bizdate}' and ds = '${bizdate}'
+AND before_grade_id < after_grade_id AND STATUS > 0;
+
+
+drop table ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm;
+--店铺数
+SELECT org_code
+,
+			 COUNT(DISTINCT channel_endpoint_code) AS store_qty
+FROM ods_sales_order
+WHERE 1 = 1 AND create_time BETWEEN '2019-09-01 00:00:00' AND '2019-09-30 23:59:59' AND org_code = 'TRE'
+AND channel_endpoint_code IN ('1101', '1102', '1104')
+GROUP BY org_code
+HAVING sum(price_amt_discount) > 0
+ORDER BY org_code
+LIMIT 1000;
+
+
+
+--普通会员
+SELECT t.org_code,
+			 t.channel_endpoint_code,
+			 t.grade_code,
+			 t.grade_name
+,
+			 member_qty
+FROM (
+	SELECT a.org_code,
+				 a.channel_endpoint_code
+	,
+				 b.grade_code
+	,
+				 b.grade_name
+	,
+				 COUNT(DISTINCT a.member_no) AS member_qty
+	,
+				 a.member_no
+	,
+				 min(a.create_time) AS first_order_time
+	,
+				 sum(a.price_amt_discount) AS order_fact_amount
+	FROM ods_sales_order a
+		LEFT JOIN ods_member_grade_state c
+			ON a.member_no = c.member_no and c.ds = '20191014'
+		LEFT JOIN ods_member_grade_info b
+			ON b.org_code = c.org_code AND b.grade_code = a.member_grade_code and b.ds = '20191014'
+	WHERE a.create_time <= '2019-10-15 23:59:59' AND a.member_no != - 1 and a.ds = '20191014'
+	GROUP BY a.org_code, a.channel_endpoint_code, a.member_grade_code, b.grade_code, b.grade_name, a.member_no
+	HAVING min(a.create_time) BETWEEN '2019-10-12 00:00:00' AND '2019-10-12 23:59:59'
+) t
+WHERE t.order_fact_amount > 0;
+
+
+
+--门店总销售金额
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) as order_time,
+			 sum(soi.price_sales * soi.qty_product) as total_amt
+FROM ods_sales_order so
+	INNER JOIN ods_sales_order_item soi
+		ON soi.sales_order_no = so.sales_order_no
+WHERE so.order_status = 1 AND so.ds = '${bizdate}'
+GROUP BY so.org_code, so.channel_endpoint_code,substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8);
+
+
+
+--吊牌价总额
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 sum(so.price_amt_retail)
+FROM ods_sales_order so
+WHERE so.order_status = 1 AND so.paid_time BETWEEN ? AND ?
+GROUP BY so.org_code, so.channel_endpoint_code;
+
+
+--退货件数
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 sum(so.qty_return_item)
+FROM ods_sales_order so
+WHERE so.order_status = 1 AND so.paid_time BETWEEN ? AND ?
+AND so.order_type = '103'
+GROUP BY so.org_code, so.channel_endpoint_code;
+
+
+
+--退货金额
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8),
+			 sum(so.qty_return_item),
+			 sum(so.amt_return_item)
+FROM ods_sales_order so
+WHERE so.order_status = 1 AND so.ds = '${bizdate}'
+AND so.order_type = '103'
+GROUP BY so.org_code, so.channel_endpoint_code,substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8);
+
+--销售件数、净销售量
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) as order_time,
+			 sum(soi.qty_product) as sales_num_1d_brand_store
+FROM ods_sales_order so
+	INNER JOIN ods_sales_order_item soi
+		ON soi.sales_order_no = so.sales_order_no AND soi.ds = '${bizdate}'
+WHERE so.order_status = 1 AND so.ds = '${bizdate}'
+AND (soi.price_discount <> 0 OR soi.qty_product <> 0)
+GROUP BY so.org_code, so.channel_endpoint_code,substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8);
+
+
+--退换笔数
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8),
+			 COUNT(1)
+FROM ods_sales_order so
+WHERE so.order_status = 1 AND so.ds = '${bizdate}'
+AND so.order_type IN ('103', '104')
+GROUP BY so.org_code, so.channel_endpoint_code;
+
+
+--vip销售件数
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 sum(soi.qty_product)
+FROM ods_sales_order so
+	LEFT JOIN ods_member_grade_info mgi
+		ON so.member_grade_code = mgi.grade_code
+	INNER JOIN ods_sales_order_item soi
+		ON soi.sales_order_no = so.sales_order_no
+WHERE so.order_status = 1 AND mgi.is_vip = TRUE AND so.paid_time BETWEEN ? AND ?
+AND (soi.price_discount <> 0 OR soi.qty_product <> 0)
+GROUP BY so.org_code, so.channel_endpoint_code;
+
+
+
+--成交笔数
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) as order_time,
+			 sum(CASE
+			 WHEN so.order_type = '101' THEN 1
+			 WHEN so.order_type IN ('102', '103') THEN - 1
+			 WHEN so.order_type = '104' AND so.amt_total > 0 THEN 1
+			 WHEN so.order_type = '104' AND so.amt_total = 0 THEN 0
+			 END)
+FROM ods_sales_order so
+WHERE so.order_status = 1 AND so.ds = '${bizdate}'
+GROUP BY so.org_code, so.channel_endpoint_code,substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8);
+
+
+--vip销售金额
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) as order_time,
+			 sum(soi.price_sales * soi.qty_product)
+FROM ods_sales_order so
+	INNER JOIN ods_sales_order_item soi
+		ON soi.sales_order_no = so.sales_order_no
+	LEFT JOIN ods_member_grade_info mgi
+		ON so.member_grade_code = mgi.grade_code
+WHERE so.order_status = 1 AND mgi.is_vip = 1 AND so.ds = '${bizdate}'
+GROUP BY so.org_code, so.channel_endpoint_code,substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8);
+
+
+SELECT so.org_code,
+			 so.sales_order_no,
+			 so.order_type,
+			 so.member_no,
+			 so.member_grade_code,
+			 channel_endpoint_code,
+			 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) AS order_time,
+			 sum(soi.price_sales * soi.qty_product) AS sales_amt_1d_brand_channel_endpoint,
+			 sum(case when (soi.price_discount <> 0 OR soi.qty_product <> 0) then 1 end) as sales_num_1d_brand_channel_endpoint
+FROM ods_sales_order so
+	INNER JOIN ods_sales_order_item soi
+		ON soi.sales_order_no = so.sales_order_no AND soi.ds = '${bizdate}'
+WHERE so.order_status = 1 AND so.ds = '${bizdate}'
+GROUP BY so.org_code, so.sales_order_no,
+so.order_type,
+so.member_no,
+so.member_grade_code, so.channel_endpoint_code, substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8);
+
+--------销售件数
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) as order_time,
+			 sum(soi.qty_product) as sales_num_1d_brand_store
+FROM ods_sales_order so
+	INNER JOIN ods_sales_order_item soi
+		ON soi.sales_order_no = so.sales_order_no AND soi.ds = '${bizdate}'
+WHERE so.order_status = 1 AND so.ds = '${bizdate}'
+AND (soi.price_discount <> 0 OR soi.qty_product <> 0)
+GROUP BY so.org_code, so.channel_endpoint_code,substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8);
 
 
 
 
---会员总数
-SELECT member_manage_clerk,
-			 COUNT(DISTINCT member_no) AS member_qty_all
-FROM ods_member_card
-WHERE STATUS > 0 AND CAST(member_no AS bigint) > 1
-GROUP BY member_manage_clerk;
+
+
+
+--门店级:
+SELECT so.org_code,
+			 so.channel_endpoint_code,
+			 sum(soi.price_sales * soi.qty_product) - sum(soip.amt_cash_coupon_contribution)
+FROM ods_sales_order so
+	INNER JOIN ods_sales_order_item soi
+		ON soi.sales_order_no = so.sales_order_no
+	INNER JOIN ods_sales_order_item_price soip
+		ON soip.sales_order_item_no = soi.sales_order_item_no
+WHERE so.order_status = 1 AND so.paid_time BETWEEN ? AND ?
+GROUP BY so.org_code, so.channel_endpoint_code;
+
+-- 如果算到导购级 , 追加so.shopping_guider_no, 和group by so.shopping_guider_no
+-- 如果算到商品级 , 追加soi.sku_code, 和group by soi.sku_code
+
+
+
+
+
+
+--期初在库数
+SELECT t1.org_code,
+			 t1.owner_channel_code,
+			 t1.sku_code,
+			 sum(qty) AS qty
+FROM (
+	SELECT sl.org_code,
+				 sli.owner_channel_code,
+				 sli.sku_code,
+				 sli.qty_actual AS qty
+	FROM ods_stock_logic_items sli
+		LEFT JOIN ods_stock_logic sl
+			ON sli.stock_logic_id = sl.id
+	UNION ALL
+	--出库单，加回去
+	SELECT sl.org_code,
+				 ii.owner_channel_code,
+				 ii.sku_code,
+				 ii.qty_sended AS qty
+	FROM ods_stock_logic_order_out AS o
+		INNER JOIN ods_stock_logic_order_out_items AS ii
+			ON o.id = ii.logic_order_out_id
+		LEFT JOIN ods_stock_logic sl
+			ON o.stock_logic_id = sl.id
+	WHERE o.made_order_time >= '2019-09-01 00:00:00'
+	UNION ALL
+	--入库单，库存反减回去
+	SELECT sl.org_code,
+				 ii.channel_code,
+				 ii.sku_code,
+				 - 1 * ii.qty_received AS qty
+	FROM ods_stock_logic_order_in AS i
+		INNER JOIN ods_stock_logic_order_in_items AS ii
+			ON i.id = ii.logic_order_in_id
+		LEFT JOIN ods_stock_logic sl
+			ON i.stock_logic_id = sl.id
+	WHERE i.made_order_time >= '2019-09-01 00:00:00'
+
+) AS t1
+GROUP BY t1.org_code,
+t1.owner_channel_code,
+t1.sku_code;
+
+
+
+--期初在途数
+SELECT t1.org_code,
+			 t1.owner_channel_code,
+			 t1.sku_code,
+			 sum(qty) AS qty
+FROM (
+	SELECT sl.org_code,
+				 sli.owner_channel_code,
+				 sli.sku_code,
+				 sli.qty_transit AS qty
+	FROM ods_stock_logic_items sli
+		LEFT JOIN ods_stock_logic sl
+			ON sli.stock_logic_id = sl.id
+	UNION ALL
+	--根据收货通知单计算：+加上实收数，-去计划数
+	SELECT sl.org_code,
+				 ii.owner_channel_code,
+				 ii.sku_code,
+				 ii.qty_received - ii.qty_receive_plan AS qty
+	FROM ods_stock_logic_order_in_notify AS i
+		INNER JOIN ods_stock_logic_order_in_notify_items AS ii
+			ON i.id = ii.logic_order_in_notify_id
+		INNER JOIN ods_stock_logic sl
+			ON i.stock_logic_id = sl.id
+	WHERE i.made_order_time >= '2019-09-01 00:00:00'
+	UNION ALL
+	--收发差异单，+差异数
+
+	SELECT s.org_code,
+				 b.owner_channel_code,
+				 b.sku_code,
+				 b.qty_difference AS qty
+	FROM ods_stock_logic_order_difference AS a
+		INNER JOIN ods_stock_logic_order_difference_items AS b
+			ON a.id = b.logic_order_difference_id
+		INNER JOIN ods_stock_logic s
+			ON a.stock_logic_in_id = s.id
+	WHERE a.made_order_time >= '2019-09-01 00:00:00'
+
+) AS t1
+GROUP BY t1.org_code,
+			 t1.owner_channel_code,
+			 t1.sku_code;
+
+
+
+--调拨入数量
+SELECT i.org_code,
+			 b.channel_code as owner_channel_code,
+			 b.sku_code,
+			 b.qty_received AS qty
+FROM ods_stock_logic_order_in AS a
+	INNER JOIN ods_stock_logic_order_in_items AS b
+		ON a.id = b.logic_order_in_id AND b.ds = '${bizdate}'
+	INNER JOIN ods_stock_logic AS i
+		ON a.stock_logic_id = i.id AND b.ds = '${bizdate}'
+WHERE a.business_order_type = '301' AND a.business_order_business_type IN ('30101', '30102')
+AND a.ds = '${bizdate}'
+AND a.made_order_time >= '2019-08-01 00:00:00';
+
+
+select distinct app_id from ods_stock_logic_order_out where ds = '20190920';
+
+--调退出数量
+SELECT o.org_code,
+			 b.owner_channel_code,
+			 b.sku_code,
+			 b.qty_sended AS qty
+FROM ods_stock_logic_order_out AS a
+	INNER JOIN ods_stock_logic_order_out_items AS b
+		ON a.id = b.logic_order_out_id AND b.ds = '${bizdate}'
+	INNER JOIN ods_stock_logic AS o
+		ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
+WHERE a.business_order_type = '302' AND a.business_order_business_type IN ('30201', '30202') AND a.app_id = 'TPOS'
+AND a.ds = '${bizdate}'
+AND a.made_order_time >= '2019-09-01 00:00:00';
+
+
+
+
+
+
+
+--配货出数量
+SELECT o.org_code,
+			 b.owner_channel_code,
+			 b.sku_code,
+			 a.business_order_business_type,
+			 b.qty_sended AS qty
+FROM ods_stock_logic_order_out AS a
+	INNER JOIN ods_stock_logic_order_out_items AS b
+		ON a.id = b.logic_order_out_id
+	INNER JOIN ods_stock_logic AS o
+		ON a.stock_logic_id = o.id
+
+WHERE a.business_order_type = '201'
+--AND a.business_order_business_type = '20101'
+AND substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = '${bizdate}';
+
+--配货入数量
+SELECT o.org_code,
+			 b.channel_code as owner_channel_code,
+			 b.sku_code,
+			 a.business_order_business_type,
+			 b.qty_received AS qty
+FROM ods_stock_logic_order_in AS a
+	INNER JOIN ods_stock_logic_order_in_items AS b
+		ON a.id = b.logic_order_in_id and b.ds = '20190920'
+	INNER JOIN ods_stock_logic AS o
+		ON a.stock_logic_id = o.id and o.ds = '20190920'
+
+WHERE a.business_order_type = '201'
+AND a.business_order_business_type = '20101' and a.ds = '20190920'
+AND substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = '${bizdate}';
+
+
+SELECT o.org_code,
+			 b.owner_channel_code,
+			 b.sku_code,
+			 a.business_order_business_type,
+			 a.business_order_type,
+			 b.qty_sended AS qty
+FROM ods_stock_logic_order_out AS a
+	INNER JOIN ods_stock_logic_order_out_items AS b
+		ON a.id = b.logic_order_out_id AND b.ds = '${bizdate}'
+	INNER JOIN ods_stock_logic AS o
+		ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
+WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = '${bizdate}' AND a.ds = '${bizdate}'
+AND a.business_order_business_type IN ('30201', '30202') AND a.business_order_type = '302' AND a.app_id
+= 'TPOS';
+
+
+
+
+--配退出数量
+SELECT o.org_code,
+			 b.owner_channel_code,
+			 b.sku_code,
+			 b.qty_sended AS qty
+FROM ods_stock_logic_order_out AS a
+	INNER JOIN ods_stock_logic_order_out_items AS b
+		ON a.id = b.logic_order_out_id
+	INNER JOIN ods_stock_logic AS o
+		ON a.stock_logic_id = o.id
+WHERE business_order_type = '201' AND business_order_business_type = '20104'
+AND a.made_order_time = '2019-09-01 00:00:00';
+
+--配退入数量
+SELECT o.org_code,
+			 b.channel_code as owner_channel_code,
+			 b.sku_code,
+			 b.qty_received AS qty
+FROM ods_stock_logic_order_in AS a
+	INNER JOIN ods_stock_logic_order_in_items AS b
+		ON a.id = b.logic_order_in_id
+	INNER JOIN ods_stock_logic AS o
+		ON a.stock_logic_id = o.id
+WHERE business_order_type = '201' AND business_order_business_type = '20104'
+AND a.made_order_time >= '2019-09-01 00:00:00';
+
+
+
+
+--横调出数量
+SELECT o.org_code,
+			 b.owner_channel_code,
+			 b.sku_code,
+			 b.qty_sended AS qty
+FROM ods_stock_logic_order_out AS a
+	INNER JOIN ods_stock_logic_order_out_items AS b
+		ON a.id = b.logic_order_out_id
+	INNER JOIN ods_stock_logic AS o
+		ON a.stock_logic_id = o.id
+
+WHERE business_order_type = '201' AND business_order_business_type IN ('20102')
+AND a.made_order_time >= '2019-09-01 00:00:00';
+
+
+--横调入数量
+SELECT i.org_code,
+			 b.channel_code as owner_channel_code,
+			 b.sku_code,
+			 b.qty_received AS qty
+FROM ods_stock_logic_order_in AS a
+	INNER JOIN ods_stock_logic_order_in_items AS b
+		ON a.id = b.logic_order_in_id
+	INNER JOIN ods_stock_logic AS i
+		ON a.stock_logic_id = i.id
+WHERE business_order_type = '201' AND business_order_business_type IN ('20102')
+AND a.made_order_time >= '2019-09-01 00:00:00';
+
+
+
+--跨渠道横调出数量
+SELECT o.org_code,
+			 b.owner_channel_code,
+			 b.sku_code,
+			 b.qty_sended AS qty
+FROM ods_stock_logic_order_out AS a
+	INNER JOIN ods_stock_logic_order_out_items AS b
+		ON a.id = b.logic_order_out_id AND b.ds = '${bizdate}'
+	INNER JOIN ods_stock_logic AS o
+		ON a.stock_logic_id = o.id and o.ds = '${bizdate}'
+	INNER JOIN ods_stock_logic_order_allocate AS e
+		ON a.business_order_no = e.order_no and e.ds = '${bizdate}'
+	INNER JOIN ods_stock_logic AS i
+		ON e.stock_logic_code_in_id = i.id AND o.manager_channel_code != i.manager_channel_code
+WHERE  business_order_type = '201' AND business_order_business_type IN ('20102')
+AND a.made_order_time >= '2019-09-01 00:00:00';
+
+--跨渠道横调入数量
+SELECT i.org_code,
+			 b.channel_code,
+			 b.sku_code,
+			 b.qty_received AS qty
+FROM ods_stock_logic_order_in AS a
+	INNER JOIN ods_stock_logic_order_in_items AS b
+		ON a.id = b.logic_order_in_id and b.ds = '${bizdate}'
+	INNER JOIN ods_stock_logic AS i
+		ON a.stock_logic_id = i.id and i.ds = '${bizdate}'
+	INNER JOIN ods_stock_logic_order_allocate AS e
+		ON a.business_order_no = e.order_no and e.ds = '${bizdate}'
+	INNER JOIN ods_stock_logic AS o
+		ON e.stock_logic_code_out_id = o.id and o.manager_channel_code != i.manager_channel_code
+WHERE  business_order_type = '201' AND business_order_business_type IN ('20102')
+AND a.made_order_time >= '2019-09-01 00:00:00';
+
+
+
+--盘点差异数量
+SELECT b.sku_code,
+			 c.org_code,
+			 b.owner_channel_code,
+			 sum(abs(qty_change))
+FROM ods_stock_physical_order_inventory AS a
+	INNER JOIN ods_stock_physical_order_inventory_items AS b
+		ON a.id = b.physical_order_inventory_id AND b.ds = '${bizdate}'
+	INNER JOIN ods_stock_logic AS c
+		ON a.inventory_logic_id = c.id and c.ds = '${bizdate}'
+WHERE a.audit_time >= '2019-09-01 00:00:00' and c.ds = '${bizdate}'
+GROUP BY b.sku_code,
+c.org_code,
+b.owner_channel_code;
+
+
 
 
 --活跃会员人数
@@ -351,4 +886,98 @@ where t1.is_vip = 1 group by t1.channel_endpoint_code;
 
 
 
+
+SELECT so.id
+,so.sales_order_no             --订单编号
+,so.app_id
+,so.online_store_order_no      --网络单号
+,so.original_order_no          --源单号
+,so.order_type
+,so.price_print_type           --入机类型
+,so.transaction_flow_code
+,so.shipping_type
+,so.order_status
+,so.pay_status
+,so.shipping_status
+,so.refund_status
+,so.refund_payment_status
+,so.org_code                   --品牌编码
+,so.channel_endpoint_code      --渠道终端编码
+,''                      --终端代码
+,''                      --终端名称
+,so.shopping_guider_app_code
+,so.sales_app_code
+,so.shopping_guider_no         --导购
+,so.has_rma
+,so.rma_contact_number
+,so.rma_reason
+,so.member_no                  --会员编号
+,mi.member_mobile              --会员手机号
+,so.member_source_type
+,so.member_grade_code          --会员等级
+
+,so.external_member_type
+,so.qty_order_item
+,so.qty_sales_item
+,so.qty_return_item
+,so.price_amt_retail            --吊牌价总计
+,so.price_amt_discount          --实收金额
+,so.amt_total                   --订单总金额
+,CASE WHEN sop.pay_way = 'COUPON' THEN sop.amt_pay END AS coupon_amt --现金券抵扣金额
+,CASE WHEN sop.pay_way = 'CARD' THEN sop.amt_pay END AS card_amt --储值卡支付金额
+, so.amt_discount                --折扣总额
+,so.amt_sales_item
+,so.amt_return_item
+,so.amt_paid
+,so.amt_freight
+,so.refund_logistics_no
+,so.average_discount
+,so.remark
+,so.paid_time                  --支付时间
+,so.shipping_time
+,so.warehouse_receiving_time
+,so.customer_receiving_time
+,so.create_user_id
+,so.create_user_name
+,so.create_time
+,so.last_update_user_id
+,so.last_update_user_name
+,so.last_update_time
+,so.deleted
+,so.external_order_no          --EC单号
+,so.outer_order_id             --外部单号
+,so.business_type
+,so.related_rma_order_id
+,so.statemachine
+,so.amt_m_discount
+,so.channel_stock_code
+,so.oms_version
+,so.channel_code
+,so.member_mobile
+,so.stock_receive_code
+,so.point_deduction             --商场扣点
+,so.sales_platform_code
+,so.logistics_company_no
+,so.buyer_nick_name
+,so.made_order_time
+,so.audit_time
+,soc.coupon_no
+,soc.coupon_name
+,soc.coupon_type
+,soc.coupon_password
+FROM ods_sales_order so
+	LEFT JOIN ods_sales_order_coupon soc
+		ON so.sales_order_no = soc.sales_order_no
+	AND soc.ds = '20190920'
+	LEFT JOIN ods_member_info mi
+		ON so.member_no = mi.member_no
+	AND mi.ds = '20190920'
+	LEFT JOIN ods_member_card mc
+		ON so.org_code = mc.org_code
+	AND so.member_no = mc.member_no
+	AND mc.ds = '20190920'
+	LEFT JOIN ods_sales_order_payment sop
+		ON so.sales_order_no = sop.sales_order_no
+	AND sop.ds = '20190920'
+WHERE so.ds = '20190920';
 

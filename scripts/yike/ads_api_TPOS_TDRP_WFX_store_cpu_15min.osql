@@ -1,0 +1,66 @@
+--name:ads_api_TPOS_TDRP_WFX_store_15min
+--author:yike
+--create time:2019-10-16 15:17
+create table if not exists ads_api_TPOS_TDRP_WFX_store_cpu_15min(
+  brand_code                    string comment '品牌编号',
+  audit_time                    string comment '营业时间',
+  store_code                    string comment '门店编码',
+  no                            string comment '排名',
+  SPU                           string comment '商品款号',
+  quantity                      bigint comment '销售件数',
+  discount_rate_store           double comment '平均折扣-门店',
+  discount_rate_org             double comment '平均折扣-品牌',
+  sales_amount                   double comment '销售金额（扣券）'
+) comment '商品销售金额排行TOP10' partitioned by (
+  ds string
+);
+INSERT OVERWRITE TABLE ads_api_TPOS_TDRP_WFX_store_cpu_15min PARTITION(ds)
+select
+  a.org_code,
+  a.audit_time,
+  a.store_code,
+  '动态排名',
+  a.spu_code,
+  a.quantity,
+  a.rate1,
+  a.rate2,
+  (a.al_amt - coalesce(b.amt_pay,0)) as sales_amount,
+  a.ds
+from (
+  select
+  org_code,audit_time,store_code,spu_code,quantity,rate1,rate2,al_amt,ds
+  from (
+    select
+    oso.org_code,
+    oso.audit_time,
+    rs_r.store_code,
+    oais.spu_code,
+    sum(osoi.qty_product) over (partition by oso.org_code,rs_r.store_code,oais.spu_code,oso.audit_time) as quantity,--粒度到spu的销售件数
+    avg(osoi.discount_rate) over (partition by oso.org_code,rs_r.store_code,oso.audit_time) rate1,--粒度到门店的所有商品折扣
+    avg(osoi.discount_rate) over (partition by oso.org_code,oso.audit_time) rate2,--粒度到品牌的所有商品折扣
+    sum(oso.amt_total) over (partition by oso.org_code,rs_r.store_code,oais.spu_code,oso.audit_time) as al_amt,--粒度到门店spu的销售金额
+    oso.ds
+    from ods_sales_order oso
+      left join ods_sales_order_item osoi on oso.sales_order_no = osoi.sales_order_no
+      left join ods_api_item_sku oais on osoi.sku_code = oais.sku_code
+      join ods_real_store rs_r on oso.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20191014'
+    where oso.ds = '20191014' and osoi.ds = '20191014' and oais.ds = '20191014'
+  )t group by org_code,audit_time,store_code,spu_code,quantity,rate1,rate2,al_amt,ds
+)a left join (
+  SELECT
+  sum(amt_pay) as amt_pay,
+  osop.org_code,
+  rs_r.store_code,
+  oais.spu_code,
+  oso.audit_time,
+  osop.ds
+  FROM ods_sales_order_payment osop
+    left join ods_sales_order_item osoi on osop.sales_order_no = osoi.sales_order_no
+    left join ods_api_item_sku oais on osoi.sku_code = oais.sku_code
+    left join ods_sales_order oso on osop.sales_order_no = oso.sales_order_no and osop.org_code = oso.org_code
+    join ods_real_store rs_r on oso.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20191014'
+  WHERE osop.ds = '20191014' and oso.ds = '20191014'
+  and osoi.ds = '20191014' and pay_way = 'COUPON' and oais.ds = '20191014'
+group by   osop.org_code, rs_r.store_code, oais.spu_code, osop.ds, oso.audit_time
+) b on a.org_code = b.org_code and a.spu_code = b.spu_code and a.ds = b.ds and a.store_code = b.store_code and a.audit_time = b.audit_time
+;

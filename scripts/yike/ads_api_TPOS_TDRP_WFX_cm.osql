@@ -1,0 +1,100 @@
+--name:ads_api_TPOS_TDRP_WFX_cm
+--author:yike
+--create time:2019-10-09 14:51
+create table if not exists ads_api_TPOS_TDRP_WFX_cm(
+brand_code                    string comment '品牌编号',
+store_code                    string comment '门店编号',
+month                         bigint comment '月份',
+year                          bigint comment '年份',
+monthlyRealityMoney           double comment '本月累计销售金额',
+monthlyInitTargetMoney        double comment '本月目标销售金额',
+monthlyCumulateTargetMoney    double comment '预估完成销售金额',
+mtdEstimatedReach             double comment 'MTD预估达成率',
+mtdSaleTargetTop              bigint comment 'MTD销售达成排名',
+mtdTop                        bigint comment '月累计全国排名'
+) comment '月销售目标' partitioned by (
+ds string
+);
+INSERT OVERWRITE TABLE ads_api_TPOS_TDRP_WFX_cm PARTITION(ds)
+select
+  ts.org_code,
+  ts.store_code,
+  cast(ts.month as bigint),
+  cast(ts.year as bigint),
+  tl.monthly_reality_money,
+  ts.monthly_init_target_money,
+  ts.monthly_cumulate_target_money,
+  ts.mtdEstimatedReach,
+  rank()OVER (PARTITION BY ts.org_code,ts.year,ts.month ORDER BY ts.mtdEstimatedReach DESC) AS mtdSaleTargetTop,
+  rank()OVER (PARTITION BY ts.org_code,ts.year,ts.month ORDER BY tl.monthly_reality_money DESC) AS mtdTop,
+  ts.ds
+from (
+  select
+  b.org_code,
+  a.store_code,
+  a.month,
+  a.year,
+  sum(a.monthly_init_target_money) over (partition by b.org_code,a.store_code) monthly_init_target_money,--本月目标销售金额
+  sum(a.monthly_cumulate_target_money) over (partition by b.org_code,a.store_code) monthly_cumulate_target_money,--预估完成销售金额
+  case when a.monthly_reality_money is not null and a.monthly_reality_money != 0
+  then a.monthly_init_target_money/a.monthly_reality_money else null end as mtdEstimatedReach,--MTD预估达成率
+  a.ds
+  from ods_store_monthly_sales_analyze a left join ods_product_brand b on a.brand_code = b.brand_code
+  where a.ds = '20190920' and b.ds = '20191014'
+)ts left join (
+--销售金额（扣券）
+  SELECT
+  a.store_code as storeCode,
+  a.org_code as orgCode,
+  sum(a.amt_total - coalesce(b.amt_pay,0)) as monthly_reality_money,--销售金额(扣券)
+  a.ds
+  FROM (
+    SELECT
+    rs_r.store_code,
+    so.ds,
+    so.org_code,
+    so.sales_order_no,
+    so.amt_total
+    FROM
+    (
+      SELECT
+      sales_order_no,
+      amt_total,
+      channel_endpoint_code,
+      org_code,
+      ds
+      FROM
+      ods_sales_order
+      WHERE
+      ds = '20191014' and replace (substr(create_time,1,7),'-','') = '201910'
+    ) so join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20191014'
+  ) a
+    LEFT JOIN (
+      SELECT
+      rs_r.store_code,
+      sop.org_code,
+      sop.sales_order_no,
+      sop.amt_pay
+      FROM
+      (
+        SELECT
+        amt_pay,
+        sales_order_no,
+        pay_way,
+        org_code
+        FROM ods_sales_order_payment
+        WHERE ds = '20191014'
+        and pay_way = 'COUPON'
+      ) sop LEFT JOIN (
+        SELECT
+        org_code,
+        channel_endpoint_code,
+        sales_order_no
+        FROM ods_sales_order
+        WHERE ds = '20191014'
+      ) so ON sop.sales_order_no = so.sales_order_no
+        join ods_real_store rs_r on so.channel_endpoint_code = rs_r.store_code and rs_r.ds = '20191014'
+    ) b ON a.store_code = b.store_code and a.org_code = b.org_code and a.sales_order_no = b.sales_order_no
+  group by a.org_code,a.store_code,a.ds
+)tl on ts.org_code = tl.orgCode and ts.store_code = tl.storeCode
+;

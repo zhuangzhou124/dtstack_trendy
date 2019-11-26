@@ -1,0 +1,163 @@
+--name:导购员销售分析
+--author:zhangjunda
+--create time:2019-10-13 23:38
+
+
+CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_clerk_15mm_1(
+
+  date_type                                           STRING COMMENT '统计周期类型',
+  date_id                                             STRING COMMENT '统计周期',
+  org_code                                            STRING COMMENT '品牌编号',
+  channel_endpoint_code                               STRING COMMENT '门店编号',
+  rank_no                                             BIGINT COMMENT '排名',
+  clerk_no                                            STRING COMMENT '工号',
+  clerk_name                                          BIGINT COMMENT '姓名',
+  sale_amt                                            DOUBLE COMMENT '销售售出',
+  item_num                                            BIGINT COMMENT '销售数量',
+  order_num                                           BIGINT COMMENT '销售单数',
+  average_discount                                    DOUBLE COMMENT '平均折扣',
+  per_customer_transaction                            DOUBLE COMMENT '客单价',
+  associated_purchase_rate                            DOUBLE COMMENT '连带率',
+  vip_sales_amount                                    DOUBLE COMMENT 'vip消费额',
+  vip_sales_rate                                      DOUBLE COMMENT 'vip消费占比',
+  cash_coupon                                         DOUBLE COMMENT '现金券',
+  biz_date                                            BIGINT COMMENT '统计日期'
+)COMMENT '导购员销售分析 日销售排行 ' PARTITIONED BY(
+  ds  STRING);
+
+
+
+
+
+
+
+
+
+INSERT OVERWRITE TABLE td_ads.ads_api_tpos_tdrp_wfx_clerk_15mm_1 PARTITION(ds = '20190101')
+  SELECT date_type
+  ,      date_id
+  ,      t1.org_code
+  ,      coalesce(t1.channel_endpoint_code, '-110')
+  ,      dense_rank()OVER (PARTITION BY date_type, date_id, t1.org_code, t1.channel_endpoint_code
+  ORDER BY salesAmount DESC) AS rank_no
+  ,      coalesce(shopping_guider_no, '-110')
+  ,      t2.clerk_name AS name
+  ,      salesAmount
+  ,      itemQuantity
+  ,      orderQuantity
+  ,      CASE WHEN salesAmount != 0 AND price_amt_retail != 0 THEN round(salesAmount / price_amt_retail, 4) ELSE 0 END
+         AS averageDiscount
+  ,      CASE WHEN salesAmount != 0 AND orderQuantity != 0 THEN round(salesAmount / orderQuantity, 4) ELSE 0 END AS
+         perCustomerTransaction
+  ,      CASE WHEN itemQuantity != 0 AND orderQuantity != 0 THEN round(itemQuantity / orderQuantity, 4) ELSE 0 END AS
+         associatedPurchaseRate
+  ,      vipSalesAmount
+  ,      CASE WHEN vipSalesAmount != 0 AND salesAmount != 0 THEN round(vipSalesAmount / salesAmount, 4) ELSE 0 END AS
+         vipSalesRate
+  ,      cashCoupon
+  ,      CAST('20191025' AS BIGINT)
+  FROM (
+    SELECT date_type
+    ,      date_id
+    ,      so.org_code
+    ,      so.channel_endpoint_code
+    ,      so.shopping_guider_no
+    ,      coalesce(sum(soi.price_sales * soi.qty_product), 0) - coalesce(sum(soip.amt_cash_coupon_contribution), 0) AS
+           salesAmount
+    ,      sum(CASE WHEN soi.price_discount <> 0 OR soi.qty_product <> 0 THEN soi.qty_product END) AS itemQuantity
+    ,
+           sum(CASE WHEN so.order_type = '101' THEN 1 WHEN so.order_type IN ('102', '103') THEN - 1 WHEN so.order_type = '104' AND so.amt_total > 0 THEN 1 WHEN so.order_type = '104' AND so.amt_total = 0 THEN 0 END)
+           AS orderQuantity
+    ,      sum(so.price_amt_retail) AS price_amt_retail
+    ,      coalesce(sum(CASE WHEN mgi.is_vip = '1' THEN soi.price_sales * soi.qty_product END), 0) -
+    coalesce(sum(CASE WHEN mgi.is_vip = '1' THEN soip.amt_cash_coupon_contribution END), 0) AS vipSalesAmount
+    ,      coalesce(sum(soip.amt_cash_coupon_contribution), 0) AS cashCoupon
+    FROM (
+      SELECT *
+      FROM td_ods.ods_sales_order a1
+        JOIN (
+          SELECT max(ds1), date_type, date_id, time_id
+          FROM td_ads_dev.dim_time
+          WHERE ds >= '${start}' AND ds <= '${end}'
+          GROUP BY date_type, date_id, time_id
+        ) time ON to_char(to_date(paid_time, 'yyyy-mm-dd hh:mi:ss'), 'yyyymmdd') = time.time_id
+      WHERE a1.ds = '${bizdate}' AND order_status = 1 AND shopping_guider_no IS NOT NULL
+      --AND paid_time = substr('20191025', 1, 6)
+    ) so
+      INNER JOIN (
+        SELECT *
+        FROM td_ods.ods_sales_order_item
+        WHERE ds = '${bizdate}'
+      ) soi ON soi.sales_order_no = so.sales_order_no
+      INNER JOIN (
+        SELECT *
+        FROM td_ods.ods_sales_order_item_price
+        WHERE ds = '${bizdate}'
+      ) soip ON soip.sales_order_item_no = soi.sales_order_item_no
+      LEFT JOIN (
+        SELECT *
+        FROM td_ods.ods_member_grade_info
+        WHERE ds = '${bizdate}'
+      ) mgi ON so.member_grade_code = mgi.grade_code
+    GROUP BY date_type
+    , date_id
+    , so.org_code
+    , so.channel_endpoint_code
+    , so.shopping_guider_no
+  ) t1
+    LEFT JOIN (
+      SELECT *
+      FROM (
+        SELECT *, row_number()OVER (PARTITION BY clerk_no, channel_endpoint_code ORDER BY last_update_time DESC) AS rank
+        FROM td_ods.ods_clerk_info
+        WHERE ds = '${bizdate}'
+      ) a
+      WHERE rank = 1
+    ) t2 ON t1.shopping_guider_no = t2.clerk_no AND t1.channel_endpoint_code = t2.channel_endpoint_code;
+
+
+
+
+
+
+
+;
+
+SELECT max(ds1), date_type, date_id, time_id
+FROM td_ads_dev.dim_time
+WHERE ds >= '${start}' AND ds <= '${end}'
+GROUP BY date_type, date_id, time_id;
+
+
+
+
+--20190101 x
+
+
+
+
+
+
+
+SELECT max(ds1), date_type, date_id, time_id
+FROM td_ads_dev.dim_time
+WHERE ds >= '20150101' AND ds <= '20160202'  and date_type='year'
+GROUP BY date_type, date_id, time_id
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
