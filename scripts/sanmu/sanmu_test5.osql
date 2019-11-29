@@ -1,70 +1,62 @@
-SELECT '${bizdate}' AS biz_date,
-			 t1.org_code AS org_code,
-			 t1.member_no AS member_no,
-			 t2.member_mobile AS member_mobile,
-			 t0.first_order_time AS member_fit5t_order_time,
-			 t3.member_register_channel_endpoint_code AS member_register_store,
-			 t3.member_manage_channel_endpoint_code AS member_manage_store,
-			 t4.operation_name AS manage_operation_name,
-			 t5.region_name AS manage_region,
-			 t5.province_name AS manage_provint4,
-			 t5.city_name AS manage_city,
-			 t1.outer_order_no AS outer_order_no,
-			 t6.app_id AS trade_t6urt4,
-			 t6.member_grade_code AS order_grade,
-			 t6.sub_coupon_amount AS order_fact_amount_with_coupon,
-			 t6.order_fact_amount AS order_amount,
-			 t6.channel_endpoint_code AS member_consumed_store,
-			 t7.region_name AS consumer_region,
-			 t1.before_grade_id AS before_grade_id,
-			 t1.after_grade_id AS after_grade_id,
-			 t1.grade_change_time AS grade_change_time,
-			 t1.change_reason_desc AS change_reason_desc,
-			 t1.create_user AS create_user,
-			 t6.paid_time AS pay_time,
-			 t1.create_time AS create_time
-FROM ods_member_grade_log t1
-	LEFT JOIN ods_member_card t3
-		ON t1.org_code = t3.org_code AND t1.member_no = t3.member_no AND t3.ds = '${bizdate}'
-	LEFT JOIN ods_real_store t5
-		ON t3.member_manage_channel_endpoint_code = t5.store_code AND t5.ds = '${bizdate}'
-	LEFT JOIN ods_channel_endpoint t4
-		ON t3.member_manage_channel_endpoint_code = t4.channel_endpoint_code AND t4.ds = '${bizdate}'
-	LEFT JOIN ods_member_info t2
-		ON t1.member_no = t2.member_no AND t2.ds = '${bizdate}'
-	LEFT JOIN (
-		SELECT org_code,
-					 member_no,
-					 min(paid_time) AS first_order_time
-		FROM ods_sales_order
-		WHERE ds = '${bizdate}' AND order_status = 1 AND member_no > 0
-		GROUP BY org_code
-		, member_no
-	) t0
-		ON t1.org_code = t0.org_code AND t1.member_no = t0.member_no
-	LEFT JOIN (
-		SELECT a.sales_order_no,
-					 channel_endpoint_code,
-					 a.paid_time,
-					 a.app_id,
-					 a.member_no,
-					 a.member_grade_code,
-					 sum(b.price_sales * b.qty_product) AS order_fact_amount,
-					 sum(b.price_sales * b.qty_product - coalesce(c.amt_cash_coupon_contribution, 0)) AS sub_coupon_amount
-		FROM ods_sales_order a
-			LEFT JOIN ods_sales_order_item b
-				ON a.sales_order_no = b.sales_order_no AND b.ds = '${bizdate}'
-			LEFT JOIN ods_sales_order_item_price c
-				ON b.sales_order_item_no = c.sales_order_item_no AND c.ds = '${bizdate}'
-		WHERE a.ds = '${bizdate}'
-		GROUP BY a.sales_order_no
-		, channel_endpoint_code
-		, a.paid_time
-		, a.app_id
-		, a.member_no
-		, a.member_grade_code
-	) t6
-		ON t1.outer_order_no = t6.sales_order_no
-	LEFT JOIN ods_real_store t7
-		ON t6.channel_endpoint_code = t7.store_code AND t7.ds = '${bizdate}'
-WHERE t1.ds = '${bizdate}' AND t3.STATUS > -1;
+--***********************************
+-- 表   dwd_order_region_1d
+-- 功能描述：采购数据明细表
+-- 生命周期：30天
+-- 调度周期：天
+-- 创建者：  三木
+-- 创建日期：20191125
+-- 修改日志：
+--***********************************
+-- drop table dwd_order_region_1d;
+
+CREATE TABLE IF NOT EXISTS dwd_order_region_1d(
+	region_id                                        STRING COMMENT '大区id     ',
+	region_name                                      STRING COMMENT '大区名称     ',
+	order_level1_id                                  STRING COMMENT '编号（1级）    ',
+	order_level2_id                                  STRING COMMENT '编号（2级）',
+	order_requirement_weight                         STRING COMMENT '需求重量(KG)   ',
+	order_actual_take_weight                         DOUBLE COMMENT '提货重量（KG',
+	order_stock_in_weight                            DOUBLE COMMENT '入库重量（KG）',
+	order_interval_days_1d_sign_approval             BIGINT COMMENT '订单签订和审批周期',
+	order_interval_days_1d_market_delivery           BIGINT COMMENT '订单市场交货周期',
+	order_interval_days_1d_delivery                  BIGINT COMMENT '订单交货周期（按采购合同约定时间)',
+	order_interval_days_1d_send_stock_in             BIGINT COMMENT '发货- 入库周期',
+	order_interval_days_1d_stock_in_payment          BIGINT COMMENT '入库 -挂账周期',
+	order_interval_days_1d_payment_account           BIGINT COMMENT '挂账-付款周期',
+	price_analysis_supplier                          DOUBLE COMMENT '供应商价格分析',
+	order_interval_days_1d_overstock                 BIGINT COMMENT '订单积压周期'
+)COMMENT '采购数据明细表' PARTITIONED BY(
+	ds STRING COMMENT '时间分区')
+LIFECYCLE 30;
+
+INSERT OVERWRITE TABLE dwd_order_region_1d PARTITION(ds = '${bdp.system.bizdate}')
+	SELECT region_id,
+				 order_level1_id,
+				 order_level2_id,
+				 order_requirement_weight,
+				 order_actual_take_weight,
+				 order_stock_in_weight,
+				 datediff(order_create_date, order_requirement_send_date) AS order_interval_days_1d_sign_approval,
+				 datediff(order_market_requirement_delivery_date, order_finish_date) AS order_interval_days_1d_market_delivery,
+				 datediff(order_finish_date, order_requirement_delivery_date) AS order_interval_days_1d_delivery,
+				 datediff(order_stock_in_date, order_actual_take_date) AS order_interval_days_1d_send_stock_in,
+				 datediff(order_payment_date, order_stock_in_date) AS order_interval_days_1d_stock_in_payment,
+				 datediff(order_account_date, order_payment_date) AS order_interval_days_1d_payment_account,
+				 CASE
+				 WHEN order_requirement_weight <> 0 AND order_requirement_weight IS NOT NULL THEN substr((order_stock_in_weight /
+				 order_requirement_weight) * 100,1,2)
+				 ELSE null
+				 END AS price_analysis_supplier,
+				 datediff(order_actual_take_date, order_finish_date) AS order_interval_days_1d_overstock
+	FROM ods_yichang_purchase WHERE ds = '${bdp.system.bizdate}'
+	group by region_id;
+
+
+SELECT region_id,
+			 sum(CASE
+			 WHEN substr((order_stock_in_weight /
+			 order_requirement_weight) * 100,1,2) >= 20 THEN 1
+			 ELSE 0
+			 END) AS order_nums_1d_price_up_20per
+FROM ods_yichang_purchase WHERE ds = '${bdp.system.bizdate}'
+group by region_id

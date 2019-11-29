@@ -32,16 +32,6 @@ ods_member_grade_log
 --***********************************
 --drop table if exists ods_member_grade_info;
 
-actual_amt_deduct_coupon  实际成交额(扣券)
-actual_amt_with_coupon    实际成交额(未扣券)
-
-sales_order_item.price_sales * sales_order_item.qty_product
-sales_order_item.price_sales * sales_order_item.qty_product - sales_order_item_price.amt_cash_coupon_contribution
-
-sku_sales_amt 销售金额(小票价×数量)
-
-(sales_order_item.price_discount * sales_order_item.qty_product)
-- if(sales_order_item_price.amt_cash_coupon_contribution is null,0,sales_order_item_price.amt_cash_coupon_contribution)
 
 
 desc ods_sales_order_price;

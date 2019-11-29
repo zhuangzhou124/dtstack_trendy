@@ -48,7 +48,7 @@ LIFECYCLE 30;
 
 INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION(ds = '${bizdate}')
 	select 				'${bizdate}' AS biz_date,
-								time.date_id AS gmt_sale,
+								t2.order_time AS gmt_sale,
 								t2.org_code,
 								t2.channel_endpoint_code ,
 								t2.endpoint_name,
@@ -89,8 +89,8 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_brand_channel_endpoint_1d PARTITION
 								OR sum(t2.sales_amt_1d_brand_store_vip) <= 0 THEN 0.0
 								ELSE (sum(t2.sales_amt_1d_brand_store_vip) / sum(t2.sales_amt_1d_brand_channel_endpoint))
 								END AS sales_ratio_1d_brand_store_vip,
-								time.date_type,
-								time.date_id
+								'day' as date_type,
+								t2.order_time as date_id
 	from
 	(SELECT
 	 t1.order_time ,
@@ -181,21 +181,10 @@ LEFT OUTER JOIN (
 			FROM ${td_ods}.ods_api_channel_endpoint
 			WHERE ds = '${bizdate}') AS t5
 	ON t1.channel_endpoint_code = t5.channel_endpoint_code AND t1.org_code = t5.org_code) as t2
-JOIN (
-			SELECT max(ds1) as ds1,
-						 date_type,
-						 date_id,
-						 time_id
-			FROM td_ads_dev.dim_time
-			WHERE ds >= '20150101' AND ds <= '${bizdate}'
-			GROUP BY date_type, date_id, time_id
-		) time
-	ON t2.order_time = time.time_id
 group by t2.org_code,
 t2.channel_endpoint_code,
 t2.endpoint_name,
-time.date_type,
-time.date_id
+t2.order_time
 ;
 
 
