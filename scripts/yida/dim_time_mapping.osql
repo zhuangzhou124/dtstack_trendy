@@ -30,7 +30,8 @@ CREATE TABLE IF NOT EXISTS dim_time_mapping(
 ,
   is_7d                           BIGINT COMMENT '是否最近7天，是为1，否为0'
 ,
-  is_15d                          BIGINT COMMENT '是否最近15天，是为1，否为0'
+  is_15d
+  BIGINT COMMENT '是否最近15天，是为1，否为0'
 ,
   is_30d                          BIGINT COMMENT '是否最近30天，是为1，否为0'
 

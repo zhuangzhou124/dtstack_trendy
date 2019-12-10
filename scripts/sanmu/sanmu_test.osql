@@ -6,32 +6,179 @@
 
 
 --business_type in ('10103','10104','10202','10203','10302','10303','10403','10404')
+SELECT A.org_code,
+			 A.channel_endpoint_code,
+			 COUNT ( DISTINCT A.member_no ) AS new_member_qty
+from   (
+	select
+	ods_sales_order.org_code,
+	ods_sales_order.channel_endpoint_code,
+	ods_sales_order.member_no,
+	min( ods_sales_order.paid_time ) as first_order_time
+	from   ods_sales_order
+	where  1 = 1
+	and  ods_sales_order.paid_time <= '2019-12-05 23:59:59'
+	and   ods_sales_order.price_amt_discount > 0
+	and   ods_sales_order.channel_endpoint_code = '1102'
+	and   ods_sales_order.org_code = 'TRE'
+	and   ods_sales_order.member_no != -1
+	group by
+	ods_sales_order.org_code, ods_sales_order.channel_endpoint_code, ods_sales_order.member_no
+	order by
+	ods_sales_order.org_code, ods_sales_order.channel_endpoint_code, ods_sales_order.member_no
+-- limit 1000
+) a
+	left join (
+		select  ods_sales_order.org_code, ods_sales_order.channel_endpoint_code, ods_sales_order.member_no, sum( ods_sales_order.price_amt_discount ) as order_fact_amount
+		from   ods_sales_order
+		where  1 = 1
+		and   ods_sales_order.paid_time between '2019-12-05 00:00:00' and '2019-12-05 23:59:59'
+		and   ods_sales_order.org_code = 'TRE'
+		and   ods_sales_order.channel_endpoint_code = '1102'
+		and   ods_sales_order.member_no != -1
+		group by
+		ods_sales_order.org_code, ods_sales_order.channel_endpoint_code, ods_sales_order.member_no
+		order by
+		ods_sales_order.org_code, ods_sales_order.channel_endpoint_code, ods_sales_order.member_no
+	-- limit 1000
+	) b
+		on    a.org_code = b.org_code
+	and   a.channel_endpoint_code = b.channel_endpoint_code
+	and   a.member_no = b.member_no
+where  1 = 1
+and   a.first_order_time < '2019-12-05 00:00:00'
+and   b.order_fact_amount > 0
+GROUP BY A.org_code,A.channel_endpoint_code
+order by
+a.org_code, a.channel_endpoint_code
+limit 1000;
 
-ods_member_grade_log
 
---三木：3个接口的其他周期为计算
+SELECT A.org_code,
+			 A.channel_endpoint_code,
+			 COUNT ( DISTINCT A.member_no ) AS new_member_qty
+from   (
+	select
+	ods_sales_order.org_code,
+	ods_sales_order.channel_endpoint_code,
+	ods_sales_order.member_no,
+	min( ods_sales_order.create_time ) as first_order_time
+	from   ods_sales_order
+	where  1 = 1
+	and  ods_sales_order.create_time <= '2019-08-23 23:59:59'
+	and   ods_sales_order.price_amt_discount > 0
+	and   ods_sales_order.channel_endpoint_code = '1102'
+	and   ods_sales_order.org_code = 'TRE'
+	and   ods_sales_order.member_no != -1
+	group by
+	ods_sales_order.org_code, ods_sales_order.channel_endpoint_code, ods_sales_order.member_no
+	order by
+	ods_sales_order.org_code, ods_sales_order.channel_endpoint_code, ods_sales_order.member_no
+-- limit 1000
+) a
+	left join (
+		select  ods_sales_order.org_code, ods_sales_order.channel_endpoint_code, ods_sales_order.member_no, sum( ods_sales_order.price_amt_discount ) as order_fact_amount
+		from   ods_sales_order
+		where  1 = 1
+		and   ods_sales_order.create_time between '2019-08-01 00:00:00' and '2019-08-23 23:59:59'
+		and   ods_sales_order.org_code = 'TRE'
+		and   ods_sales_order.channel_endpoint_code = '1102'
+		and   ods_sales_order.member_no != -1
+		group by
+		ods_sales_order.org_code, ods_sales_order.channel_endpoint_code, ods_sales_order.member_no
+		order by
+		ods_sales_order.org_code, ods_sales_order.channel_endpoint_code, ods_sales_order.member_no
+	-- limit 1000
+	) b
+		on    a.org_code = b.org_code
+	and   a.channel_endpoint_code = b.channel_endpoint_code
+	and   a.member_no = b.member_no
+where  1 = 1
+and   a.first_order_time between '2019-08-01 00:00:00' and '2019-08-23 23:59:59'
+and   b.order_fact_amount > 0
+GROUP BY A.org_code,A.channel_endpoint_code
+order by
+a.org_code, a.channel_endpoint_code
+limit 1000;
 
---***********************************
--- 所属系统：会员中心
--- 功能描述：物理库区表DDL
--- 生命周期：365天
--- 调度周期：手动调度
--- 创建者：   行周
--- 创建日期：20190902
--- 修改日志：20190927,客户修改了表结构
---***********************************
---drop table if exists ods_member_card;
---***********************************
--- 所属系统：会员中心
--- 功能描述：物理库区表DDL
--- 生命周期：365天
--- 调度周期：手动调度
--- 创建者：   行周
--- 创建日期：20190902
--- 修改日志：
---***********************************
---drop table if exists ods_member_grade_info;
+select  t.org_code, t.channel_endpoint_code, t.grade_code, t.grade_name
+, count( distinct t.member_no ) as member_qty
+from   (
+	select
+	a.org_code,
+	a.channel_endpoint_code
+	, b.grade_code
+	, b.grade_name
+	, count( distinct a.member_no ) as member_qty
+	, a.member_no
+	, min( a.create_time ) as first_order_time
+	, sum( a.price_amt_discount ) as order_fact_amount
+	from   ods_sales_order a
+		LEFT JOIN ods_member_grade_state c on a.member_no = c.member_no
+		left join ods_member_grade_info b
+			on   b.org_code = c.org_code
+		and  b.grade_code = a.member_grade_code
+	where  1 = 1
+	and  a.create_time <= '2019-09-30 23:59:59'
+	and   a.channel_endpoint_code = '1102'
+	and   a.org_code = 'TRE'
+	and   a.member_no != -1
+	group by
+	a.org_code, a.channel_endpoint_code, a.member_grade_code, b.grade_code,b.grade_name, a.member_no
+	having
+	min( a.create_time ) between '2019-09-01 00:00:00' and '2019-09-30 23:59:59'
+	-- and sum( a.order_fact_amount ) < 0
+	order by
+	a.org_code, a.channel_endpoint_code, a.member_grade_code, b.grade_name, a.member_no
+-- limit 1000
+) t
+where  1 = 1
+and   order_fact_amount > 0
+group by
+t.org_code, t.channel_endpint_code, t.grade_code, t.grade_name
+order by
+t.org_code, t.channel_endpint_code, t.grade_code, t.grade_name;
 
+
+select  t.org_code, t.channel_endpoint_code, t.grade_code, t.grade_name
+, count( distinct t.member_no ) as member_qty
+from   (
+	select a.org_code
+	, a.channel_endpoint_code
+	, b.grade_code
+	, b.grade_name
+	, count( distinct a.member_no ) as member_qty
+	, a.member_no
+	, min( a.create_time ) as first_order_time
+	, sum( a.price_amt_discount ) as order_fact_amount
+	from   ods_sales_order a
+		LEFT JOIN ods_member_grade_state c
+			on a.member_no = c.member_no and a.org_code = c.org_code
+		left join ods_member_grade_info b
+			on   b.org_code = c.org_code
+		and  b.grade_code = c.grade_code
+	where  1 = 1
+	and  a.create_time <= '2019-09-30 23:59:59'
+	and   a.channel_endpoint_code = '1102'
+	and   a.org_code = 'TRE'
+	and   a.member_no != '-1'
+	group by
+	a.org_code, a.channel_endpoint_code, b.grade_code, b.grade_name
+	, a.member_no
+	having
+	min( a.create_time ) between '2019-09-01 00:00:00' and '2019-09-30 23:59:59'
+	-- and sum( a.order_fact_amount ) < 0
+	order by
+	a.org_code, a.channel_endpoint_code, b.grade_code, b.grade_name
+	, a.member_no
+-- limit 1000
+) t
+where  1 = 1
+and   order_fact_amount > 0
+group by
+t.org_code, t.channel_endpoint_code, t.grade_code, t.grade_name
+order by
+t.org_code, t.channel_endpoint_code, t.grade_code, t.grade_name
 
 
 desc ods_sales_order_price;
