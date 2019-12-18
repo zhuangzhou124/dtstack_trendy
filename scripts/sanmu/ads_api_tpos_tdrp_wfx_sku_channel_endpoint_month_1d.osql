@@ -112,7 +112,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_month_1d PARTI
 				 t12.qty AS sku_num_1d_qmzts,
 				 t11.qty + t12.qty AS sku_num_1d_qmkcs,
 				 'month' AS date_type,
-				 '${bizdate}' AS date_id
+				 substr('${bizdate}',1,6) AS date_id
 	FROM (
 		SELECT t1.org_code,
 					 t1.channel_endpoint_code,

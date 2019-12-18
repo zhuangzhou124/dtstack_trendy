@@ -1,0 +1,28 @@
+CREATE TABLE IF NOT EXISTS ads_daily_report_order_info(
+	org_code                                         varchar(255) COMMENT '品牌         ',
+	channel_endpoint_code                            varchar(255) COMMENT '消费门店编码  ',
+	operation_name                                   varchar(255) COMMENT '消费门店渠道',
+	region_name                                      varchar(255) COMMENT '消费门店区域    ',
+	city_name                                        varchar(255) COMMENT '消费门店城市    ',
+	member_no                                        varchar(255) COMMENT '会员编号  ',
+	member_grade_code                                varchar(255) COMMENT '会员消费等级编码EN ',
+	grade_name                                       varchar(255) COMMENT '会员消费等级名称CN  ',
+	grade_id                                         varchar(255) COMMENT '会员消费等级ID  ',
+	is_vip                                           varchar(255) COMMENT '是否vip     ',
+	member_manage_channel_endpoint_code              varchar(255) COMMENT '会员管理门店  ',
+	first_order_date                                 varchar(255) COMMENT '会员首购时间  ',
+	member_register_time                             varchar(255) COMMENT '会员注册时间',
+	member_register_channel_endpoint_code            varchar(255) COMMENT '会员注册门店  ',
+	member_status                                    varchar(255) COMMENT '会员状态      ',
+	sales_order_no                                   varchar(255) COMMENT '订单号      ',
+	amt_total                                        decimal(10,4) COMMENT '订单抬头金额',
+	order_type                                       varchar(255) COMMENT '订单类型',
+	paid_time                                        varchar(255) COMMENT '支付时间',
+	sales_item_quantity                              bigint COMMENT '销售件数  ',
+	sales_retail_amount                              decimal(10,4) COMMENT '销售吊牌金额   ',
+	sales_fact_amount                                decimal(10,4) COMMENT '销售金额（未扣券）  ',
+	sales_sub_coupon_amount                          decimal(10,4) COMMENT '销售金额（扣券）'
+
+)COMMENT ' ' ;
+
+

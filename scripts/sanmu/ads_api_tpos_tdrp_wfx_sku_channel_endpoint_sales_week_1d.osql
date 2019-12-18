@@ -674,7 +674,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_sales_week_1d 
 				 t1.sku_num_1d_qmzts,
 				 t1.sku_num_1d_qmkcs,
 				 t1.date_type,
-				 t1.date_id
+				 time.date_id
 	FROM (
 		SELECT biz_date,
 					 org_code,
@@ -752,5 +752,15 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_sales_week_1d 
 						 store_name
 			FROM ${td_ods}.ods_real_store
 			WHERE ds = '${bizdate}') AS t6
-			ON t1.channel_endpoint = t6.store_code;
+			ON t1.channel_endpoint = t6.store_code
+JOIN (
+					SELECT date_id,
+								 date_type,
+								 time_id
+					FROM td_ads_dev.dim_time
+					WHERE ds = '${bizdate}' and date_type = 'salesWeek'
+					group by date_id,
+					date_type,
+					time_id) AS time
+	ON t1.date_id = time.time_id;
 

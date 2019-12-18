@@ -4,55 +4,79 @@
 --drop table sanmu_test
 
 
+CREATE TABLE IF NOT EXISTS ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm(
+	biz_date                                                              varchar(255) COMMENT '统计日期',
+	org_code                                                              varchar(255) COMMENT '品牌         ',
+	regions_code                                                          varchar(255) COMMENT '区域编码',
+	endpoint_code                                                         varchar(255) COMMENT '终端代码       ',
+	endpoint_name                                                         varchar(255) COMMENT '终端名称       ',
+	channel_endpoint                                                      varchar(255) COMMENT '门店code',
+	operation_name                                                        varchar(255) COMMENT '门店经营方式                 ',
+	sku_code                                                              varchar(255) COMMENT '商品编码       ',
+	sku_name                                                              varchar(255) COMMENT '商品名称       ',
+	product_code                                                          varchar(255) COMMENT '商品款号       ',
+	sku_retail_price                                                      decimal(20,4) COMMENT '商品吊牌价 ',
+	sku_year                                                              varchar(255) COMMENT '商品年度         ',
+	sku_season                                                            varchar(255) COMMENT '商品季节         ',
+	sku_band                                                              varchar(255) COMMENT '商品波段         ',
+	sku_series                                                            varchar(255) COMMENT '商品系列 ',
+	sku_class_name                                                        varchar(255) COMMENT '商品品类名称         ',
+	sku_main_cate_name                                                    varchar(255) COMMENT '商品大类名称   ',
+	sku_sub_cate_name                                                     varchar(255) COMMENT '商品中类名称 ',
+	sku_leaf_cate_name                                                    varchar(255) COMMENT '商品小类名称         ',
+	sku_color_code                                                        varchar(255) COMMENT '商品颜色编码         ',
+	sku_color_name                                                        varchar(255) COMMENT '商品颜色名称         ',
+	sku_size_code                                                         varchar(255) COMMENT '商品尺码编码         ',
+	sku_size_name                                                         varchar(255) COMMENT '商品尺码名称   ',
+	sku_type_1d_zckc                                                      varchar(255) COMMENT '商品在仓库存数类型("变更后数量类型:ZERO-零,NONZERO-非零)         ',
+	sku_num_1d_zckc                                                       bigint COMMENT '商品在仓库存数         ',
+	sku_amt_1d_zckc_retail                                                decimal(20,4) COMMENT '商品在仓库存吊牌总金额   ',
+	sku_type_1d_ztkc                                                      varchar(255) COMMENT '商品在途库存数类型("变更后数量类型:ZERO-零,NONZERO-非零)         ',
+	sku_num_1d_ztkc                                                       bigint COMMENT '商品在途库存数         ',
+	sku_amt_1d_ztkc_retail                                                decimal(20,4) COMMENT '商品在途库存吊牌总金额   ',
+	gmt_sku_effective                                                     varchar(255) COMMENT '库存有效时间       ',
+	date_type                                                             varchar(20) COMMENT '日期类型',
+	date_id                                                               varchar(100) COMMENT '日期'
 
---business_type in ('10103','10104','10202','10203','10302','10303','10403','10404')
-SELECT A.org_code,
-			 A.channel_endpoint_code,
-			 COUNT ( DISTINCT A.member_no ) AS new_member_qty
-from   (
-	select
-	ods_sales_order.org_code,
-	ods_sales_order.channel_endpoint_code,
-	ods_sales_order.member_no,
-	min( ods_sales_order.paid_time ) as first_order_time
-	from   ods_sales_order
-	where  1 = 1
-	and  ods_sales_order.paid_time <= '2019-12-05 23:59:59'
-	and   ods_sales_order.price_amt_discount > 0
-	and   ods_sales_order.channel_endpoint_code = '1102'
-	and   ods_sales_order.org_code = 'TRE'
-	and   ods_sales_order.member_no != -1
-	group by
-	ods_sales_order.org_code, ods_sales_order.channel_endpoint_code, ods_sales_order.member_no
-	order by
-	ods_sales_order.org_code, ods_sales_order.channel_endpoint_code, ods_sales_order.member_no
--- limit 1000
-) a
-	left join (
-		select  ods_sales_order.org_code, ods_sales_order.channel_endpoint_code, ods_sales_order.member_no, sum( ods_sales_order.price_amt_discount ) as order_fact_amount
-		from   ods_sales_order
-		where  1 = 1
-		and   ods_sales_order.paid_time between '2019-12-05 00:00:00' and '2019-12-05 23:59:59'
-		and   ods_sales_order.org_code = 'TRE'
-		and   ods_sales_order.channel_endpoint_code = '1102'
-		and   ods_sales_order.member_no != -1
-		group by
-		ods_sales_order.org_code, ods_sales_order.channel_endpoint_code, ods_sales_order.member_no
-		order by
-		ods_sales_order.org_code, ods_sales_order.channel_endpoint_code, ods_sales_order.member_no
-	-- limit 1000
-	) b
-		on    a.org_code = b.org_code
-	and   a.channel_endpoint_code = b.channel_endpoint_code
-	and   a.member_no = b.member_no
-where  1 = 1
-and   a.first_order_time < '2019-12-05 00:00:00'
-and   b.order_fact_amount > 0
-GROUP BY A.org_code,A.channel_endpoint_code
-order by
-a.org_code, a.channel_endpoint_code
-limit 1000;
+)COMMENT '日期+商品+门店粒度明细表';
 
+
+
+
+CREATE TABLE `ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm` (
+  `biz_date` varchar(255) NOT NULL COMMENT '统计日期',
+  `org_code` varchar(255) NOT NULL COMMENT '品牌         ',
+  `regions_code` varchar(255) DEFAULT NULL COMMENT '区域编码',
+  `endpoint_code` varchar(255) DEFAULT NULL COMMENT '终端代码       ',
+  `endpoint_name` varchar(255) DEFAULT NULL COMMENT '终端名称       ',
+  `channel_endpoint` varchar(255) NOT NULL COMMENT '门店code',
+  `operation_name` varchar(255) DEFAULT NULL COMMENT '门店经营方式                 ',
+  `sku_code` varchar(255) NOT NULL COMMENT '商品编码       ',
+  `sku_name` varchar(255) DEFAULT NULL COMMENT '商品名称       ',
+  `product_code` varchar(255) DEFAULT NULL COMMENT '商品款号       ',
+  `sku_retail_price` decimal(10,4) DEFAULT NULL COMMENT '商品吊牌价 ',
+  `sku_year` varchar(255) DEFAULT NULL COMMENT '商品年度         ',
+  `sku_season` varchar(255) DEFAULT NULL COMMENT '商品季节         ',
+  `sku_band` varchar(255) DEFAULT NULL COMMENT '商品波段         ',
+  `sku_series` varchar(255) DEFAULT NULL COMMENT '商品系列 ',
+  `sku_class_name` varchar(255) DEFAULT NULL COMMENT '商品品类名称         ',
+  `sku_main_cate_name` varchar(255) DEFAULT NULL COMMENT '商品大类名称   ',
+  `sku_sub_cate_name` varchar(255) DEFAULT NULL COMMENT '商品中类名称 ',
+  `sku_leaf_cate_name` varchar(255) DEFAULT NULL COMMENT '商品小类名称         ',
+  `sku_color_code` varchar(255) DEFAULT NULL COMMENT '商品颜色编码         ',
+  `sku_color_name` varchar(255) DEFAULT NULL COMMENT '商品颜色名称         ',
+  `sku_size_code` varchar(255) DEFAULT NULL COMMENT '商品尺码编码         ',
+  `sku_size_name` varchar(255) DEFAULT NULL COMMENT '商品尺码名称   ',
+  `sku_type_1d_zckc` varchar(255) DEFAULT NULL COMMENT '商品在仓库存数类型("变更后数量类型:POSITIVE-正数,NEGATIVE-负数,ZERO-零,NONZERO-非零)         ',
+  `sku_num_1d_zckc` bigint(20) DEFAULT NULL COMMENT '商品在仓库存数         ',
+`sku_amt_1d_zckc_retail` decimal(20,4) DEFAULT NULL COMMENT '商品在仓库存吊牌总金额   ',
+`sku_type_1d_ztkc` varchar(255) DEFAULT NULL COMMENT '商品在途库存数类型("变更后数量类型:POSITIVE-正数,NEGATIVE-负数,ZERO-零,NONZERO-非零)         ',
+`sku_num_1d_ztkc` bigint(20) DEFAULT NULL COMMENT '商品在途库存数         ',
+`sku_amt_1d_ztkc_retail` decimal(20,4) DEFAULT NULL COMMENT '商品在途库存吊牌总金额   ',
+`gmt_sku_effective` varchar(255) DEFAULT NULL COMMENT '库存有效时间       ',
+`date_type` varchar(20) DEFAULT NULL,
+`date_id` varchar(100) NOT NULL
+) COMMENT='日期+商品+门店粒度明细表';
 
 SELECT A.org_code,
 			 A.channel_endpoint_code,
