@@ -1,7 +1,7 @@
---name:ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm
+--name:ads_api_tpos_tdrp_wfx_sku_channel_endpoint_15mm
 --author:sanmu
 --create time:2019-10-14 09:53
---drop table ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm
+--drop table ads_api_tpos_tdrp_wfx_sku_channel_endpoint_15mm
 --***********************************
 -- 表   名：ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm
 -- 功能描述：日期+商品+门店粒度明细表
@@ -14,7 +14,7 @@
 
 
 
-CREATE TABLE IF NOT EXISTS ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm(
+CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_sku_channel_endpoint_15mm(
 	biz_date                                                              STRING COMMENT '统计日期',
 	org_code                                                              STRING COMMENT '品牌         ',
 	regions_code                                                          STRING COMMENT '区域编码',
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm(
 LIFECYCLE 30;
 
 
-INSERT OVERWRITE TABLE ads_api_tops_tdrp_wfx_sku_channel_endpoint_15mm PARTITION(ds = '${bizdate}')
+INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_15mm PARTITION(ds = '${bizdate}')
 	SELECT '${bizdate}' AS biz_date,
 				 t9.org_code,
 				 t6.region_code,

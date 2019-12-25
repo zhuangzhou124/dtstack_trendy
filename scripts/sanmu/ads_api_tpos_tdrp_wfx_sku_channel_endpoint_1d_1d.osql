@@ -125,8 +125,8 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 						 sli.qty_actual AS qty
 			FROM ${td_ods}.ods_stock_logic_items sli
 				LEFT JOIN ${td_ods}.ods_stock_logic sl
-					ON sli.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-			WHERE sli.ds = '${bizdate}'
+					ON sli.stock_logic_id = sl.id AND sl.ds = '20191222'
+			WHERE sli.ds = '20191222'
 			UNION ALL
 			--出库单，加回去
 			SELECT sl.org_code,
@@ -135,11 +135,11 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 						 ii.qty_sended AS qty
 			FROM ${td_ods}.ods_stock_logic_order_out AS o
 				INNER JOIN ${td_ods}.ods_stock_logic_order_out_items AS ii
-					ON o.id = ii.logic_order_out_id AND ii.ds = '${bizdate}'
+					ON o.id = ii.logic_order_out_id AND ii.ds = '20191222'
 				LEFT JOIN ${td_ods}.ods_stock_logic sl
-					ON o.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
+					ON o.stock_logic_id = sl.id AND sl.ds = '20191222'
 			WHERE substr(regexp_replace(o.made_order_time, '-', '', 0), 1, 8) >= '${bizdate}'
-			AND o.ds = '${bizdate}'
+			AND o.ds = '20191222'
 			UNION ALL
 			--入库单，库存反减回去
 			SELECT sl.org_code,
@@ -148,11 +148,11 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 						 - 1 * ii.qty_received AS qty
 			FROM ${td_ods}.ods_stock_logic_order_in AS i
 				INNER JOIN ${td_ods}.ods_stock_logic_order_in_items AS ii
-					ON i.id = ii.logic_order_in_id AND ii.ds = '${bizdate}'
+					ON i.id = ii.logic_order_in_id AND ii.ds = '20191222'
 				LEFT JOIN ${td_ods}.ods_stock_logic sl
-					ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
+					ON i.stock_logic_id = sl.id AND sl.ds = '20191222'
 			WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) >= '${bizdate}'
-			AND i.ds = '${bizdate}') AS t1
+			AND i.ds = '20191222') AS t1
 		GROUP BY t1.org_code,
 		t1.channel_endpoint_code,
 		t1.sku_code) AS t7
@@ -169,8 +169,8 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 							 sli.qty_transit AS qty
 				FROM ${td_ods}.ods_stock_logic_items sli
 					LEFT JOIN ${td_ods}.ods_stock_logic sl
-						ON sli.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-				WHERE sli.ds = '${bizdate}'
+						ON sli.stock_logic_id = sl.id AND sl.ds = '20191222'
+				WHERE sli.ds = '20191222'
 				UNION ALL
 				--根据收货通知单计算：+加上实收数，-去计划数
 				SELECT sl.org_code,
@@ -179,11 +179,11 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 							 ii.qty_received - ii.qty_receive_plan AS qty
 				FROM ${td_ods}.ods_stock_logic_order_in_notify AS i
 					INNER JOIN ${td_ods}.ods_stock_logic_order_in_notify_items AS ii
-						ON i.id = ii.logic_order_in_notify_id AND ii.ds = '${bizdate}'
+						ON i.id = ii.logic_order_in_notify_id AND ii.ds = '20191222'
 					INNER JOIN ${td_ods}.ods_stock_logic sl
-						ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
+						ON i.stock_logic_id = sl.id AND sl.ds = '20191222'
 				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) >= '${bizdate}'
-				AND i.ds = '${bizdate}'
+				AND i.ds = '20191222'
 				UNION ALL
 				--收发差异单，+差异数
 
@@ -193,11 +193,11 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 							 b.qty_difference AS qty
 				FROM ${td_ods}.ods_stock_logic_order_difference AS a
 					INNER JOIN ${td_ods}.ods_stock_logic_order_difference_items AS b
-						ON a.id = b.logic_order_difference_id AND b.ds = '${bizdate}'
+						ON a.id = b.logic_order_difference_id AND b.ds = '20191222'
 					INNER JOIN ${td_ods}.ods_stock_logic s
-						ON a.stock_logic_in_id = s.id AND s.ds = '${bizdate}'
+						ON a.stock_logic_in_id = s.id AND s.ds = '20191222'
 				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) >= '${bizdate}'
-				AND a.ds = '${bizdate}'
+				AND a.ds = '20191222'
 
 			) AS t1
 			GROUP BY t1.org_code,
@@ -212,16 +212,16 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 						 sum(b.qty_sended) AS qty
 			FROM ${td_ods}.ods_stock_logic_order_out AS a
 				INNER JOIN ${td_ods}.ods_stock_logic_order_out_items AS b
-					ON a.id = b.logic_order_out_id AND b.ds = '${bizdate}'
+					ON a.id = b.logic_order_out_id AND b.ds = '20191222'
 				INNER JOIN ${td_ods}.ods_stock_logic AS o
-					ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
+					ON a.stock_logic_id = o.id AND o.ds = '20191222'
 				INNER JOIN ${td_ods}.ods_stock_logic_order_allocate AS e
 					ON a.business_order_no = e.order_no AND e.ds =
 				'${bizdate}'
 				INNER JOIN ${td_ods}.ods_stock_logic AS i
 					ON e.stock_logic_code_in_id = i.id AND o.manager_channel_code !=
-				i.manager_channel_code AND i.ds = '${bizdate}'
-			WHERE a.business_order_type = '201' AND a.business_order_business_type IN ('20102') AND a.ds = '${bizdate}'
+				i.manager_channel_code AND i.ds = '20191222'
+			WHERE a.business_order_type = '201' AND a.business_order_business_type IN ('20102') AND a.ds = '20191222'
 			and substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) >= '${bizdate}'
 			group by o.org_code,
 			o.channel_endpoint_code,
@@ -235,16 +235,16 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 						 sum(b.qty_received) AS qty
 			FROM ${td_ods}.ods_stock_logic_order_in AS a
 				INNER JOIN ${td_ods}.ods_stock_logic_order_in_items AS b
-					ON a.id = b.logic_order_in_id AND b.ds = '${bizdate}'
+					ON a.id = b.logic_order_in_id AND b.ds = '20191222'
 				INNER JOIN ${td_ods}.ods_stock_logic AS i
-					ON a.stock_logic_id = i.id AND i.ds = '${bizdate}'
+					ON a.stock_logic_id = i.id AND i.ds = '20191222'
 				INNER JOIN ${td_ods}.ods_stock_logic_order_allocate AS e
 					ON a.business_order_no = e.order_no AND e.ds =
 				'${bizdate}'
 				INNER JOIN ${td_ods}.ods_stock_logic AS o
 					ON o.manager_channel_code != i.manager_channel_code AND e.stock_logic_code_out_id = o.id
-				AND o.ds = '${bizdate}'
-			WHERE a.business_order_type = '201' AND a.business_order_business_type IN ('20102') AND a.ds = '${bizdate}'
+				AND o.ds = '20191222'
+			WHERE a.business_order_type = '201' AND a.business_order_business_type IN ('20102') AND a.ds = '20191222'
 			and substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) >= '${bizdate}'
 			group by i.org_code,
 			i.channel_endpoint_code,
@@ -258,11 +258,11 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 						 sum(abs(qty_change)) AS sku_num_1d_pdcysl
 			FROM ${td_ods}.ods_stock_physical_order_inventory AS a
 				INNER JOIN ${td_ods}.ods_stock_physical_order_inventory_items AS b
-					ON a.id = b.physical_order_inventory_id AND b.ds = '${bizdate}'
+					ON a.id = b.physical_order_inventory_id AND b.ds = '20191222'
 				INNER JOIN ${td_ods}.ods_stock_logic AS c
-					ON a.inventory_logic_id = c.id AND c.ds = '${bizdate}'
+					ON a.inventory_logic_id = c.id AND c.ds = '20191222'
 			WHERE substr(regexp_replace(a.audit_time, '-', '', 0), 1, 8) >= '${bizdate}'
-			AND a.ds = '${bizdate}'
+			AND a.ds = '20191222'
 			GROUP BY b.sku_code,
 			c.org_code,
 			c.channel_endpoint_code) AS t13
@@ -280,8 +280,8 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 							 sli.qty_actual AS qty
 				FROM ${td_ods}.ods_stock_logic_items sli
 					LEFT JOIN ${td_ods}.ods_stock_logic sl
-						ON sli.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-				WHERE sli.ds = '${bizdate}'
+						ON sli.stock_logic_id = sl.id AND sl.ds = '20191222'
+				WHERE sli.ds = '20191222'
 				UNION ALL
 				--出库单，加回去
 				SELECT sl.org_code,
@@ -290,10 +290,10 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 							 ii.qty_sended AS qty
 				FROM ${td_ods}.ods_stock_logic_order_out AS o
 					INNER JOIN ${td_ods}.ods_stock_logic_order_out_items AS ii
-						ON o.id = ii.logic_order_out_id AND ii.ds = '${bizdate}'
+						ON o.id = ii.logic_order_out_id AND ii.ds = '20191222'
 					LEFT JOIN ${td_ods}.ods_stock_logic sl
-						ON o.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-				WHERE substr(regexp_replace(o.made_order_time, '-', '', 0), 1, 8) > '${bizdate}' AND o.ds = '${bizdate}'
+						ON o.stock_logic_id = sl.id AND sl.ds = '20191222'
+				WHERE substr(regexp_replace(o.made_order_time, '-', '', 0), 1, 8) > '${bizdate}' AND o.ds = '20191222'
 				UNION ALL
 				--入库单，库存反减回去
 				SELECT sl.org_code,
@@ -302,10 +302,10 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 							 - 1 * ii.qty_received AS qty
 				FROM ${td_ods}.ods_stock_logic_order_in AS i
 					INNER JOIN ${td_ods}.ods_stock_logic_order_in_items AS ii
-						ON i.id = ii.logic_order_in_id AND ii.ds = '${bizdate}'
+						ON i.id = ii.logic_order_in_id AND ii.ds = '20191222'
 					LEFT JOIN ${td_ods}.ods_stock_logic sl
-						ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) > '${bizdate}' AND i.ds = '${bizdate}') AS t1
+						ON i.stock_logic_id = sl.id AND sl.ds = '20191222'
+				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) > '${bizdate}' AND i.ds = '20191222') AS t1
 			GROUP BY t1.org_code,
 			t1.channel_endpoint_code,
 			t1.sku_code) AS t11
@@ -323,8 +323,8 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 							 sli.qty_transit AS qty
 				FROM ${td_ods}.ods_stock_logic_items sli
 					LEFT JOIN ${td_ods}.ods_stock_logic sl
-						ON sli.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-				WHERE sli.ds = '${bizdate}'
+						ON sli.stock_logic_id = sl.id AND sl.ds = '20191222'
+				WHERE sli.ds = '20191222'
 				UNION ALL
 				--根据收货通知单计算：+加上实收数，-去计划数
 				SELECT sl.org_code,
@@ -333,10 +333,10 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 							 ii.qty_received - ii.qty_receive_plan AS qty
 				FROM ${td_ods}.ods_stock_logic_order_in_notify AS i
 					INNER JOIN ${td_ods}.ods_stock_logic_order_in_notify_items AS ii
-						ON i.id = ii.logic_order_in_notify_id AND ii.ds = '${bizdate}'
+						ON i.id = ii.logic_order_in_notify_id AND ii.ds = '20191222'
 					INNER JOIN ${td_ods}.ods_stock_logic sl
-						ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) > '${bizdate}' AND i.ds = '${bizdate}'
+						ON i.stock_logic_id = sl.id AND sl.ds = '20191222'
+				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) > '${bizdate}' AND i.ds = '20191222'
 				UNION ALL
 				--收发差异单，+差异数
 
@@ -346,10 +346,10 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 							 b.qty_difference AS qty
 				FROM ${td_ods}.ods_stock_logic_order_difference AS a
 					INNER JOIN ${td_ods}.ods_stock_logic_order_difference_items AS b
-						ON a.id = b.logic_order_difference_id AND b.ds = '${bizdate}'
+						ON a.id = b.logic_order_difference_id AND b.ds = '20191222'
 					INNER JOIN ${td_ods}.ods_stock_logic s
-						ON a.stock_logic_in_id = s.id AND s.ds = '${bizdate}'
-				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) > '${bizdate}' AND a.ds = '${bizdate}'
+						ON a.stock_logic_in_id = s.id AND s.ds = '20191222'
+				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) > '${bizdate}' AND a.ds = '20191222'
 
 			) AS t1
 			GROUP BY t1.org_code,
@@ -385,11 +385,11 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 							 END) AS sku_num_1d_hdcsl
 				FROM ${td_ods}.ods_stock_logic_order_out AS a
 					INNER JOIN ${td_ods}.ods_stock_logic_order_out_items AS b
-						ON a.id = b.logic_order_out_id AND b.ds = '${bizdate}'
+						ON a.id = b.logic_order_out_id AND b.ds = '20191222'
 					INNER JOIN ${td_ods}.ods_stock_logic AS o
-						ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
+						ON a.stock_logic_id = o.id AND o.ds = '20191222'
 				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) >= '${bizdate}'
-				AND a.ds = '${bizdate}'
+				AND a.ds = '20191222'
 				group by o.org_code,
 				o.channel_endpoint_code,
 				b.sku_code) as t2
@@ -428,11 +428,11 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 							 END) AS sku_num_1d_hdrsl
 				FROM ${td_ods}.ods_stock_logic_order_in AS a
 					INNER JOIN ${td_ods}.ods_stock_logic_order_in_items AS b
-						ON a.id = b.logic_order_in_id AND b.ds = '${bizdate}'
+						ON a.id = b.logic_order_in_id AND b.ds = '20191222'
 					INNER JOIN ${td_ods}.ods_stock_logic AS o
-						ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
+						ON a.stock_logic_id = o.id AND o.ds = '20191222'
 				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) >= '${bizdate}'
-				AND a.ds = '${bizdate}'
+				AND a.ds = '20191222'
 				group by o.org_code,
 				o.channel_endpoint_code,
 				b.sku_code) as t3
@@ -454,11 +454,11 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 							 -(ii.qty_received - ii.qty_receive_plan) AS qty
 				FROM ${td_ods}.ods_stock_logic_order_in_notify AS i
 					INNER JOIN ${td_ods}.ods_stock_logic_order_in_notify_items AS ii
-						ON i.id = ii.logic_order_in_notify_id AND ii.ds = '${bizdate}'
+						ON i.id = ii.logic_order_in_notify_id AND ii.ds = '20191222'
 					INNER JOIN ${td_ods}.ods_stock_logic sl
-						ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
+						ON i.stock_logic_id = sl.id AND sl.ds = '20191222'
 				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) >= '${bizdate}'
- AND i.ds = '${bizdate}'
+ AND i.ds = '20191222'
 				UNION ALL
 				--收发差异单，+差异数
 
@@ -468,11 +468,11 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 							 -b.qty_difference AS qty
 				FROM ${td_ods}.ods_stock_logic_order_difference AS a
 					INNER JOIN ${td_ods}.ods_stock_logic_order_difference_items AS b
-						ON a.id = b.logic_order_difference_id AND b.ds = '${bizdate}'
+						ON a.id = b.logic_order_difference_id AND b.ds = '20191222'
 					INNER JOIN ${td_ods}.ods_stock_logic s
-						ON a.stock_logic_in_id = s.id AND s.ds = '${bizdate}'
+						ON a.stock_logic_in_id = s.id AND s.ds = '20191222'
 				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) >= '${bizdate}'
-				 AND a.ds = '${bizdate}'
+				 AND a.ds = '20191222'
 			) AS t1
 			GROUP BY t1.org_code, t1.channel_endpoint_code, t1.sku_code) AS t17
 			ON t7.org_code = t17.org_code AND t7.channel_endpoint_code = t17.channel_endpoint_code
@@ -486,7 +486,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 			FROM ${td_ods}.ods_sales_order a
 				JOIN ${td_ods}.ods_sales_order_item b
 					ON a.sales_order_no = b.sales_order_no
-			WHERE a.ds = '${bizdate}' AND b.ds = '${bizdate}' AND a.order_status = 1
+			WHERE a.ds = '20191222' AND b.ds = '20191222' AND a.order_status = 1
 			AND a.business_type IN ('10103', '10104', '10202', '10203', '10302', '10303', '10403', '10404')
 			AND substr(regexp_replace(a.paid_time, '-', '', 0), 1, 8) >= '${bizdate}'
 			GROUP BY a.org_code
@@ -502,7 +502,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 			FROM ${td_ods}.ods_sales_order a
 				JOIN ${td_ods}.ods_sales_order_item b
 					ON a.sales_order_no = b.sales_order_no
-			WHERE a.ds = '${bizdate}' AND b.ds = '${bizdate}' AND a.order_status = 1
+			WHERE a.ds = '20191222' AND b.ds = '20191222' AND a.order_status = 1
 			AND a.business_type IN ('10103', '10104', '10202', '10203', '10302', '10303', '10403', '10404')
 			AND a.order_type IN ('102', '103')
 			AND substr(regexp_replace(a.paid_time, '-', '', 0), 1, 8) >= '${bizdate}'
@@ -629,12 +629,12 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITIO
 						 size_id,
 						 cn_size_desc
 			FROM ${td_ods}.ods_api_item_sku
-			WHERE ds = '${bizdate}') AS t4
+			WHERE ds = '20191222') AS t4
 			ON t1.sku_code = t4.sku_code
 		LEFT OUTER JOIN (
 			SELECT store_code,
 						 store_name
 			FROM ${td_ods}.ods_real_store
-			WHERE ds = '${bizdate}') AS t6
+			WHERE ds = '20191222') AS t6
 			ON t1.channel_endpoint = t6.store_code;
 

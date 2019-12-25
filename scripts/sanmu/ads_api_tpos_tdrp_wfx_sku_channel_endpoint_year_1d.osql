@@ -112,7 +112,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_year_1d PARTIT
 				 t12.qty AS sku_num_1d_qmzts,
 				 t11.qty + t12.qty AS sku_num_1d_qmkcs,
 				 'year' AS date_type,
-				 substr('${bizdate}',1,4) AS date_id
+				 '${bizdate}' AS date_id
 	FROM (
 		SELECT t1.org_code,
 					 t1.channel_endpoint_code,
@@ -124,153 +124,212 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_year_1d PARTIT
 						 sli.sku_code,
 						 sli.qty_actual AS qty
 			FROM ${td_ods}.ods_stock_logic_items sli
-				LEFT JOIN ${td_ods}.ods_stock_logic sl
-					ON sli.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-			WHERE sli.ds = '${bizdate}'
-			UNION ALL
-			--出库单，加回去
-			SELECT sl.org_code,
-						 sl.channel_endpoint_code,
-						 ii.sku_code,
-						 ii.qty_sended AS qty
-			FROM ${td_ods}.ods_stock_logic_order_out AS o
-				INNER JOIN ${td_ods}.ods_stock_logic_order_out_items AS ii
-					ON o.id = ii.logic_order_out_id AND ii.ds = '${bizdate}'
-				LEFT JOIN ${td_ods}.ods_stock_logic sl
-					ON o.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-			WHERE substr(regexp_replace(o.made_order_time, '-', '', 0), 1, 8) >= to_char(dateadd(to_date('${bizdate}','yyyymmdd'),-1,'year'),'yyyymmdd')
-			AND o.ds = '${bizdate}'
-			UNION ALL
-			--入库单，库存反减回去
-			SELECT sl.org_code,
-						 sl.channel_endpoint_code,
-						 ii.sku_code,
-						 - 1 * ii.qty_received AS qty
-			FROM ${td_ods}.ods_stock_logic_order_in AS i
-				INNER JOIN ${td_ods}.ods_stock_logic_order_in_items AS ii
-					ON i.id = ii.logic_order_in_id AND ii.ds = '${bizdate}'
-				LEFT JOIN ${td_ods}.ods_stock_logic sl
-					ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-			WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) >= to_char(dateadd(to_date('${bizdate}','yyyymmdd'),-1,'year'),'yyyymmdd')
-			AND i.ds = '${bizdate}') AS t1
-		GROUP BY t1.org_code,
-		t1.channel_endpoint_code,
-		t1.sku_code) AS t7
-		full JOIN (
-		--期初在途数
-			SELECT t1.org_code,
-						 t1.channel_endpoint_code,
-						 t1.sku_code,
-						 sum(qty) AS qty
-			FROM (
-				SELECT sl.org_code,
-							 sl.channel_endpoint_code,
-							 sli.sku_code,
-							 sli.qty_transit AS qty
-				FROM ${td_ods}.ods_stock_logic_items sli
-					LEFT JOIN ${td_ods}.ods_stock_logic sl
-						ON sli.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-				WHERE sli.ds = '${bizdate}'
-				UNION ALL
-				--根据收货通知单计算：+加上实收数，-去计划数
-				SELECT sl.org_code,
-							 sl.channel_endpoint_code,
-							 ii.sku_code,
-							 ii.qty_received - ii.qty_receive_plan AS qty
-				FROM ${td_ods}.ods_stock_logic_order_in_notify AS i
-					INNER JOIN ${td_ods}.ods_stock_logic_order_in_notify_items AS ii
-						ON i.id = ii.logic_order_in_notify_id AND ii.ds = '${bizdate}'
-					INNER JOIN ${td_ods}.ods_stock_logic sl
-						ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) >= to_char(dateadd(to_date('${bizdate}','yyyymmdd'),-1,'year'),'yyyymmdd')
-				AND i.ds = '${bizdate}'
-				UNION ALL
-				--收发差异单，+差异数
+		LEFT JOIN ${td_ods}.ods_stock_logic sl
+			ON sli.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
+	WHERE sli.ds = '${bizdate}'
+	UNION ALL
+	--出库单，加回去
+	SELECT sl.org_code,
+				 sl.channel_endpoint_code,
+				 ii.sku_code,
+				 ii.qty_sended  AS qty
+	FROM ${td_ods}.ods_stock_logic_order_out AS o
+	INNER JOIN ${td_ods}.ods_stock_logic_order_out_items AS ii
+		ON o.id = ii.logic_order_out_id AND ii.ds = '${bizdate}'
+	LEFT JOIN ${td_ods}.ods_stock_logic sl
+		ON o.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
+	JOIN (
+					SELECT date_id,
+								 date_type,
+								 time_id
+					FROM td_ads_dev.dim_time
+					WHERE ds = '${bizdate}' and date_type = 'year'
+					group by date_id,
+					date_type,
+					time_id) AS time
+	ON substr(regexp_replace(o.made_order_time, '-', '', 0), 1, 8) = time.time_id
+WHERE o.ds = '${bizdate}'
+UNION ALL
+--入库单，库存反减回去
+SELECT sl.org_code,
+			 sl.channel_endpoint_code,
+			 ii.sku_code,
+			 - 1 * ii.qty_received  AS qty
+FROM ${td_ods}.ods_stock_logic_order_in AS i
+INNER JOIN ${td_ods}.ods_stock_logic_order_in_items AS ii
+	ON i.id = ii.logic_order_in_id AND ii.ds = '${bizdate}'
+LEFT JOIN ${td_ods}.ods_stock_logic sl
+	ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
+JOIN (
+					SELECT date_id,
+								 date_type,
+								 time_id
+					FROM td_ads_dev.dim_time
+					WHERE ds = '${bizdate}' and date_type = 'year'
+					group by date_id,
+					date_type,
+					time_id) AS time
+	ON substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) = time.time_id
+WHERE i.ds = '${bizdate}') AS t1
+GROUP BY t1.org_code,
+t1.channel_endpoint_code,
+t1.sku_code) AS t7
+full JOIN (
+--期初在途数
+	SELECT t1.org_code,
+				 t1.channel_endpoint_code,
+				 t1.sku_code,
+				 sum(qty) AS qty
+	FROM (
+		SELECT sl.org_code,
+					 sl.channel_endpoint_code,
+					 sli.sku_code,
+					 sli.qty_transit AS qty
+		FROM ${td_ods}.ods_stock_logic_items sli
+		LEFT JOIN ${td_ods}.ods_stock_logic sl
+			ON sli.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
+	WHERE sli.ds = '${bizdate}'
+	UNION ALL
+	--根据收货通知单计算：+加上实收数，-去计划数
+	SELECT sl.org_code,
+				 sl.channel_endpoint_code,
+				 ii.sku_code,
+				 (ii.qty_received - ii.qty_receive_plan)  AS qty
+	FROM ${td_ods}.ods_stock_logic_order_in_notify AS i
+	INNER JOIN ${td_ods}.ods_stock_logic_order_in_notify_items AS ii
+		ON i.id = ii.logic_order_in_notify_id AND ii.ds = '${bizdate}'
+	INNER JOIN ${td_ods}.ods_stock_logic sl
+		ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
+	JOIN (
+						SELECT date_id,
+									 date_type,
+									 time_id
+						FROM td_ads_dev.dim_time
+						WHERE ds = '${bizdate}' and date_type = 'year'
+						group by date_id,
+						date_type,
+						time_id) AS time
+	ON substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) = time.time_id
+WHERE i.ds = '${bizdate}'
+UNION ALL
+--收发差异单，+差异数
 
-				SELECT s.org_code,
-							 s.channel_endpoint_code,
-							 b.sku_code,
-							 b.qty_difference AS qty
-				FROM ${td_ods}.ods_stock_logic_order_difference AS a
-					INNER JOIN ${td_ods}.ods_stock_logic_order_difference_items AS b
-						ON a.id = b.logic_order_difference_id AND b.ds = '${bizdate}'
-					INNER JOIN ${td_ods}.ods_stock_logic s
-						ON a.stock_logic_in_id = s.id AND s.ds = '${bizdate}'
-				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) >= to_char(dateadd(to_date('${bizdate}','yyyymmdd'),-1,'year'),'yyyymmdd')
-				AND a.ds = '${bizdate}'
-
-			) AS t1
-			GROUP BY t1.org_code,
-			t1.channel_endpoint_code,
-			t1.sku_code) AS t8
-			ON t7.org_code = t8.org_code AND t7.sku_code = t8.sku_code AND t7.channel_endpoint_code = t8.channel_endpoint_code
-		full JOIN (
-		--跨渠道横调出数量
-			SELECT o.org_code,
-						 o.channel_endpoint_code,
-						 b.sku_code,
-						 sum(b.qty_sended) AS qty
-			FROM ${td_ods}.ods_stock_logic_order_out AS a
-				INNER JOIN ${td_ods}.ods_stock_logic_order_out_items AS b
-					ON a.id = b.logic_order_out_id AND b.ds = '${bizdate}'
-				INNER JOIN ${td_ods}.ods_stock_logic AS o
-					ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
-				INNER JOIN ${td_ods}.ods_stock_logic_order_allocate AS e
-					ON a.business_order_no = e.order_no AND e.ds =
-				'${bizdate}'
-				INNER JOIN ${td_ods}.ods_stock_logic AS i
-					ON e.stock_logic_code_in_id = i.id AND o.manager_channel_code !=
-				i.manager_channel_code AND i.ds = '${bizdate}'
-			WHERE a.business_order_type = '201' AND a.business_order_business_type IN ('20102') AND a.ds = '${bizdate}'
-			and substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) >= to_char(dateadd(to_date('${bizdate}','yyyymmdd'),-1,'year'),'yyyymmdd')
-			AND substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) <= '${bizdate}'
-			group by o.org_code,
-			o.channel_endpoint_code,
-			b.sku_code) AS t9
-			ON t7.org_code = t9.org_code AND t7.channel_endpoint_code = t9.channel_endpoint_code AND t7.sku_code = t9.sku_code
-		full JOIN (
-		--跨渠道横调入数量
-			SELECT i.org_code,
-						 i.channel_endpoint_code,
-						 b.sku_code,
-						 sum(b.qty_received) AS qty
-			FROM ${td_ods}.ods_stock_logic_order_in AS a
-				INNER JOIN ${td_ods}.ods_stock_logic_order_in_items AS b
-					ON a.id = b.logic_order_in_id AND b.ds = '${bizdate}'
-				INNER JOIN ${td_ods}.ods_stock_logic AS i
-					ON a.stock_logic_id = i.id AND i.ds = '${bizdate}'
-				INNER JOIN ${td_ods}.ods_stock_logic_order_allocate AS e
-					ON a.business_order_no = e.order_no AND e.ds =
-				'${bizdate}'
-				INNER JOIN ${td_ods}.ods_stock_logic AS o
-					ON o.manager_channel_code != i.manager_channel_code AND e.stock_logic_code_out_id = o.id
-				AND o.ds = '${bizdate}'
-			WHERE a.business_order_type = '201' AND a.business_order_business_type IN ('20102') AND a.ds = '${bizdate}'
-			and substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) >= to_char(dateadd(to_date('${bizdate}','yyyymmdd'),-1,'year'),'yyyymmdd')
-			AND substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) <= '${bizdate}'
-			group by i.org_code,
-			i.channel_endpoint_code,
-			b.sku_code) AS t10
-			ON t7.org_code = t10.org_code AND t7.channel_endpoint_code = t10.channel_endpoint_code AND t7.sku_code = t10.sku_code
-		full JOIN (
-		--盘点差异数量
-			SELECT b.sku_code,
-						 c.org_code,
-						 c.channel_endpoint_code,
-						 sum(abs(qty_change)) AS sku_num_1d_pdcysl
-			FROM ${td_ods}.ods_stock_physical_order_inventory AS a
-				INNER JOIN ${td_ods}.ods_stock_physical_order_inventory_items AS b
-					ON a.id = b.physical_order_inventory_id AND b.ds = '${bizdate}'
-				INNER JOIN ${td_ods}.ods_stock_logic AS c
-					ON a.inventory_logic_id = c.id AND c.ds = '${bizdate}'
-			WHERE substr(regexp_replace(a.audit_time, '-', '', 0), 1, 8) <= '${bizdate}'
-			and substr(regexp_replace(a.audit_time, '-', '', 0), 1, 8) >= to_char(dateadd(to_date('${bizdate}','yyyymmdd'),-1,'year'),'yyyymmdd')
-			AND a.ds = '${bizdate}'
-			GROUP BY b.sku_code,
-			c.org_code,
-			c.channel_endpoint_code) AS t13
-			ON t7.org_code = t13.org_code AND t7.channel_endpoint_code = t13.channel_endpoint_code AND t7.sku_code = t13.sku_code
-		full JOIN (
+SELECT s.org_code,
+			 s.channel_endpoint_code,
+			 b.sku_code,
+			 b.qty_difference  AS qty
+FROM ${td_ods}.ods_stock_logic_order_difference AS a
+INNER JOIN ${td_ods}.ods_stock_logic_order_difference_items AS b
+	ON a.id = b.logic_order_difference_id AND b.ds = '${bizdate}'
+INNER JOIN ${td_ods}.ods_stock_logic s
+	ON a.stock_logic_in_id = s.id AND s.ds = '${bizdate}'
+JOIN (
+						SELECT date_id,
+									 date_type,
+									 time_id
+						FROM td_ads_dev.dim_time
+						WHERE ds = '${bizdate}' and date_type = 'year'
+						group by date_id,
+						date_type,
+						time_id) AS time
+	ON substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = time.time_id
+WHERE  a.ds = '${bizdate}'
+) AS t1
+GROUP BY t1.org_code,
+t1.channel_endpoint_code,
+t1.sku_code) AS t8
+	ON t7.org_code = t8.org_code AND t7.sku_code = t8.sku_code AND t7.channel_endpoint_code = t8.channel_endpoint_code
+full JOIN (
+--跨渠道横调出数量
+	SELECT o.org_code,
+				 o.channel_endpoint_code,
+				 b.sku_code,
+				 sum(b.qty_sended)  AS qty
+	FROM ${td_ods}.ods_stock_logic_order_out AS a
+	INNER JOIN ${td_ods}.ods_stock_logic_order_out_items AS b
+		ON a.id = b.logic_order_out_id AND b.ds = '${bizdate}'
+	INNER JOIN ${td_ods}.ods_stock_logic AS o
+		ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
+	INNER JOIN ${td_ods}.ods_stock_logic_order_allocate AS e
+		ON a.business_order_no = e.order_no AND e.ds =
+	'${bizdate}'
+	INNER JOIN ${td_ods}.ods_stock_logic AS i
+		ON e.stock_logic_code_in_id = i.id AND o.manager_channel_code !=
+	i.manager_channel_code AND i.ds = '${bizdate}'
+	JOIN (
+					SELECT date_id,
+								 date_type,
+								 time_id
+					FROM td_ads_dev.dim_time
+					WHERE ds = '${bizdate}' and date_type = 'year'
+					group by date_id,
+					date_type,
+					time_id) AS time
+	ON substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = time.time_id
+WHERE a.business_order_type = '201' AND a.business_order_business_type IN ('20102') AND a.ds = '${bizdate}'
+group by o.org_code,
+o.channel_endpoint_code,
+b.sku_code) AS t9
+	ON t7.org_code = t9.org_code AND t7.channel_endpoint_code = t9.channel_endpoint_code AND t7.sku_code = t9.sku_code
+full JOIN (
+--跨渠道横调入数量
+	SELECT i.org_code,
+				 i.channel_endpoint_code,
+				 b.sku_code,
+				 sum(b.qty_received)   AS qty
+	FROM ${td_ods}.ods_stock_logic_order_in AS a
+	INNER JOIN ${td_ods}.ods_stock_logic_order_in_items AS b
+		ON a.id = b.logic_order_in_id AND b.ds = '${bizdate}'
+	INNER JOIN ${td_ods}.ods_stock_logic AS i
+		ON a.stock_logic_id = i.id AND i.ds = '${bizdate}'
+	INNER JOIN ${td_ods}.ods_stock_logic_order_allocate AS e
+		ON a.business_order_no = e.order_no AND e.ds =
+	'${bizdate}'
+	INNER JOIN ${td_ods}.ods_stock_logic AS o
+		ON o.manager_channel_code != i.manager_channel_code AND e.stock_logic_code_out_id = o.id
+	AND o.ds = '${bizdate}'
+	JOIN (
+					SELECT date_id,
+								 date_type,
+								 time_id
+					FROM td_ads_dev.dim_time
+					WHERE ds = '${bizdate}' and date_type = 'year'
+					group by date_id,
+					date_type,
+					time_id) AS time
+	ON substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = time.time_id
+WHERE a.business_order_type = '201' AND a.business_order_business_type IN ('20102') AND a.ds = '${bizdate}'
+group by i.org_code,
+i.channel_endpoint_code,
+b.sku_code) AS t10
+	ON t7.org_code = t10.org_code AND t7.channel_endpoint_code = t10.channel_endpoint_code AND t7.sku_code = t10.sku_code
+full JOIN (
+--盘点差异数量
+	SELECT b.sku_code,
+				 c.org_code,
+				 c.channel_endpoint_code,
+				 sum(abs(qty_change))  AS sku_num_1d_pdcysl
+	FROM ${td_ods}.ods_stock_physical_order_inventory AS a
+	INNER JOIN ${td_ods}.ods_stock_physical_order_inventory_items AS b
+		ON a.id = b.physical_order_inventory_id AND b.ds = '${bizdate}'
+	INNER JOIN ${td_ods}.ods_stock_logic AS c
+		ON a.inventory_logic_id = c.id AND c.ds = '${bizdate}'
+	JOIN (
+					SELECT date_id,
+								 date_type,
+								 time_id
+					FROM td_ads_dev.dim_time
+					WHERE ds = '${bizdate}' and date_type = 'year'
+					group by date_id,
+					date_type,
+					time_id) AS time
+	ON substr(regexp_replace(a.audit_time, '-', '', 0), 1, 8) = time.time_id
+WHERE a.ds = '${bizdate}'
+GROUP BY b.sku_code,
+c.org_code,
+c.channel_endpoint_code) AS t13
+	ON t7.org_code = t13.org_code AND t7.channel_endpoint_code = t13.channel_endpoint_code AND t7.sku_code = t13.sku_code
+full JOIN (
 		----期末在库数
 			SELECT t1.org_code,
 						 t1.channel_endpoint_code,
@@ -309,11 +368,11 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_year_1d PARTIT
 					LEFT JOIN ${td_ods}.ods_stock_logic sl
 						ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
 				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) > '${bizdate}' AND i.ds = '${bizdate}') AS t1
-			GROUP BY t1.org_code,
-			t1.channel_endpoint_code,
-			t1.sku_code) AS t11
-			ON t7.sku_code = t11.sku_code AND t7.channel_endpoint_code = t11.channel_endpoint_code AND t7.org_code = t11.org_code
-		full JOIN (
+GROUP BY t1.org_code,
+t1.channel_endpoint_code,
+t1.sku_code) AS t11
+	ON t7.sku_code = t11.sku_code AND t7.channel_endpoint_code = t11.channel_endpoint_code AND t7.org_code = t11.org_code
+full JOIN (
 		----期末在途数
 			SELECT t1.org_code,
 						 t1.channel_endpoint_code,
@@ -355,11 +414,11 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_year_1d PARTIT
 				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) > '${bizdate}' AND a.ds = '${bizdate}'
 
 			) AS t1
-			GROUP BY t1.org_code,
-			t1.channel_endpoint_code,
-			t1.sku_code) AS t12
-			ON t7.org_code = t12.org_code AND t7.sku_code = t12.sku_code AND t7.channel_endpoint_code = t12.channel_endpoint_code
-		full JOIN (--配货出数量、配退出数量、调退出数量、横调出数量
+GROUP BY t1.org_code,
+t1.channel_endpoint_code,
+t1.sku_code) AS t12
+	ON t7.org_code = t12.org_code AND t7.sku_code = t12.sku_code AND t7.channel_endpoint_code = t12.channel_endpoint_code
+full JOIN (--配货出数量、配退出数量、调退出数量、横调出数量
 			select t2.org_code,
 						 t2.channel_endpoint_code,
 						 t2.sku_code,
@@ -368,40 +427,48 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_year_1d PARTIT
 						 wm_concat('',case when t2.sku_num_1d_ptcsl = 0 then null else t2.sku_num_1d_ptcsl end) as sku_num_1d_ptcsl,
 						 wm_concat('',case when t2.sku_num_1d_hdcsl = 0 then null else t2.sku_num_1d_hdcsl end) as sku_num_1d_hdcsl from
 			(SELECT o.org_code,
-							 o.channel_endpoint_code,
-							 b.sku_code,
-							 sum(CASE
-							 WHEN a.business_order_business_type IN ('30201', '30202') AND a.business_order_type = '302' THEN b.qty_sended
-							 ELSE 0
-							 END) AS sku_num_1d_dtcsl,
-							 sum(CASE
-							 WHEN a.business_order_business_type = '20101' AND a.business_order_type = '201' THEN b.qty_sended
-							 ELSE 0
-							 END) AS sku_num_1d_phcsl,
-							 sum(CASE
-							 WHEN a.business_order_business_type = '20104' AND a.business_order_type = '201' THEN b.qty_sended
-							 ELSE 0
-							 END) AS sku_num_1d_ptcsl,
-							 sum(CASE
-							 WHEN a.business_order_business_type = '20102' AND a.business_order_type = '201' THEN b.qty_sended
-							 ELSE 0
-							 END) AS sku_num_1d_hdcsl
-				FROM ${td_ods}.ods_stock_logic_order_out AS a
-					INNER JOIN ${td_ods}.ods_stock_logic_order_out_items AS b
-						ON a.id = b.logic_order_out_id AND b.ds = '${bizdate}'
-					INNER JOIN ${td_ods}.ods_stock_logic AS o
-						ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
-				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) <= '${bizdate}'
-				and substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) >= to_char(dateadd(to_date('${bizdate}','yyyymmdd'),-1,'year'),'yyyymmdd')
-				AND a.ds = '${bizdate}'
-				group by o.org_code,
-				o.channel_endpoint_code,
-				b.sku_code) as t2
-			group by t2.org_code,
-			t2.channel_endpoint_code,
-			t2.sku_code) AS t15
-			ON t7.org_code = t15.org_code AND t7.sku_code = t15.sku_code AND t7.channel_endpoint_code = t15.channel_endpoint_code
-		full JOIN (
+							o.channel_endpoint_code,
+							b.sku_code,
+							sum(CASE
+							WHEN a.business_order_business_type IN ('30201', '30202') AND a.business_order_type = '302' THEN b.qty_sended
+							ELSE 0
+							END) AS sku_num_1d_dtcsl,
+							sum(CASE
+							WHEN a.business_order_business_type = '20101' AND a.business_order_type = '201' THEN b.qty_sended
+							ELSE 0
+							END) AS sku_num_1d_phcsl,
+							sum(CASE
+							WHEN a.business_order_business_type = '20104' AND a.business_order_type = '201' THEN b.qty_sended
+							ELSE 0
+							END) AS sku_num_1d_ptcsl,
+							sum(CASE
+							WHEN a.business_order_business_type = '20102' AND a.business_order_type = '201' THEN b.qty_sended
+							ELSE 0
+							END) AS sku_num_1d_hdcsl
+			 FROM ${td_ods}.ods_stock_logic_order_out AS a
+				 INNER JOIN ${td_ods}.ods_stock_logic_order_out_items AS b
+					 ON a.id = b.logic_order_out_id AND b.ds = '${bizdate}'
+				 INNER JOIN ${td_ods}.ods_stock_logic AS o
+					 ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
+				 JOIN (
+					 SELECT date_id,
+									date_type,
+									time_id
+					 FROM td_ads_dev.dim_time
+					 WHERE ds = '${bizdate}' and date_type = 'year'
+					 group by date_id,
+					 date_type,
+					 time_id) AS time
+					 ON substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = time.time_id
+			 WHERE a.ds = '${bizdate}'
+			 group by o.org_code,
+			 o.channel_endpoint_code,
+			 b.sku_code) as t2
+group by t2.org_code,
+t2.channel_endpoint_code,
+t2.sku_code) AS t15
+	ON t7.org_code = t15.org_code AND t7.sku_code = t15.sku_code AND t7.channel_endpoint_code = t15.channel_endpoint_code
+full JOIN (
 		--配货入数量、配退入数量、调拨入数量、横调入数量
 			select t3.org_code,
 						 t3.channel_endpoint_code,
@@ -435,90 +502,130 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_year_1d PARTIT
 						ON a.id = b.logic_order_in_id AND b.ds = '${bizdate}'
 					INNER JOIN ${td_ods}.ods_stock_logic AS o
 						ON a.stock_logic_id = o.id AND o.ds = '${bizdate}'
-				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) <= '${bizdate}'
-				and substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) >= to_char(dateadd(to_date('${bizdate}','yyyymmdd'),-1,'year'),'yyyymmdd')
-				AND a.ds = '${bizdate}'
+					JOIN (
+						SELECT date_id,
+									 date_type,
+									 time_id
+						FROM td_ads_dev.dim_time
+						WHERE ds = '${bizdate}' and date_type = 'year'
+						group by date_id,
+						date_type,
+						time_id) AS time
+						ON substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = time.time_id
+				WHERE a.ds = '${bizdate}'
 				group by o.org_code,
 				o.channel_endpoint_code,
 				b.sku_code) as t3
-			group by t3.org_code,
-			t3.channel_endpoint_code,
-			t3.sku_code) AS t16
-			ON t7.org_code = t16.org_code AND t7.sku_code = t16.sku_code AND t7.channel_endpoint_code = t16.channel_endpoint_code
-		LEFT JOIN (
-		--本期在途数
-			SELECT t1.org_code,
-						 t1.channel_endpoint_code,
-						 t1.sku_code,
-						 sum(qty) AS qty
-			FROM (
-			--根据收货通知单计算：+加上实收数，-去计划数
-				SELECT sl.org_code,
-							 sl.channel_endpoint_code,
-							 ii.sku_code,
-							 -(ii.qty_received - ii.qty_receive_plan) AS qty
-				FROM ${td_ods}.ods_stock_logic_order_in_notify AS i
-					INNER JOIN ${td_ods}.ods_stock_logic_order_in_notify_items AS ii
-						ON i.id = ii.logic_order_in_notify_id AND ii.ds = '${bizdate}'
-					INNER JOIN ${td_ods}.ods_stock_logic sl
-						ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-				WHERE substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) <= '${bizdate}'
-				AND substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) >= to_char(dateadd(to_date('${bizdate}',
-				'yyyymmdd'), -1, 'mm'), 'yyyymmdd') AND i.ds = '${bizdate}'
-				UNION ALL
-				--收发差异单，+差异数
+group by t3.org_code,
+t3.channel_endpoint_code,
+t3.sku_code) AS t16
+	ON t7.org_code = t16.org_code AND t7.sku_code = t16.sku_code AND t7.channel_endpoint_code = t16.channel_endpoint_code
+LEFT JOIN (
+--本期在途数
+	SELECT t1.org_code,
+				 t1.channel_endpoint_code,
+				 t1.sku_code,
+				 sum(qty) AS qty
+	FROM (
+	--根据收货通知单计算：+加上实收数，-去计划数
+		SELECT sl.org_code,
+					 sl.channel_endpoint_code,
+					 ii.sku_code,
+					 -(ii.qty_received - ii.qty_receive_plan) AS qty
+		FROM ${td_ods}.ods_stock_logic_order_in_notify AS i
+		INNER JOIN ${td_ods}.ods_stock_logic_order_in_notify_items AS ii
+			ON i.id = ii.logic_order_in_notify_id AND ii.ds = '${bizdate}'
+		INNER JOIN ${td_ods}.ods_stock_logic sl
+			ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
+		JOIN (
+			SELECT date_id,
+						 date_type,
+						 time_id
+			FROM td_ads_dev.dim_time
+			WHERE ds = '${bizdate}' and date_type = 'year'
+			group by date_id,
+			date_type,
+			time_id) AS time
+			ON substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) = time.time_id
+	WHERE i.ds = '${bizdate}'
+	UNION ALL
+	--收发差异单，+差异数
 
-				SELECT s.org_code,
-							 s.channel_endpoint_code,
-							 b.sku_code,
-							 -b.qty_difference AS qty
-				FROM ${td_ods}.ods_stock_logic_order_difference AS a
-					INNER JOIN ${td_ods}.ods_stock_logic_order_difference_items AS b
-						ON a.id = b.logic_order_difference_id AND b.ds = '${bizdate}'
-					INNER JOIN ${td_ods}.ods_stock_logic s
-						ON a.stock_logic_in_id = s.id AND s.ds = '${bizdate}'
-				WHERE substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) <= '${bizdate}'
-				AND substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) >= to_char(dateadd(to_date('${bizdate}',
-				'yyyymmdd'), -1, 'mm'), 'yyyymmdd') AND a.ds = '${bizdate}'
-			) AS t1
-			GROUP BY t1.org_code, t1.channel_endpoint_code, t1.sku_code) AS t17
-			ON t7.org_code = t17.org_code AND t7.channel_endpoint_code = t17.channel_endpoint_code
-		AND t7.sku_code = t17.sku_code
-		LEFT JOIN (
-		--本期销售数
-			SELECT a.org_code,
-						 a.channel_endpoint_code,
-						 b.sku_code,
-						 sum(b.qty_product) AS qty
-			FROM ${td_ods}.ods_sales_order a
-				JOIN ${td_ods}.ods_sales_order_item b
-					ON a.sales_order_no = b.sales_order_no
-			WHERE a.ds = '${bizdate}' AND b.ds = '${bizdate}' AND a.order_status = 1
-			AND a.business_type IN ('10103', '10104', '10202', '10203', '10302', '10303', '10403', '10404')
-			AND substr(regexp_replace(a.paid_time, '-', '', 0), 1, 8) >= to_char(dateadd(to_date('${bizdate}', 'yyyymmdd'), -
-			1, 'year'), 'yyyymmdd') AND substr(regexp_replace(a.paid_time, '-', '', 0), 1, 8) <= '${bizdate}'
-			GROUP BY a.org_code
-			, a.channel_endpoint_code
-			, b.sku_code) AS t18
-			ON t7.org_code = t18.org_code AND t7.channel_endpoint_code = t18.channel_endpoint_code AND t7.sku_code = t18.sku_code
-		LEFT JOIN (
-		--本期销退数
-			SELECT a.org_code,
-						 a.channel_endpoint_code,
-						 b.sku_code,
-						 abs(sum(b.qty_product)) AS qty
-			FROM ${td_ods}.ods_sales_order a
-				JOIN ${td_ods}.ods_sales_order_item b
-					ON a.sales_order_no = b.sales_order_no
-			WHERE a.ds = '${bizdate}' AND b.ds = '${bizdate}' AND a.order_status = 1
-			AND a.business_type IN ('10103', '10104', '10202', '10203', '10302', '10303', '10403', '10404')
-			AND a.order_type IN ('102', '103')
-			AND substr(regexp_replace(a.paid_time, '-', '', 0), 1, 8) >= to_char(dateadd(to_date('${bizdate}', 'yyyymmdd'), -
-			1, 'year'), 'yyyymmdd') AND substr(regexp_replace(a.paid_time, '-', '', 0), 1, 8) <= '${bizdate}'
-			GROUP BY a.org_code
-			, a.channel_endpoint_code
-			, b.sku_code) AS t19
-			ON t7.org_code = t19.org_code AND t7.channel_endpoint_code = t19.channel_endpoint_code AND t7.sku_code = t19.sku_code;
+	SELECT s.org_code,
+				 s.channel_endpoint_code,
+				 b.sku_code,
+				 -b.qty_difference AS qty
+	FROM ${td_ods}.ods_stock_logic_order_difference AS a
+	INNER JOIN ${td_ods}.ods_stock_logic_order_difference_items AS b
+		ON a.id = b.logic_order_difference_id AND b.ds = '${bizdate}'
+	INNER JOIN ${td_ods}.ods_stock_logic s
+		ON a.stock_logic_in_id = s.id AND s.ds = '${bizdate}'
+	JOIN (
+						SELECT date_id,
+									 date_type,
+									 time_id
+						FROM td_ads_dev.dim_time
+						WHERE ds = '${bizdate}' and date_type = 'year'
+						group by date_id,
+						date_type,
+						time_id) AS time
+	ON substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = time.time_id
+WHERE a.ds = '${bizdate}'
+) AS t1
+GROUP BY t1.org_code, t1.channel_endpoint_code, t1.sku_code) AS t17
+	ON t7.org_code = t17.org_code AND t7.channel_endpoint_code = t17.channel_endpoint_code
+AND t7.sku_code = t17.sku_code
+LEFT JOIN (
+--本期销售数
+	SELECT a.org_code,
+				 a.channel_endpoint_code,
+				 b.sku_code,
+				 sum(b.qty_product) AS qty
+	FROM ${td_ods}.ods_sales_order a
+	JOIN ${td_ods}.ods_sales_order_item b
+		ON a.sales_order_no = b.sales_order_no
+	JOIN (
+					SELECT date_id,
+								 date_type,
+								 time_id
+					FROM td_ads_dev.dim_time
+					WHERE ds = '${bizdate}' and date_type = 'year'
+					group by date_id,
+					date_type,
+					time_id) AS time
+	ON substr(regexp_replace(a.paid_time, '-', '', 0), 1, 8) = time.time_id
+WHERE a.ds = '${bizdate}' AND b.ds = '${bizdate}' AND a.order_status = 1
+AND a.business_type IN ('10103', '10104', '10202', '10203', '10302', '10303', '10403', '10404')
+GROUP BY a.org_code
+, a.channel_endpoint_code
+, b.sku_code) AS t18
+	ON t7.org_code = t18.org_code AND t7.channel_endpoint_code = t18.channel_endpoint_code AND t7.sku_code = t18.sku_code
+LEFT JOIN (
+--本期销退数
+	SELECT a.org_code,
+				 a.channel_endpoint_code,
+				 b.sku_code,
+				 abs(sum(b.qty_product)) AS qty
+	FROM ${td_ods}.ods_sales_order a
+	JOIN ${td_ods}.ods_sales_order_item b
+		ON a.sales_order_no = b.sales_order_no
+	JOIN (
+					SELECT date_id,
+								 date_type,
+								 time_id
+					FROM td_ads_dev.dim_time
+					WHERE ds = '${bizdate}' and date_type = 'year'
+					group by date_id,
+					date_type,
+					time_id) AS time
+	ON substr(regexp_replace(a.paid_time, '-', '', 0), 1, 8) = time.time_id
+WHERE a.ds = '${bizdate}' AND b.ds = '${bizdate}' AND a.order_status = 1
+AND a.business_type IN ('10103', '10104', '10202', '10203', '10302', '10303', '10403', '10404')
+AND a.order_type IN ('102', '103')
+GROUP BY a.org_code
+, a.channel_endpoint_code
+, b.sku_code) AS t19
+	ON t7.org_code = t19.org_code AND t7.channel_endpoint_code = t19.channel_endpoint_code AND t7.sku_code = t19.sku_code;
 
 
 INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_year_1d PARTITION(ds = '${bizdate}')
@@ -567,7 +674,7 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_year_1d PARTIT
 				 t1.sku_num_1d_qmzts,
 				 t1.sku_num_1d_qmkcs,
 				 t1.date_type,
-				 t1.date_id
+				 time.date_id
 	FROM (
 		SELECT biz_date,
 					 org_code,
@@ -638,12 +745,22 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_year_1d PARTIT
 						 size_id,
 						 cn_size_desc
 			FROM ${td_ods}.ods_api_item_sku
-			WHERE ds = '${bizdate}') AS t4
-			ON t1.sku_code = t4.sku_code
-		LEFT OUTER JOIN (
+	WHERE ds = '${bizdate}') AS t4
+		ON t1.sku_code = t4.sku_code
+	LEFT OUTER JOIN (
 			SELECT store_code,
 						 store_name
 			FROM ${td_ods}.ods_real_store
 			WHERE ds = '${bizdate}') AS t6
-			ON t1.channel_endpoint = t6.store_code;
+	ON t1.channel_endpoint = t6.store_code
+JOIN (
+					SELECT date_id,
+								 date_type,
+								 time_id
+					FROM td_ads_dev.dim_time
+					WHERE ds = '${bizdate}' and date_type = 'year'
+					group by date_id,
+					date_type,
+					time_id) AS time
+	ON t1.date_id = time.time_id;
 
