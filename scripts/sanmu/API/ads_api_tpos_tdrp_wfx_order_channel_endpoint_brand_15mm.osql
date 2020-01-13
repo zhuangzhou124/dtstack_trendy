@@ -40,8 +40,8 @@ CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15
 	discount_coupon_amt                                   DOUBLE COMMENT '现金券抵扣金额    ',
 	promotion_discount_coupon_amt                         DOUBLE COMMENT '折扣券优惠总额    ',
 	stored_value_card_pay_amt                             DOUBLE COMMENT '储值卡支付金额    ',
-  amt_member_score                                      DOUBLE COMMENT '积分支付金额',
-  wxpay_amt                                             DOUBLE COMMENT '微信         ',
+	amt_member_score                                      DOUBLE COMMENT '积分支付金额',
+	wxpay_amt                                             DOUBLE COMMENT '微信         ',
 	alipay_amt                                            DOUBLE COMMENT '支付宝        ',
 	card_amt                                              DOUBLE COMMENT '借记卡/信用卡    ',
 	cash_amt                                              DOUBLE COMMENT '现金         ',
@@ -75,7 +75,8 @@ CREATE TABLE IF NOT EXISTS ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15
 	audit_time                                            STRING COMMENT '营业时间       ',
 	audit_date                                            STRING COMMENT '营业日期       ',
 	date_type                                             STRING COMMENT '日期类型',
-	date_id                                               STRING COMMENT '日期'
+	date_id                                               STRING COMMENT '日期',
+	operation_name                                        STRING COMMENT '经营方式名称'
 
 )COMMENT '日期+门店+品牌粒度明细表' PARTITIONED BY(
 	ds STRING COMMENT '时间分区')
@@ -115,10 +116,10 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 				 soc.coupon_no,
 				 soc.coupon_name,
 				 CASE
-				 WHEN soip.promotion_code LIKE '%MallVPr95%' THEN '9.5折商场卡'
-				 WHEN soip.promotion_code LIKE '%MallVPr90%' THEN '9折商场卡'
-				 ELSE null
-				 END as shopping_card,   --商场卡
+							WHEN soip.promotion_code LIKE '%MallVPr95%' THEN '9.5折商场卡'
+							WHEN soip.promotion_code LIKE '%MallVPr90%' THEN '9折商场卡'
+							ELSE null
+							END as shopping_card,   --商场卡
 				 t3.order_amt - if(t3.amt_cash_coupon_contribution is null,0,t3.amt_cash_coupon_contribution),  --实收金额
 				 so.amt_total,             --订单总金额
 				 t3.amt_cash_coupon_contribution,--现金券抵扣金额
@@ -156,9 +157,9 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 				 mgi.grade_name, --会员类型
 				 if(so.member_no = '-1',null,so.member_no),  --会员编号
 				 CASE
-				 WHEN soip.promotion_name LIKE '%抹零%' THEN '抹零'
-				 ELSE '未抹零'
-				 END AS is_wipe_zero,    --是否抹零
+							WHEN soip.promotion_name LIKE '%抹零%' THEN '抹零'
+							ELSE '未抹零'
+							END AS is_wipe_zero,    --是否抹零
 				 ua.outer_user_id,        --UnionId
 				 so.paid_time, --支付时间
 				 so.create_time, --订单建立时间(年月日时分秒)
@@ -166,9 +167,10 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 				 so.audit_time, --营业时间
 				 substr(so.audit_time, 1, 10), --营业日期
 				 'day' AS date_type,
-				 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) AS date_id
-	FROM ods_sales_order so
-		INNER JOIN (
+				 substr(regexp_replace(so.paid_time, '-', '', 0), 1, 8) AS date_id,
+         ace.operation_name
+	FROM ${td_ods}.ods_sales_order so
+	INNER JOIN (
 			SELECT t2.sales_order_no,
 						 t2.order_amt,
 						 t2.actual_amt_with_coupon,
@@ -185,30 +187,30 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 								 price_discount,
 								 amt_sales,
 								 qty_product
-					FROM ods_sales_order_item
+					FROM ${td_ods}.ods_sales_order_item
 					WHERE ds = '${bizdate}') soi
-					INNER JOIN (
+INNER JOIN (
 						SELECT sales_order_item_no,
 									 amt_cash_coupon_contribution
-						FROM ods_sales_order_item_price
+						FROM ${td_ods}.ods_sales_order_item_price
 						WHERE ds = '${bizdate}') osoip
-						ON osoip.sales_order_item_no = soi.sales_order_item_no
-				GROUP BY soi.sales_order_no) AS t2) AS t3
-			ON so.sales_order_no = t3.sales_order_no
-		LEFT JOIN (
+	ON osoip.sales_order_item_no = soi.sales_order_item_no
+GROUP BY soi.sales_order_no) AS t2) AS t3
+	ON so.sales_order_no = t3.sales_order_no
+LEFT JOIN (
 			SELECT sales_order_no,
 						 wm_concat(distinct ',', coupon_no) AS coupon_no,
 						 wm_concat(distinct ',', coupon_name) AS coupon_name,
 						 wm_concat(DISTINCT ',', coupon_type) AS coupon_type
-			FROM ods_sales_order_coupon
+			FROM ${td_ods}.ods_sales_order_coupon
 			WHERE ds = '${bizdate}'
 			GROUP BY sales_order_no) soc
-			ON so.sales_order_no = soc.sales_order_no
-		LEFT JOIN ods_member_info mi
-			ON so.member_no = mi.member_no AND mi.ds = '${bizdate}'
-		LEFT JOIN ods_member_card mc
-			ON so.org_code = mc.org_code AND so.member_no = mc.member_no AND mc.ds = '${bizdate}'
-		LEFT JOIN (
+	ON so.sales_order_no = soc.sales_order_no
+LEFT JOIN ${td_ods}.ods_member_info mi
+	ON so.member_no = mi.member_no AND mi.ds = '${bizdate}'
+LEFT JOIN ${td_ods}.ods_member_card mc
+	ON so.org_code = mc.org_code AND so.member_no = mc.member_no AND mc.ds = '${bizdate}'
+LEFT JOIN (
 			SELECT t1.sales_order_no,
 						 wm_concat('', discount_coupon_amt) AS discount_coupon_amt,
 						 wm_concat('', promotion_discount_coupon_amt) AS promotion_discount_coupon_amt,
@@ -254,11 +256,11 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 												WHEN pay_way = 'THIRD_ONLINE' THEN amt_pay
 												END AS third_online_amt,             --第三方支付方式
 												pay_way                      --支付方式
-				FROM ods_sales_order_payment
+				FROM ${td_ods}.ods_sales_order_payment
 				WHERE ds = '${bizdate}') AS t1
-			GROUP BY t1.sales_order_no) sop
-			ON so.sales_order_no = sop.sales_order_no
-		LEFT JOIN (
+GROUP BY t1.sales_order_no) sop
+	ON so.sales_order_no = sop.sales_order_no
+LEFT JOIN (
 			SELECT a.sales_order_no,
 						 wm_concat(',',IF(vsoip.discount_points = 0, NULL, vsoip.discount_points)) as promotion_discount,
 						 wm_concat(',', a.promotion_code) AS promotion_code,
@@ -267,51 +269,51 @@ INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_order_channel_endpoint_brand_15mm P
 				SELECT  sales_order_no,
 								promotion_code,
 								promotion_name
-				FROM ods_sales_order_item_promotion
+				FROM ${td_ods}.ods_sales_order_item_promotion
 				WHERE ds = '${bizdate}' and promotion_code not like '%DECIMAL_00%'
 				and promotion_code not like '%KEEPINT%'
 				and promotion_name not like '%抹零%'
 				group by sales_order_no,
 				promotion_code,
 				promotion_name) AS a
-				LEFT JOIN (
+LEFT JOIN (
 					SELECT promotion_no,discount_points
 					--  IF(discount_points = 0, NULL, discount_points) AS promotion_discount
-					FROM ods_promotion_store_info
+					FROM ${td_ods}.ods_promotion_store_info
 					WHERE ds = '${bizdate}' group by promotion_no,discount_points) vsoip
-					ON a.promotion_code = vsoip.promotion_no
-			GROUP BY sales_order_no) soip
-			ON so.sales_order_no = soip.sales_order_no
-		LEFT JOIN ods_api_channel_endpoint ace
-			ON so.channel_endpoint_code = ace.channel_endpoint_code AND ace.ds = '${bizdate}'
-		LEFT JOIN ods_user_auth ua
-			ON so.member_no = ua.member_no AND ua.ds = '${bizdate}' AND ua.auth_type = 20
-		LEFT JOIN ods_promotion_info pi
-			ON soip.promotion_code = pi.promotion_no AND pi.ds = '${bizdate}'
-		LEFT JOIN ods_sales_delivery_order sdo
-			ON so.sales_order_no = sdo.sales_order_no AND sdo.ds = '${bizdate}'
-		LEFT JOIN (
+	ON a.promotion_code = vsoip.promotion_no
+GROUP BY sales_order_no) soip
+	ON so.sales_order_no = soip.sales_order_no
+LEFT JOIN ${td_ods}.ods_api_channel_endpoint ace
+	ON so.channel_endpoint_code = ace.channel_endpoint_code AND ace.ds = '${bizdate}'
+LEFT JOIN ${td_ods}.ods_user_auth ua
+	ON so.member_no = ua.member_no AND ua.ds = '${bizdate}' AND ua.auth_type = 20
+LEFT JOIN ${td_ods}.ods_promotion_info pi
+	ON soip.promotion_code = pi.promotion_no AND pi.ds = '${bizdate}'
+LEFT JOIN ${td_ods}.ods_sales_delivery_order sdo
+	ON so.sales_order_no = sdo.sales_order_no AND sdo.ds = '${bizdate}'
+LEFT JOIN (
 			SELECT distinct channel_endpoint_code,
 						 clerk_no,
 						 clerk_name
-			FROM ods_clerk_info
+			FROM ${td_ods}.ods_clerk_info
 			WHERE ds = '${bizdate}') oci
-			ON so.shopping_guider_no = oci.clerk_no
-	    AND so.channel_endpoint_code = oci.channel_endpoint_code
-	  left join ods_member_grade_info mgi
+	ON so.shopping_guider_no = oci.clerk_no
+AND so.channel_endpoint_code = oci.channel_endpoint_code
+left join ${td_ods}.ods_member_grade_info mgi
 	on so.member_grade_code = mgi.grade_code and mgi.ds = '${bizdate}'
-	  left join
-		(	SELECT  sales_order_no,
+left join
+(	SELECT  sales_order_no,
 							 sum(amt_discount) as amt_discount
-										 FROM ods_sales_order_item_promotion
+										 FROM ${td_ods}.ods_sales_order_item_promotion
 											 WHERE ds = '${bizdate}' and
 											 (promotion_code != 'KEEP_INTEGER'
 											 or promotion_code IS NULL)
 		                   and promotion_base_on = 'DISCOUNT_COUPON'
 											 group by sales_order_no) AS b
 	on so.sales_order_no = b.sales_order_no
-	left join ods_sales_order_price osop
+left join ${td_ods}.ods_sales_order_price osop
 	on so.sales_order_no = osop.sales_order_no and osop.ds = '${bizdate}'
-	WHERE so.ds = '${bizdate}' AND so.order_status = 1 AND so.paid_time IS NOT NULL
+WHERE so.ds = '${bizdate}' AND so.order_status = 1 AND so.paid_time IS NOT NULL
 AND so.business_type in ('10103','10104','10202','10203','10302','10303','10403','10404')
 ;

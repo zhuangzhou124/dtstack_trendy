@@ -1,82 +1,154 @@
-SELECT t1.org_code,
-			 t1.channel_endpoint_code,
-			 t1.sku_code,
-			 sum(qty) AS qty
-FROM (
-	SELECT sl.org_code,
-				 sl.channel_endpoint_code,
-				 sli.sku_code,
-				 sli.qty_transit AS qty
-	FROM ${td_ods}.ods_stock_logic_items sli
-	LEFT JOIN ${td_ods}.ods_stock_logic sl
-		ON sli.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-WHERE sli.ds = '${bizdate}'
-UNION ALL
---根据收货通知单计算：+加上实收数，-去计划数
-SELECT sl.org_code,
-			 sl.channel_endpoint_code,
-			 ii.sku_code,
-			 -1 * ii.qty_receivable AS qty
-FROM ${td_ods}.ods_stock_logic_order_in_notify AS i
-INNER JOIN ${td_ods}.ods_stock_logic_order_in_notify_items AS ii
-	ON i.id = ii.logic_order_in_notify_id AND ii.ds = '${bizdate}'
-INNER JOIN ${td_ods}.ods_stock_logic sl
-	ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-JOIN (
-						SELECT date_id,
-									 date_type,
-									 time_id
-						FROM td_ads_dev.dim_time
-						WHERE ds = '${bizdate}' AND date_type = 'year'
-						GROUP BY date_id,
-						date_type,
-						time_id) AS time
-	ON substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) = time.time_id
-WHERE i.ds = '${bizdate}' AND i.business_order_type = '201'
+--name:ads_api_tpos_ma_clerkno_ordertype_subcate_15min
+--author:ziyun
+--create time:2019-10-09 11:29
+--drop table ads_api_tpos_ma_clerkno_ordertype_subcate_15min
+--***********************************
+-- 表   ads_api_tpos_ma_clerkno_ordertype_subcate_15min
+-- 功能描述：导购+订单类型+二级类目粒度汇总表
+-- 生命周期：30天
+-- 调度周期：周期调度
+-- 创建者：  子云
+-- 创建日期：20191008
+-- 修改日志：已修改
+--***********************************
+-- drop table ads_api_tpos_ma_clerkno_ordertype_subcate_15min;
+CREATE TABLE IF NOT EXISTS ads_api_tpos_ma_clerkno_ordertype_subcate_15min(
+	org_code                  STRING COMMENT '品牌编码',
+	date_type                 STRING COMMENT '时间类型',
+	date_id                   STRING COMMENT '时间',
+	channel_endpoint_code     STRING COMMENT '门店编码',
+	clerk_no                  STRING COMMENT '店员编号',
+	sales_amt                 DOUBLE COMMENT '整体销售金额',
+	sales_subcoupon_amt       DOUBLE COMMENT '销售金额（扣券）',
+	sales_num                 DOUBLE COMMENT '销售件数',
+	subcate                   STRING COMMENT '二级品类',
+	sales_amt_rate            DOUBLE COMMENT '销售金额占比',
+	sales_subcoupon_amt_rate  DOUBLE COMMENT '销售金额占比（扣券）',
+	sales_num_rate            DOUBLE COMMENT '销售件数占比',
+	biz_date                  STRING COMMENT '插入时间'
+)COMMENT '店员品类销售占比' PARTITIONED BY(ds  STRING);
 
-UNION ALL
----------------------新加的逻辑
-SELECT sl.org_code,
-			 sl.channel_endpoint_code,
-			 ii.sku_code,
-			 ii.qty_received AS qty
-FROM ${td_ods}.ods_stock_logic_order_in AS i
-INNER JOIN ${td_ods}.ods_stock_logic_order_in_items AS ii
-	ON i.id = ii.logic_order_in_id AND ii.ds = '${bizdate}'
-INNER JOIN ${td_ods}.ods_stock_logic sl
-	ON i.stock_logic_id = sl.id AND sl.ds = '${bizdate}'
-JOIN (
-						SELECT date_id,
-									 date_type,
-									 time_id
-						FROM td_ads_dev.dim_time
-						WHERE ds = '${bizdate}' AND date_type = 'year'
-						GROUP BY date_id,
-						date_type,
-						time_id) AS time
-	ON substr(regexp_replace(i.made_order_time, '-', '', 0), 1, 8) = time.time_id
-WHERE i.business_order_type = '201' AND i.ds = '${bizdate}'
+INSERT OVERWRITE TABLE ads_api_tpos_ma_clerkno_ordertype_subcate_15min PARTITION(ds = '${bizdate}')
+	SELECT coalesce(cate.org_code, '-110'),
+				 coalesce(cate.date_type, '-110'),
+				 coalesce(cate.date_id, '-110'),
+				 coalesce(cate.channel_endpoint_code, '-110'),
+				 coalesce(cate.clerk_no, '-110'),
+				 coalesce(cate.sales_amt, 0),  --销售金额（未扣券）,
+				 coalesce(cate.sales_sub_coupon_amt, 0) , --销售金额（扣券）,
+				 coalesce(cate.sales_quantity, 0),
+				 cate.level2_cate_name,
+				 CASE
+				 WHEN coalesce(clerk.sales_amt, 0) <> 0 THEN coalesce(cate.sales_amt, 0) / clerk.sales_amt
+				 ELSE 0
+				 END AS sales_amt_rate,  --销售金额占比,
+				 CASE
+				 WHEN coalesce(clerk.sales_sub_coupon_amt, 0) <> 0 THEN coalesce(cate.sales_sub_coupon_amt, 0) / clerk.
+				 sales_sub_coupon_amt
+				 ELSE 0
+				 END AS sales_subcoupon_amt_rate,  --销售金额占比（扣券）,
+				 CASE
+				 WHEN coalesce(clerk.sales_quantity, 0) <> 0 THEN coalesce(cate.sales_quantity, 0) / clerk.sales_quantity
+				 ELSE 0
+				 END AS sales_num_rate , --销售金额占比（扣券）,
+				 '${bizdate}'
+	FROM (
+	--店员品类销售
+		SELECT  coalesce(b.org_code, -110) AS org_code,  --品牌编码,
+						dtm.date_type AS date_type,
+						dtm.date_id AS date_id,
+						coalesce(a.channel_endpoint_code, -110) AS channel_endpoint_code,--门店编码,
+						coalesce(a.shopping_guider_no, -110) AS clerk_no,--店员编号,
+						coalesce(sob.level2_cate_name, -110) AS level2_cate_name,
+						sum(CASE
+						WHEN b.price_sales <> 0 THEN b.qty_product
+						ELSE 0
+						END) AS sales_quantity ,--销售件数,
+						sum(b.price_sales * b.qty_product - coalesce(c.amt_cash_coupon_contribution, 0)) AS sales_sub_coupon_amt,
+		--销售金额（扣券）,
+						sum(b.price_sales * b.qty_product) AS sales_amt  --销售金额（未扣券）
+		FROM ods_sales_order a
 
-UNION ALL
---收发差异单，+差异数
+			LEFT JOIN ods_sales_order_item b
+				ON a.sales_order_no = b.sales_order_no AND b.ds = '${bizdate}'
 
-SELECT s.org_code,
-			 s.channel_endpoint_code,
-			 b.sku_code,
-			 b.qty_difference AS qty
-FROM ${td_ods}.ods_stock_logic_order_difference AS a
-INNER JOIN ${td_ods}.ods_stock_logic_order_difference_items AS b
-	ON a.id = b.logic_order_difference_id AND b.ds = '${bizdate}'
-INNER JOIN ${td_ods}.ods_stock_logic s
-	ON a.stock_logic_in_id = s.id AND s.ds = '${bizdate}'
-JOIN (
-						SELECT date_id,
-									 date_type,
-									 time_id
-						FROM td_ads_dev.dim_time
-						WHERE ds = '${bizdate}' AND date_type = 'year'
-						GROUP BY date_id,
-						date_type,
-						time_id) AS time
-	ON substr(regexp_replace(a.made_order_time, '-', '', 0), 1, 8) = time.time_id
-WHERE a.ds = '${bizdate}'
+			LEFT JOIN ods_sales_order_item_price c
+				ON b.sales_order_item_no = c.sales_order_item_no AND c.ds = '${bizdate}'
+
+			LEFT JOIN ods_api_item_sku sob
+				ON b.sku_code = sob.sku_code AND sob.ds = '${bizdate}'
+
+			JOIN (
+				SELECT max(ds1),
+							 date_type,
+							 date_id,
+							 time_id
+				FROM td_ads_dev.dim_time
+				WHERE ds >= '20180101' AND ds <= '${bizdate}' AND date_type NOT IN ('7d', '15d', '30d')
+				GROUP BY date_type, date_id, time_id UNION ALL SELECT max(ds1),
+																															date_type,
+																															date_id,
+																															time_id
+																											 FROM td_ads_dev.dim_time
+																											 WHERE ds = '${bizdate}' AND date_type IN ('7d', '15d', '30d')
+																											 GROUP BY date_type, date_id, time_id) dtm
+				ON dtm.time_id = to_char(CAST(a.paid_time AS DATETIME), 'yyyymmdd')
+
+		WHERE a.ds = '${bizdate}' AND a.order_status = 1 AND b.org_code IS NOT NULL
+		AND a.business_type IN ('10103', '10104', '10202', '10203', '10302', '10303', '10403', '10404')
+		GROUP BY b.org_code
+		, a.channel_endpoint_code
+		, a.shopping_guider_no
+		, sob.level2_cate_name
+		, dtm.date_id
+		, dtm.date_type
+	) cate
+		LEFT JOIN (
+		--店员销售
+			SELECT  coalesce(b.org_code, -110) AS org_code , --品牌编码,
+							dtm.date_type AS date_type,
+							dtm.date_id AS date_id,
+							coalesce(a.channel_endpoint_code, -110) AS channel_endpoint_code,--门店编码,
+							coalesce(a.shopping_guider_no, -110) AS clerk_no,--店员编号,
+							sum(b.price_sales * b.qty_product - coalesce(c.amt_cash_coupon_contribution, 0)) AS sales_sub_coupon_amt,
+			--销售金额（扣券）,
+							sum(b.price_sales * b.qty_product) AS sales_amt , --销售金额（未扣券）,
+							sum(CASE
+							WHEN b.price_sales <> 0 THEN b.qty_product
+							ELSE 0
+							END) AS sales_quantity --销售件数
+			FROM ods_sales_order a
+
+				LEFT JOIN ods_sales_order_item b
+					ON a.sales_order_no = b.sales_order_no AND b.ds = '${bizdate}'
+
+				LEFT JOIN ods_sales_order_item_price c
+					ON b.sales_order_item_no = c.sales_order_item_no AND c.ds = '${bizdate}'
+
+				JOIN (
+					SELECT max(ds1),
+								 date_type,
+								 date_id,
+								 time_id
+					FROM td_ads_dev.dim_time
+					WHERE ds >= '20180101' AND ds <= '${bizdate}' AND date_type NOT IN ('7d', '15d', '30d')
+					GROUP BY date_type, date_id, time_id UNION ALL SELECT max(ds1),
+																																date_type,
+																																date_id,
+																																time_id
+																												 FROM td_ads_dev.dim_time
+																												 WHERE ds = '${bizdate}' AND date_type IN ('7d', '15d', '30d')
+																												 GROUP BY date_type, date_id, time_id) dtm
+					ON dtm.time_id = to_char(CAST(a.paid_time AS DATETIME), 'yyyymmdd')
+
+			WHERE a.ds = '${bizdate}' AND a.order_status = 1 AND b.org_code IS NOT NULL
+			AND a.business_type IN ('10103', '10104', '10202', '10203', '10302', '10303', '10403', '10404')
+			GROUP BY b.org_code
+			, a.channel_endpoint_code
+			, a.shopping_guider_no
+			, dtm.date_type
+			, dtm.date_id
+		) clerk
+			ON clerk.channel_endpoint_code = cate.channel_endpoint_code AND cate.clerk_no = clerk.clerk_no
+		AND cate.date_type = clerk.date_type AND cate.date_id = clerk.date_id AND cate.sales_amt <> 0;
+

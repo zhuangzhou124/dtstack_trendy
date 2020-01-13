@@ -1,3 +1,9 @@
+
+ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d
+
+
+
+
 INSERT OVERWRITE TABLE ads_api_tpos_tdrp_wfx_sku_channel_endpoint_1d_1d PARTITION(ds = '${bizdate}')
 	SELECT '${bizdate}' AS biz_date,
 				 t7.org_code,
